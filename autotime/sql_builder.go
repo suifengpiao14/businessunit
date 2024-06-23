@@ -6,9 +6,7 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-const (
-	Time_format = "2024-01-02 15:04:05"
-)
+var Time_format = sqlbuilder.Time_format
 
 type AutoTimeField struct {
 	CreatedAt sqlbuilder.Column
@@ -53,8 +51,6 @@ func Insert(autoTime AutoTimeI) sqlbuilder.InsertParam {
 func Update(autoTime AutoTimeI) sqlbuilder.UpdateParam {
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_UpdatedAt(autoTime))
 }
-
-var SorftDelete = Update
 
 func First(autoTime AutoTimeI) sqlbuilder.FirstParam {
 	return sqlbuilder.NewFirstBuilder(nil)

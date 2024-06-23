@@ -39,6 +39,12 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240623010253-b6f831313f5b h1:j31fNlHonfWh4nANUcx12Z1P1H229SL4+k9eM2Xf02Q=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240623010253-b6f831313f5b/go.mod h1:EI9lCbpwH3bOtRCH7Afa/nAIAzAvMRUlwKuiyAs3krY=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240623140817-8e3f7e0408fe h1:RrbWaHcrjqxCFJQTbmhWdya8NW4yx7wgMPRIHE2ljAE=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240623140817-8e3f7e0408fe/go.mod h1:EI9lCbpwH3bOtRCH7Afa/nAIAzAvMRUlwKuiyAs3krY=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240623141401-053ffac04470 h1:W0NBmOV8UEnKguj6RXLD0IIp/d30E98eMuM6C677pjQ=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240623141401-053ffac04470/go.mod h1:EI9lCbpwH3bOtRCH7Afa/nAIAzAvMRUlwKuiyAs3krY=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240623150004-5b2df4193ca5 h1:w9Gj3xqUWd7zr3/X34tXxFyrQUmFMjNKnMXqzHviv+0=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240623150004-5b2df4193ca5/go.mod h1:EI9lCbpwH3bOtRCH7Afa/nAIAzAvMRUlwKuiyAs3krY=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=

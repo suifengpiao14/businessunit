@@ -52,8 +52,6 @@ func Update(tenant TenantI) sqlbuilder.UpdateParam {
 	return sqlbuilder.NewUpdateBuilder(nil).AppendWhere(instanceTenantI(tenant))
 }
 
-var SorftDelete = Update
-
 func First(tenant TenantI) sqlbuilder.FirstParam {
 	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(instanceTenantI(tenant))
 }

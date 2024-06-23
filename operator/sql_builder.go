@@ -35,8 +35,6 @@ func Update(operatorI OperatorI) sqlbuilder.UpdateParam {
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_OperatorFn(operatorI))
 }
 
-var SorftDelete = Update
-
 func First(operatorI OperatorI) sqlbuilder.FirstParam {
 	return sqlbuilder.NewFirstBuilder(nil)
 }
