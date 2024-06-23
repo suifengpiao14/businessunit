@@ -1,4 +1,4 @@
-package deletedat
+package softdeleted
 
 import (
 	"time"
