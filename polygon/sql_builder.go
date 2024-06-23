@@ -1,0 +1,75 @@
+package polygon
+
+import (
+	"github.com/suifengpiao14/sqlbuilder"
+)
+
+type BoundingBoxField struct {
+	LngMax sqlbuilder.Column
+	LngMin sqlbuilder.Column
+	LatMax sqlbuilder.Column
+	LatMin sqlbuilder.Column
+}
+
+type PolygonI interface {
+	Points() (points Points, err error)
+	GetBoundingBoxField() (boundingBoxField BoundingBoxField)
+}
+
+func mergePolygonData(polygon PolygonI) (polygonData map[string]any, err error) {
+	points, err := polygon.Points()
+	if err != nil {
+		return nil, err
+	}
+
+	polygonData = make(map[string]interface{})
+	if len(points) > 0 {
+		boundingBox, err := points.GetBoundingBox()
+		if err != nil {
+			return nil, err
+		}
+		boundingBoxField := polygon.GetBoundingBoxField()
+		polygonData[boundingBoxField.LngMax.Name] = boundingBoxField.LngMax.Value(boundingBox.LngMax)
+		polygonData[boundingBoxField.LngMin.Name] = boundingBoxField.LngMin.Value(boundingBox.LngMin)
+		polygonData[boundingBoxField.LatMin.Name] = boundingBoxField.LatMax.Value(boundingBox.LatMax)
+		polygonData[boundingBoxField.LatMin.Name] = boundingBoxField.LatMin.Value(boundingBox.LatMin)
+	}
+
+	return polygonData, nil
+}
+
+type _Polygon struct {
+	PolygonI
+}
+
+func (t _Polygon) Data() (data interface{}, err error) {
+	return mergePolygonData(t)
+}
+
+func NewPolygon(polygonI PolygonI) _Polygon {
+	return _Polygon{
+		PolygonI: polygonI,
+	}
+}
+
+func Insert(param PolygonI) sqlbuilder.InsertParam {
+	return sqlbuilder.NewInsertBuilder(nil).AppendData(NewPolygon(param))
+}
+
+func Update(param PolygonI) sqlbuilder.UpdateParam {
+	return sqlbuilder.NewUpdateBuilder(nil).AppendData(NewPolygon(param))
+}
+
+/**以下仅仅为了完备,方便调用方使用,减少调用方心智负担, 统一格式后,也方便调用方批量处理中间件**/
+
+func First(param PolygonI) sqlbuilder.FirstParam {
+	return sqlbuilder.NewFirstBuilder(nil)
+}
+
+func List(param PolygonI) sqlbuilder.ListParam {
+	return sqlbuilder.NewListBuilder(nil)
+}
+
+func Total(param PolygonI) sqlbuilder.TotalParam {
+	return sqlbuilder.NewTotalBuilder(nil)
+}
