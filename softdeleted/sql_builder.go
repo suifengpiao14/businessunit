@@ -11,7 +11,7 @@ var Time_format = sqlbuilder.Time_format
 var Is_where_EQ = true
 
 type SoftDeletedField struct {
-	SoftDeleted sqlbuilder.Column
+	SoftDeleted sqlbuilder.Field
 }
 
 type SoftDeletedI interface {

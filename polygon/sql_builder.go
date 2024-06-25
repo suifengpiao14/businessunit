@@ -5,10 +5,10 @@ import (
 )
 
 type BoundingBoxField struct {
-	LngMax sqlbuilder.Column
-	LngMin sqlbuilder.Column
-	LatMax sqlbuilder.Column
-	LatMin sqlbuilder.Column
+	LngMax sqlbuilder.Field
+	LngMin sqlbuilder.Field
+	LatMax sqlbuilder.Field
+	LatMin sqlbuilder.Field
 }
 
 type PolygonI interface {

@@ -9,8 +9,8 @@ import (
 var Time_format = sqlbuilder.Time_format
 
 type AutoTimeField struct {
-	CreatedAt sqlbuilder.Column
-	UpdatedAt sqlbuilder.Column
+	CreatedAt sqlbuilder.Field
+	UpdatedAt sqlbuilder.Field
 }
 
 type AutoTimeI interface {

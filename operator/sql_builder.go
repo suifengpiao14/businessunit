@@ -5,8 +5,8 @@ import (
 )
 
 type OperatorField struct {
-	OperatorID   sqlbuilder.Column
-	OperatorName sqlbuilder.Column
+	OperatorID   sqlbuilder.Field
+	OperatorName sqlbuilder.Field
 }
 
 type OperatorI interface {
