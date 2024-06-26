@@ -38,8 +38,13 @@ func (p InsertParam) Data() (data interface{}, err error) {
 	return p, nil
 }
 
-func (p InsertParam) GetTenant() (filedName string, value any) {
-	return "Ftenant", p.Tenant
+func (p InsertParam) GetTenantField() tenant.TenantField {
+	return tenant.TenantField{
+		Name: "Ftenant",
+		Value: func(in any) (value any, err error) {
+			return p.Tenant, nil
+		},
+	}
 }
 
 type Polygon struct {
@@ -129,8 +134,13 @@ func (p ListParam) Where() (expressions []exp.Expression, err error) {
 	return
 }
 
-func (p ListParam) GetTenant() (filedName string, value any) {
-	return "Ftenant", p.Tenant
+func (p ListParam) GetTenantField() tenant.TenantField {
+	return tenant.TenantField{
+		Name: "Ftenant",
+		Value: func(in any) (value any, err error) {
+			return p.Tenant, nil
+		},
+	}
 }
 
 func TestList(t *testing.T) {

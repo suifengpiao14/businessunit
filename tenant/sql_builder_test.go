@@ -35,11 +35,21 @@ func (p InsertParam) Data() (data interface{}, err error) {
 	return p, nil
 }
 
-func (p InsertParam) GetTenant() (filedName string, value any) {
-	return "Ftenant", p.Tenant
+func (p InsertParam) GetTenantField() tenant.TenantField {
+	return tenant.TenantField{
+		Name: "Ftenant",
+		Value: func(in any) (value any, err error) {
+			return p.Tenant, nil
+		},
+	}
 }
 
-var tenantData = tenant.NewTenant("Ftenant", "1243")
+var tenantData = tenant.TenantField{
+	Name: "Ftenant",
+	Value: func(in any) (value any, err error) {
+		return "123", nil
+	},
+}
 
 func TestInsert(t *testing.T) {
 	row := InsertParam{

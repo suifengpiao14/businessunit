@@ -8,31 +8,33 @@ import (
 
 var Time_format = sqlbuilder.Time_format
 
-type CreatedAtField struct {
-	CreatedAt sqlbuilder.Field
+type CreatedAtField sqlbuilder.Field
+
+func (f CreatedAtField) GetCreatedAtField() CreatedAtField {
+	return f
 }
 
 type CreatedAtI interface {
 	GetCreatedAtField() CreatedAtField
 }
 
-func _CreatedAt(createdAtI CreatedAtI) sqlbuilder.DataFn {
+func _DataFn(createdAtI CreatedAtI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		tim := time.Now().Local().Format(Time_format)
 		col := createdAtI.GetCreatedAtField()
-		val, err := col.CreatedAt.Value(tim)
+		val, err := col.Value(tim)
 		if err != nil {
 			return nil, err
 		}
 		m := map[string]any{
-			col.CreatedAt.Name: val,
+			col.Name: val,
 		}
 		return m, nil
 	}
 }
 
 func Insert(createdAtI CreatedAtI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_CreatedAt(createdAtI))
+	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(createdAtI))
 }
 
 func Update(createdAtI CreatedAtI) sqlbuilder.UpdateParam {

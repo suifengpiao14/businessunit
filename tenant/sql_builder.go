@@ -5,61 +5,58 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
+type TenantField sqlbuilder.Field
+
+func (f TenantField) GetTenantField() TenantField {
+	return f
+}
+
 type TenantI interface {
-	GetTenant() (filedName string, value any) // 获取多租户标记的字段名及值
+	GetTenantField() TenantField // 获取多租户标记的字段名及值
 }
 
-type _Tenant struct {
-	filedName string
-	value     any
-}
-
-func (t _Tenant) GetTenant() (filedName string, value any) {
-	return t.filedName, t.value
-}
-func (t _Tenant) Data() (data interface{}, err error) {
-	out := map[string]any{}
-	filed, value := t.GetTenant()
-	out[filed] = value
-	return out, nil
-}
-
-func (t _Tenant) Where() (expressions []goqu.Expression, err error) {
-	expressions = make([]goqu.Expression, 0)
-	filed, value := t.GetTenant()
-	expressions = append(expressions, goqu.C(filed).Eq(value))
-	return expressions, nil
-}
-
-func NewTenant(filedName string, value any) (tenant _Tenant) {
-	return _Tenant{
-		filedName: filedName,
-		value:     value,
+func _DataFn(tenantI TenantI) sqlbuilder.DataFn {
+	field := tenantI.GetTenantField()
+	return func() (any, error) {
+		m := map[string]any{}
+		val, err := field.Value(nil)
+		if err != nil {
+			return nil, err
+		}
+		m[field.Name] = val
+		return m, nil
 	}
 }
 
-func instanceTenantI(tenantI TenantI) _Tenant {
-	filed, value := tenantI.GetTenant()
-	_tanat := NewTenant(filed, value)
-	return _tanat
+func _whereFn(uniqueI TenantI) sqlbuilder.WhereFn {
+	return func() (expressions []goqu.Expression, err error) {
+		field := uniqueI.GetTenantField()
+		expressions = make([]goqu.Expression, 0)
+		val, err := field.Value(nil)
+		if err != nil {
+			return nil, err
+		}
+		expressions = append(expressions, goqu.C(field.Name).Eq(val))
+		return expressions, nil
+	}
 }
 
 func Insert(tenant TenantI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(instanceTenantI(tenant))
+	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(tenant))
 }
 
 func Update(tenant TenantI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendWhere(instanceTenantI(tenant))
+	return sqlbuilder.NewUpdateBuilder(nil).AppendWhere(_whereFn(tenant))
 }
 
 func First(tenant TenantI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(instanceTenantI(tenant))
+	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_whereFn(tenant))
 }
 
 func List(tenant TenantI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil).AppendWhere(instanceTenantI(tenant))
+	return sqlbuilder.NewListBuilder(nil).AppendWhere(_whereFn(tenant))
 }
 
 func Total(tenant TenantI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(instanceTenantI(tenant))
+	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_whereFn(tenant))
 }
