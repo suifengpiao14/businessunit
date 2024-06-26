@@ -2,6 +2,9 @@ package unique
 
 import (
 	"github.com/doug-martin/goqu/v9"
+	"github.com/pkg/errors"
+	"github.com/suifengpiao14/businessunit/identity"
+	"github.com/suifengpiao14/businessunit/softdeleted"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -15,21 +18,13 @@ func (f UniqueField) GetUniqueFields() UniqueField {
 
 type UniqueI interface {
 	GetUniqueFields() UniqueField
+	sqlbuilder.Table
+	AlreadyExists(sql string) (exists bool, err error)
 }
 
-func _DataFn(uniqueI UniqueI) sqlbuilder.DataFn {
-	return func() (any, error) {
-		fields := uniqueI.GetUniqueFields()
-		m := map[string]any{}
-		for _, field := range fields {
-			val, err := field.Value(nil)
-			if err != nil {
-				return nil, err
-			}
-			m[field.Name] = val
-		}
-		return m, nil
-	}
+type UniqueIForUpdate interface {
+	UniqueI
+	identity.IdentityI
 }
 
 func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
@@ -47,16 +42,59 @@ func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
 	}
 }
 
-func Exists(uniqueI UniqueI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_whereFn(uniqueI))
+func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.Where) sqlbuilder.DataFn {
+	return func() (any, error) {
+		totalInstance := _TotalInstance{
+			UniqueI: uniqueI,
+		}
+		totalParam := sqlbuilder.NewTotalBuilder(totalInstance).AppendWhere(wheres...)
+		if softdeletedI, ok := uniqueI.(softdeleted.SoftDeletedI); ok { // 如果实现了软删除接口，则排除软删除记录
+			totalParam = totalParam.Merge(softdeleted.Total(softdeletedI))
+		}
+
+		sql, err := totalParam.ToSQL()
+		if err != nil {
+			return nil, err
+		}
+		exists, err := uniqueI.AlreadyExists(sql)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			err = errors.Errorf("unique exists:%s", sqlbuilder.Fields(uniqueI.GetUniqueFields()).String())
+			return nil, err
+		}
+		return nil, err
+	}
+
+}
+
+type _TotalInstance struct {
+	UniqueI
+}
+
+func (ins _TotalInstance) Where() (expressions []goqu.Expression, err error) {
+	return _whereFn(ins).Where()
 }
 
 func Insert(uniqueI UniqueI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(uniqueI))
+	return sqlbuilder.NewInsertBuilder(nil).AppendData(_checkExists(uniqueI))
 }
 
-func Update(uniqueI UniqueI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(uniqueI))
+func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
+	// 增加排除当前记录
+	whereNotID := sqlbuilder.WhereFn(func() (expressions []goqu.Expression, err error) {
+		identity := uniqueIForUpdate.GetIdentityField()
+		val, err := identity.Value(nil)
+		if err != nil {
+			return nil, err
+		}
+		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
+			return ex, nil
+		}
+		return sqlbuilder.ConcatExpression(goqu.C(identity.Name).Neq(val)), nil
+	})
+	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_checkExists(uniqueIForUpdate, whereNotID))
 }
 
 func First(uniqueI UniqueI) sqlbuilder.FirstParam {
