@@ -8,7 +8,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.7.0
-	github.com/suifengpiao14/sqlbuilder v0.0.0-20240623150004-5b2df4193ca5
+	github.com/suifengpiao14/sqlbuilder v0.0.0-20240626013139-72114614255f
 )
 
 require (

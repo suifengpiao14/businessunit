@@ -8,18 +8,18 @@ import (
 
 var Time_format = sqlbuilder.Time_format
 
-type AutoTimeField struct {
+type CreatedAtField struct {
 	CreatedAt sqlbuilder.Field
 }
 
-type AutoTimeI interface {
-	GetAutoTimeField() AutoTimeField
+type CreatedAtI interface {
+	GetCreatedAtField() CreatedAtField
 }
 
-func _CreatedAt(autoTimeI AutoTimeI) sqlbuilder.DataFn {
+func _CreatedAt(createdAtI CreatedAtI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		tim := time.Now().Local().Format(Time_format)
-		col := autoTimeI.GetAutoTimeField()
+		col := createdAtI.GetCreatedAtField()
 		val, err := col.CreatedAt.Value(tim)
 		if err != nil {
 			return nil, err
@@ -31,22 +31,22 @@ func _CreatedAt(autoTimeI AutoTimeI) sqlbuilder.DataFn {
 	}
 }
 
-func Insert(autoTime AutoTimeI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_CreatedAt(autoTime))
+func Insert(createdAtI CreatedAtI) sqlbuilder.InsertParam {
+	return sqlbuilder.NewInsertBuilder(nil).AppendData(_CreatedAt(createdAtI))
 }
 
-func Update(autoTime AutoTimeI) sqlbuilder.UpdateParam {
+func Update(createdAtI CreatedAtI) sqlbuilder.UpdateParam {
 	return sqlbuilder.NewUpdateBuilder(nil)
 }
 
-func First(autoTime AutoTimeI) sqlbuilder.FirstParam {
+func First(createdAtI CreatedAtI) sqlbuilder.FirstParam {
 	return sqlbuilder.NewFirstBuilder(nil)
 }
 
-func List(autoTime AutoTimeI) sqlbuilder.ListParam {
+func List(createdAtI CreatedAtI) sqlbuilder.ListParam {
 	return sqlbuilder.NewListBuilder(nil)
 }
 
-func Total(autoTime AutoTimeI) sqlbuilder.TotalParam {
+func Total(createdAtI CreatedAtI) sqlbuilder.TotalParam {
 	return sqlbuilder.NewTotalBuilder(nil)
 }
