@@ -29,10 +29,26 @@ func mergePolygonData(polygon PolygonI) (polygonData map[string]any, err error) 
 			return nil, err
 		}
 		boundingBoxField := polygon.GetBoundingBoxField()
-		polygonData[boundingBoxField.LngMax.Name] = boundingBoxField.LngMax.Value(boundingBox.LngMax)
-		polygonData[boundingBoxField.LngMin.Name] = boundingBoxField.LngMin.Value(boundingBox.LngMin)
-		polygonData[boundingBoxField.LatMin.Name] = boundingBoxField.LatMax.Value(boundingBox.LatMax)
-		polygonData[boundingBoxField.LatMin.Name] = boundingBoxField.LatMin.Value(boundingBox.LatMin)
+		lngMax, err := boundingBoxField.LngMax.Value(boundingBox.LngMax)
+		if err != nil {
+			return nil, err
+		}
+		lngMin, err := boundingBoxField.LngMin.Value(boundingBox.LngMin)
+		if err != nil {
+			return nil, err
+		}
+		latMax, err := boundingBoxField.LatMax.Value(boundingBox.LatMax)
+		if err != nil {
+			return nil, err
+		}
+		latMin, err := boundingBoxField.LatMin.Value(boundingBox.LatMin)
+		if err != nil {
+			return nil, err
+		}
+		polygonData[boundingBoxField.LngMax.Name] = lngMax
+		polygonData[boundingBoxField.LngMin.Name] = lngMin
+		polygonData[boundingBoxField.LatMax.Name] = latMax
+		polygonData[boundingBoxField.LatMin.Name] = latMin
 	}
 
 	return polygonData, nil

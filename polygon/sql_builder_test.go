@@ -68,19 +68,19 @@ func (p Polygon) GetBoundingBoxField() (boundingBoxField polygon.BoundingBoxFiel
 	return polygon.BoundingBoxField{
 		LngMax: sqlbuilder.Field{
 			Name:  "Flng_max",
-			Value: func(in any) any { return cast.ToString(in) },
+			Value: func(in any) (any, error) { return cast.ToString(in), nil },
 		},
 		LngMin: sqlbuilder.Field{
 			Name:  "Flng_min",
-			Value: func(in any) any { return cast.ToString(in) },
+			Value: func(in any) (any, error) { return cast.ToString(in), nil },
 		},
 		LatMax: sqlbuilder.Field{
 			Name:  "Flat_max",
-			Value: func(in any) any { return cast.ToString(in) },
+			Value: func(in any) (any, error) { return cast.ToString(in), nil },
 		},
 		LatMin: sqlbuilder.Field{
 			Name:  "Flat_min",
-			Value: func(in any) any { return cast.ToString(in) },
+			Value: func(in any) (any, error) { return cast.ToString(in), nil },
 		},
 	}
 }

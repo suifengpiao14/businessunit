@@ -14,15 +14,23 @@ type OperatorI interface {
 }
 
 func _OperatorFn(operatorI OperatorI) sqlbuilder.DataFn {
-	col := operatorI.GetOperatorField()
-	m := map[string]any{}
-	if col.OperatorID.Name != "" {
-		m[col.OperatorID.Name] = col.OperatorID.Value(nil)
-	}
-	if col.OperatorName.Name != "" {
-		m[col.OperatorName.Name] = col.OperatorName.Value(nil)
-	}
 	return func() (any, error) {
+		col := operatorI.GetOperatorField()
+		m := map[string]any{}
+		if col.OperatorID.Name != "" {
+			val, err := col.OperatorID.Value(nil)
+			if err != nil {
+				return nil, err
+			}
+			m[col.OperatorID.Name] = val
+		}
+		if col.OperatorName.Name != "" {
+			val, err := col.OperatorName.Value(nil)
+			if err != nil {
+				return nil, err
+			}
+			m[col.OperatorName.Name] = val
+		}
 		return m, nil
 	}
 }

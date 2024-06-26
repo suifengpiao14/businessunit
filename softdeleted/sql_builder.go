@@ -19,10 +19,14 @@ type SoftDeletedI interface {
 }
 
 func _SoftDeletedFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
-	col := softDeletedI.GetOperatorField()
-	m := map[string]any{}
-	m[col.SoftDeleted.Name] = col.SoftDeleted.Value(time.Now().Local().Format(Time_format))
 	return func() (any, error) {
+		col := softDeletedI.GetOperatorField()
+		m := map[string]any{}
+		val, err := col.SoftDeleted.Value(time.Now().Local().Format(Time_format))
+		if err != nil {
+			return nil, err
+		}
+		m[col.SoftDeleted.Name] = val
 		return m, nil
 	}
 }
@@ -32,9 +36,17 @@ func _SoftDeletedWhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		var expression goqu.Expression
 		if Is_where_EQ {
-			expression = goqu.C(col.SoftDeleted.Name).Eq(col.SoftDeleted.Value("")) // 确保删除字段为空
+			val, err := col.SoftDeleted.Value("")
+			if err != nil {
+				return nil, err
+			}
+			expression = goqu.C(col.SoftDeleted.Name).Eq(val) // 确保删除字段为空
 		} else {
-			expression = goqu.C(col.SoftDeleted.Name).Neq(col.SoftDeleted.Value(nil)) // 确保指定字段不等于 特定值
+			val, err := col.SoftDeleted.Value(nil)
+			if err != nil {
+				return nil, err
+			}
+			expression = goqu.C(col.SoftDeleted.Name).Neq(val) // 确保指定字段不等于 特定值
 		}
 		return sqlbuilder.ConcatExpression(expression), nil
 	}

@@ -1,4 +1,4 @@
-package autotime
+package createdat
 
 import (
 	"time"
@@ -10,7 +10,6 @@ var Time_format = sqlbuilder.Time_format
 
 type AutoTimeField struct {
 	CreatedAt sqlbuilder.Field
-	UpdatedAt sqlbuilder.Field
 }
 
 type AutoTimeI interface {
@@ -32,31 +31,12 @@ func _CreatedAt(autoTimeI AutoTimeI) sqlbuilder.DataFn {
 	}
 }
 
-func _UpdatedAt(autoTimeI AutoTimeI) sqlbuilder.DataFn {
-	col := autoTimeI.GetAutoTimeField()
-	if col.UpdatedAt.Name == "" { // 更新字段可选
-		return func() (any, error) {
-			return nil, nil
-		}
-	}
-	tim := time.Now().Local().Format(Time_format)
-	return func() (any, error) {
-		m := map[string]any{}
-		val, err := col.CreatedAt.Value(tim)
-		if err != nil {
-			return nil, err
-		}
-		m[col.UpdatedAt.Name] = val
-		return m, nil
-	}
-}
-
 func Insert(autoTime AutoTimeI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_CreatedAt(autoTime), _UpdatedAt(autoTime))
+	return sqlbuilder.NewInsertBuilder(nil).AppendData(_CreatedAt(autoTime))
 }
 
 func Update(autoTime AutoTimeI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_UpdatedAt(autoTime))
+	return sqlbuilder.NewUpdateBuilder(nil)
 }
 
 func First(autoTime AutoTimeI) sqlbuilder.FirstParam {
