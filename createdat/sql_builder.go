@@ -38,8 +38,11 @@ func _WhereFn(createdAtI CreatedAtI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := createdAtI.GetCreatedAtField()
 		expressions = make([]goqu.Expression, 0)
-		val, err := field.Value(nil)
+		val, err := field.WhereValue(nil)
 		if err != nil {
+			return nil, err
+		}
+		if sqlbuilder.IsNil(val) {
 			return nil, err
 		}
 		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {

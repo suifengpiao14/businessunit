@@ -32,8 +32,11 @@ func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
 		fields := uniqueI.GetUniqueFields()
 		expressions = make([]goqu.Expression, 0)
 		for _, field := range fields {
-			val, err := field.Value(nil)
+			val, err := field.WhereValue(nil)
 			if err != nil {
+				return nil, err
+			}
+			if sqlbuilder.IsNil(val) {
 				return nil, err
 			}
 			expressions = append(expressions, goqu.C(field.Name).Eq(val))

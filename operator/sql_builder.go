@@ -13,7 +13,7 @@ type OperatorI interface {
 	GetOperatorField() OperatorField
 }
 
-func _OperatorFn(operatorI OperatorI) sqlbuilder.DataFn {
+func _DataFn(operatorI OperatorI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		col := operatorI.GetOperatorField()
 		m := map[string]any{}
@@ -36,11 +36,11 @@ func _OperatorFn(operatorI OperatorI) sqlbuilder.DataFn {
 }
 
 func Insert(operatorI OperatorI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_OperatorFn(operatorI))
+	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(operatorI))
 }
 
 func Update(operatorI OperatorI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_OperatorFn(operatorI))
+	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(operatorI))
 }
 
 func First(operatorI OperatorI) sqlbuilder.FirstParam {
