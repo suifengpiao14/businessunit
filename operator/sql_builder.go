@@ -17,14 +17,15 @@ func _DataFn(operatorI OperatorI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		col := operatorI.GetOperatorField()
 		m := map[string]any{}
-		if col.OperatorID.Name != "" {
+
+		if col.OperatorID.Value != nil {
 			val, err := col.OperatorID.Value(nil)
 			if err != nil {
 				return nil, err
 			}
 			m[col.OperatorID.Name] = val
 		}
-		if col.OperatorName.Name != "" {
+		if col.OperatorName.Value != nil {
 			val, err := col.OperatorName.Value(nil)
 			if err != nil {
 				return nil, err

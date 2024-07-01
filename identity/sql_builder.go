@@ -18,12 +18,12 @@ type IdentityI interface {
 func _DataFn(identityI IdentityI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		field := identityI.GetIdentityField()
+		if field.Value == nil {
+			return nil, nil
+		}
 		val, err := field.Value(nil)
 		if err != nil {
 			return nil, err
-		}
-		if sqlbuilder.IsNil(val) {
-			return nil, nil
 		}
 
 		m := map[string]any{
@@ -37,12 +37,12 @@ func _WhereFn(identityI IdentityI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := identityI.GetIdentityField()
 		expressions = make([]goqu.Expression, 0)
+		if field.WhereValue == nil {
+			return nil, nil
+		}
 		val, err := field.WhereValue(nil)
 		if err != nil {
 			return nil, err
-		}
-		if sqlbuilder.IsNil(val) {
-			return nil, nil
 		}
 		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
 			return ex, nil

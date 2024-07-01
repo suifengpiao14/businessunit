@@ -23,6 +23,9 @@ func _DataFn(updatedatI UpdatedatI) sqlbuilder.DataFn {
 	col := updatedatI.GetUpdatedatField()
 	tim := time.Now().Local().Format(Time_format)
 	return func() (any, error) {
+		if col.Value == nil {
+			return nil, nil
+		}
 		m := map[string]any{}
 		val, err := col.Value(tim)
 		if err != nil {
@@ -37,17 +40,14 @@ func _WhereFn(updatedatI UpdatedatI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := updatedatI.GetUpdatedatField()
 		expressions = make([]goqu.Expression, 0)
+		if field.Value == nil {
+			return nil, nil
+		}
 		val, err := field.WhereValue(nil)
 		if err != nil {
 			return nil, err
 		}
-		if sqlbuilder.IsNil(val) {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
-			return ex, nil
-		}
-		if ex, ok := sqlbuilder.TryConvert2Betwwen(field.Name, val); ok {
+		if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
 			return ex, nil
 		}
 		return expressions, nil

@@ -7,38 +7,53 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
+type Title struct {
+	Title sqlbuilder.Field
+	ID    identity.IdentityField
+}
+
+func (t Title) GetIdentityField() identity.IdentityField {
+	return t.ID
+}
+
+func (t Title) GetTitle() Title {
+	return t
+}
+
 type TitleI interface {
-	GetTitleField() sqlbuilder.Field
-	identity.IdentityI
+	GetTitle() Title
 }
 
 func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 	return func() (any, error) {
-		title := titleI.GetTitleField()
+		title := titleI.GetTitle()
+		if title.Title.Value == nil {
+			return nil, nil
+		}
 		m := map[string]any{}
-		val, err := title.Value(nil)
+		val, err := title.Title.Value(nil)
 		if err != nil {
 			return nil, err
 		}
 		if sqlbuilder.IsNil(val) {
 			return nil, nil
 		}
-		m[title.Name] = val
+		m[title.Title.Name] = val
 		return m, nil
 	}
 }
 func _WhereFn(titleI TitleI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
-		field := titleI.GetIdentityField()
+		field := titleI.GetTitle().ID
 		expressions = make([]goqu.Expression, 0)
-		val, err := field.Value(nil)
+		if field.WhereValue == nil {
+			return nil, nil
+		}
+		val, err := field.WhereValue(nil)
 		if err != nil {
 			return nil, err
 		}
-		if sqlbuilder.IsNil(val) {
-			return nil, nil
-		}
-		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
+		if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
 			return ex, nil
 		}
 		likeValue := "%" + cast.ToString(val) + "%"
@@ -48,21 +63,26 @@ func _WhereFn(titleI TitleI) sqlbuilder.WhereFn {
 }
 
 func Insert(titleI TitleI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).Merge(identity.Insert(titleI)).AppendData(_DataFn(titleI))
+	title := titleI.GetTitle()
+	return sqlbuilder.NewInsertBuilder(nil).Merge(identity.Insert(title)).AppendData(_DataFn(titleI))
 }
 
 func Update(titleI TitleI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).Merge(identity.Update(titleI)).AppendData(_DataFn(titleI))
+	title := titleI.GetTitle()
+	return sqlbuilder.NewUpdateBuilder(nil).Merge(identity.Update(title)).AppendData(_DataFn(titleI))
 }
 
 func First(titleI TitleI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil).Merge(identity.First(titleI)).AppendWhere(_WhereFn(titleI))
+	title := titleI.GetTitle()
+	return sqlbuilder.NewFirstBuilder(nil).Merge(identity.First(title)).AppendWhere(_WhereFn(titleI))
 }
 
 func List(titleI TitleI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil).Merge(identity.List(titleI)).AppendWhere(_WhereFn(titleI))
+	title := titleI.GetTitle()
+	return sqlbuilder.NewListBuilder(nil).Merge(identity.List(title)).AppendWhere(_WhereFn(titleI))
 }
 
 func Total(titleI TitleI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil).Merge(identity.Total(titleI)).AppendWhere(_WhereFn(titleI))
+	title := titleI.GetTitle()
+	return sqlbuilder.NewTotalBuilder(nil).Merge(identity.Total(title)).AppendWhere(_WhereFn(titleI))
 }

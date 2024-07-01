@@ -22,13 +22,16 @@ type CreatedAtI interface {
 func _DataFn(createdAtI CreatedAtI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		tim := time.Now().Local().Format(Time_format)
-		col := createdAtI.GetCreatedAtField()
-		val, err := col.Value(tim)
+		field := createdAtI.GetCreatedAtField()
+		if field.Value == nil {
+			return nil, nil
+		}
+		val, err := field.Value(tim)
 		if err != nil {
 			return nil, err
 		}
 		m := map[string]any{
-			col.Name: val,
+			field.Name: val,
 		}
 		return m, nil
 	}
@@ -38,17 +41,14 @@ func _WhereFn(createdAtI CreatedAtI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := createdAtI.GetCreatedAtField()
 		expressions = make([]goqu.Expression, 0)
+		if field.WhereValue == nil {
+			return nil, err
+		}
 		val, err := field.WhereValue(nil)
 		if err != nil {
 			return nil, err
 		}
-		if sqlbuilder.IsNil(val) {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
-			return ex, nil
-		}
-		if ex, ok := sqlbuilder.TryConvert2Betwwen(field.Name, val); ok {
+		if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
 			return ex, nil
 		}
 		return expressions, nil

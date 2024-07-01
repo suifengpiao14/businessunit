@@ -1,4 +1,4 @@
-package createdat
+package address
 
 import (
 	"github.com/doug-martin/goqu/v9"
@@ -75,19 +75,17 @@ func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
 		address := addressI.GetAddress()
 		expressions = make([]goqu.Expression, 0)
 		for _, field := range address.Fields() {
-			val, err := field.Value(nil)
+			if field.WhereValue == nil {
+				continue
+			}
+			val, err := field.WhereValue(nil)
 			if err != nil {
 				return nil, err
 			}
-			if sqlbuilder.IsNil(val) {
-				continue
-			}
-			if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
+			if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
 				expressions = append(expressions, ex...)
 			}
-			if ex, ok := sqlbuilder.TryConvert2Betwwen(field.Name, val); ok {
-				expressions = append(expressions, ex...)
-			}
+			expressions = append(expressions, goqu.C(field.Name).Eq(val))
 		}
 		return expressions, nil
 	}

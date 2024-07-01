@@ -18,6 +18,9 @@ type TenantI interface {
 func _DataFn(tenantI TenantI) sqlbuilder.DataFn {
 	field := tenantI.GetTenantField()
 	return func() (any, error) {
+		if field.Value == nil {
+			return nil, nil
+		}
 		m := map[string]any{}
 		val, err := field.Value(nil)
 		if err != nil {

@@ -18,6 +18,9 @@ type ForeignkeyI interface {
 func _DataFn(foreignkeyI ForeignkeyI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		col := foreignkeyI.GetForeignkeyField()
+		if col.Value == nil {
+			return nil, nil
+		}
 		val, err := col.Value(nil)
 		if err != nil {
 			return nil, err

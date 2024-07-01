@@ -35,25 +35,25 @@ type SoftDeletedI interface {
 
 func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 	return func() (any, error) {
-		_, col := softDeletedI.GetDeletedAtField()
+		_, field := softDeletedI.GetDeletedAtField()
 		m := map[string]any{}
-		val, err := col.Value(time.Now().Local().Format(Time_format))
+		val, err := field.Value(time.Now().Local().Format(Time_format))
 		if err != nil {
 			return nil, err
 		}
-		m[col.Name] = val
+		m[field.Name] = val
 		return m, nil
 	}
 }
 
 func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
-	valueType, col := softDeletedI.GetDeletedAtField()
+	valueType, field := softDeletedI.GetDeletedAtField()
 	return func() (expressions []goqu.Expression, err error) {
-		val, err := col.WhereValue("")
-		if err != nil {
-			return nil, err
+		if field.Value == nil {
+			return nil, nil
 		}
-		if sqlbuilder.IsNil(val) {
+		val, err := field.WhereValue("")
+		if err != nil {
 			return nil, err
 		}
 		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
@@ -62,9 +62,9 @@ func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 		var expression goqu.Expression
 		switch valueType {
 		case ValueType_OK:
-			expression = goqu.C(col.Name).Eq(val) // 确保删除字段为空
+			expression = goqu.C(field.Name).Eq(val) // 确保删除字段为空
 		case ValueType_Delete:
-			expression = goqu.C(col.Name).Neq(val) // 确保指定字段不等于 特定值
+			expression = goqu.C(field.Name).Neq(val) // 确保指定字段不等于 特定值
 		default:
 			err = errors.Errorf("invalid valueType , except %s|%s,got:%s", ValueType_OK, ValueType_Delete, valueType)
 			return nil, err
