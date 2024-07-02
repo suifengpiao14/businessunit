@@ -2,6 +2,10 @@ package address
 
 import (
 	"github.com/doug-martin/goqu/v9"
+	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
+	"github.com/spf13/cast"
+	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/title"
 	"github.com/suifengpiao14/sqlbuilder"
 )
@@ -37,7 +41,7 @@ CREATE TABLE `t_merchant_address_info` (
 type Address struct {
 	OwnerID      sqlbuilder.Field
 	Label        sqlbuilder.Field
-	ContactPhone sqlbuilder.Field
+	ContactPhone phone.PhoneField
 	ContactName  sqlbuilder.Field
 	Address      sqlbuilder.Field
 
@@ -51,7 +55,6 @@ func (address Address) Fields() (fileds sqlbuilder.Fields) {
 	fileds = append(fileds,
 		address.OwnerID,
 		address.Label,
-		address.ContactPhone,
 		address.ContactName,
 		address.Address,
 	)
@@ -73,6 +76,18 @@ func _DataFn(addressI AddressI) sqlbuilder.DataFn {
 func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		address := addressI.GetAddress()
+		validate := validator.New()
+		err = validate.Struct(address)
+		if err != nil {
+			return nil, err
+		}
+		ownerID, err := address.OwnerID.WhereValue(nil)
+		if err != nil {
+			return nil, err
+		}
+		if cast.ToString(ownerID) == "" {
+			return nil, errors.Errorf("字段%s不能为空", address.OwnerID.Name)
+		}
 		expressions = make([]goqu.Expression, 0)
 		for _, field := range address.Fields() {
 			if field.WhereValue == nil {
@@ -93,6 +108,7 @@ func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
 
 func Insert(addressI AddressI) sqlbuilder.InsertParam {
 	address := addressI.GetAddress()
+	phoneField := address.ContactPhone
 	provice := address.Province
 	city := address.City
 	area := address.Area
@@ -100,6 +116,7 @@ func Insert(addressI AddressI) sqlbuilder.InsertParam {
 		title.Insert(provice),
 		title.Insert(city),
 		title.Insert(area),
+		phone.Insert(phoneField),
 	)
 }
 
@@ -108,10 +125,12 @@ func Update(addressI AddressI) sqlbuilder.UpdateParam {
 	provice := address.Province
 	city := address.City
 	area := address.Area
+	phoneField := address.ContactPhone
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(addressI)).AppendWhere(_WhereFn(addressI)).Merge(
 		title.Update(provice),
 		title.Update(city),
 		title.Update(area),
+		phone.Update(phoneField),
 	)
 }
 
@@ -120,10 +139,12 @@ func First(addressI AddressI) sqlbuilder.FirstParam {
 	provice := address.Province
 	city := address.City
 	area := address.Area
+	phoneField := address.ContactPhone
 	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
 		title.First(provice),
 		title.First(city),
 		title.First(area),
+		phone.First(phoneField),
 	)
 }
 
@@ -132,10 +153,12 @@ func List(addressI AddressI) sqlbuilder.ListParam {
 	provice := address.Province
 	city := address.City
 	area := address.Area
+	phoneField := address.ContactPhone
 	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
 		title.List(provice),
 		title.List(city),
 		title.List(area),
+		phone.List(phoneField),
 	)
 }
 
@@ -144,9 +167,11 @@ func Total(addressI AddressI) sqlbuilder.TotalParam {
 	provice := address.Province
 	city := address.City
 	area := address.Area
+	phoneField := address.ContactPhone
 	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
 		title.Total(provice),
 		title.Total(city),
 		title.Total(area),
+		phone.Total(phoneField),
 	)
 }
