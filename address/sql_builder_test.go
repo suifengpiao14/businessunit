@@ -6,6 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/suifengpiao14/businessunit/address"
+	"github.com/suifengpiao14/businessunit/boolean"
+	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/businessunit/identity"
 	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/title"
@@ -24,6 +26,7 @@ type InsertAddress struct {
 	CityName     string `json:"cityName"`
 	AreaId       string `json:"areaId"`
 	AreaName     string `json:"areaName"`
+	IsDefault    string `json:"isDefault"`
 }
 
 func (addr InsertAddress) GetAddress() (addres address.Address) {
@@ -37,10 +40,41 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 				return addr.OwnerID, nil
 			},
 		},
-		Label: sqlbuilder.Field{
-			Name: "Flabel",
-			Value: func(in any) (value any, err error) {
-				return addr.Label, nil
+		Label: enum.EnumField{
+			Field: sqlbuilder.Field{
+				Name: "Flabel",
+				Value: func(in any) (value any, err error) {
+					return addr.Label, nil
+				},
+			},
+			EnumTitles: enum.EnumTitles{
+				{
+					Key:   "recive",
+					Title: "收获地址",
+				},
+				{
+					Key:   "return",
+					Title: "退货地址",
+				},
+			},
+		},
+		IsDefault: boolean.BooleanField{
+			Field: sqlbuilder.Field{
+				Name: "Fis_default",
+				Value: func(in any) (value any, err error) {
+					return addr.IsDefault, nil
+				},
+			},
+			TrueFalseTitleFn: func() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle) {
+				trueTitle = enum.EnumTitle{
+					Key:   "1",
+					Title: "是",
+				}
+				falseTitle = enum.EnumTitle{
+					Key:   "2",
+					Title: "否",
+				}
+				return trueTitle, falseTitle
 			},
 		},
 		ContactPhone: phone.PhoneField{
@@ -125,6 +159,7 @@ func TestInsert(t *testing.T) {
 		CityName:     "深圳",
 		AreaId:       "440301",
 		AreaName:     "福田",
+		IsDefault:    "1",
 	}
 	sql, err := sqlbuilder.NewInsertBuilder(addr).Merge(address.Insert(addr)).ToSQL()
 	require.NoError(t, err)
@@ -132,18 +167,7 @@ func TestInsert(t *testing.T) {
 
 }
 
-type UpdateAddress struct {
-	OwnerID      string `json:"ownerId"`
-	ContactPhone string `json:"contactPhone"`
-	ContactName  string `json:"contactName"`
-	Address      string `json:"address"`
-	ProvinceId   string `json:"provinceId"`
-	ProvinceName string `json:"provinceName"`
-	CityId       string `json:"cityId"`
-	CityName     string `json:"cityName"`
-	AreaId       string `json:"areaId"`
-	AreaName     string `json:"areaName"`
-}
+type UpdateAddress InsertAddress
 
 func (addr UpdateAddress) GetAddress() (addres address.Address) {
 	addres = address.Address{
