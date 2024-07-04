@@ -37,7 +37,7 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		_, field := softDeletedI.GetDeletedAtField()
 		m := map[string]any{}
-		val, err := field.Value(time.Now().Local().Format(Time_format))
+		val, err := field.ValueFn(time.Now().Local().Format(Time_format))
 		if err != nil {
 			return nil, err
 		}
@@ -49,10 +49,10 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 	valueType, field := softDeletedI.GetDeletedAtField()
 	return func() (expressions []goqu.Expression, err error) {
-		if field.Value == nil {
+		if field.ValueFn == nil {
 			return nil, nil
 		}
-		val, err := field.WhereValue("")
+		val, err := field.WhereValueFn("")
 		if err != nil {
 			return nil, err
 		}

@@ -35,6 +35,10 @@ func (ets EnumTitles) String() string {
 	return out
 }
 
+func (enumTitle EnumTitle) IsSame(key string) bool {
+	return strings.EqualFold(key, enumTitle.Key)
+}
+
 type EnumI interface {
 	GetEnumField() EnumField
 }
@@ -42,10 +46,10 @@ type EnumI interface {
 func _DataFn(enumI EnumI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		col := enumI.GetEnumField()
-		if col.Value == nil {
+		if col.ValueFn == nil {
 			return nil, nil
 		}
-		val, err := col.Value(nil)
+		val, err := col.ValueFn(nil)
 		if err != nil {
 			return nil, err
 		}
@@ -67,22 +71,27 @@ func _DataFn(enumI EnumI) sqlbuilder.DataFn {
 	}
 }
 
+func WhereFn(enumI EnumI) sqlbuilder.WhereFn {
+	field := enumI.GetEnumField()
+	return sqlbuilder.Field(field.Field).Where
+}
+
 func Insert(enumI EnumI) sqlbuilder.InsertParam {
 	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(enumI))
 }
 
 func Update(enumI EnumI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(enumI))
+	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(enumI)).AppendWhere(WhereFn(enumI))
 }
 
 func First(enumI EnumI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil)
+	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(WhereFn(enumI))
 }
 
 func List(enumI EnumI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil)
+	return sqlbuilder.NewListBuilder(nil).AppendWhere(WhereFn(enumI))
 }
 
 func Total(enumI EnumI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil)
+	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(WhereFn(enumI))
 }

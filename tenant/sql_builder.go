@@ -1,7 +1,9 @@
 package tenant
 
 import (
-	"github.com/doug-martin/goqu/v9"
+	"strings"
+
+	"github.com/spf13/cast"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -10,6 +12,17 @@ type TenantField sqlbuilder.Field
 func (f TenantField) GetTenantField() TenantField {
 	return f
 }
+func (f TenantField) IsSame(o TenantField) bool {
+	fv, err := f.ValueFn(nil)
+	if err != nil || sqlbuilder.IsNil(fv) {
+		return false
+	}
+	ov, err := f.ValueFn(nil)
+	if err != nil || sqlbuilder.IsNil(ov) {
+		return false
+	}
+	return strings.EqualFold(cast.ToString(fv), cast.ToString(ov))
+}
 
 type TenantI interface {
 	GetTenantField() TenantField // 获取多租户标记的字段名及值
@@ -17,34 +30,11 @@ type TenantI interface {
 
 func _DataFn(tenantI TenantI) sqlbuilder.DataFn {
 	field := tenantI.GetTenantField()
-	return func() (any, error) {
-		if field.Value == nil {
-			return nil, nil
-		}
-		m := map[string]any{}
-		val, err := field.Value(nil)
-		if err != nil {
-			return nil, err
-		}
-		m[field.Name] = val
-		return m, nil
-	}
+	return sqlbuilder.Field(field).Data
 }
 
-func _whereFn(uniqueI TenantI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
-		field := uniqueI.GetTenantField()
-		expressions = make([]goqu.Expression, 0)
-		val, err := field.WhereValue(nil)
-		if err != nil {
-			return nil, err
-		}
-		if sqlbuilder.IsNil(val) {
-			return nil, err
-		}
-		expressions = append(expressions, goqu.C(field.Name).Eq(val))
-		return expressions, nil
-	}
+func WhereFn(uniqueI TenantI) sqlbuilder.WhereFn {
+	return sqlbuilder.Field(uniqueI.GetTenantField()).Where
 }
 
 func Insert(tenant TenantI) sqlbuilder.InsertParam {
@@ -52,17 +42,17 @@ func Insert(tenant TenantI) sqlbuilder.InsertParam {
 }
 
 func Update(tenant TenantI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendWhere(_whereFn(tenant))
+	return sqlbuilder.NewUpdateBuilder(nil).AppendWhere(WhereFn(tenant))
 }
 
 func First(tenant TenantI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_whereFn(tenant))
+	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(WhereFn(tenant))
 }
 
 func List(tenant TenantI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil).AppendWhere(_whereFn(tenant))
+	return sqlbuilder.NewListBuilder(nil).AppendWhere(WhereFn(tenant))
 }
 
 func Total(tenant TenantI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_whereFn(tenant))
+	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(WhereFn(tenant))
 }

@@ -23,10 +23,10 @@ func _DataFn(createdAtI CreatedAtI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		tim := time.Now().Local().Format(Time_format)
 		field := createdAtI.GetCreatedAtField()
-		if field.Value == nil {
+		if field.ValueFn == nil {
 			return nil, nil
 		}
-		val, err := field.Value(tim)
+		val, err := field.ValueFn(tim)
 		if err != nil {
 			return nil, err
 		}
@@ -41,10 +41,10 @@ func _WhereFn(createdAtI CreatedAtI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := createdAtI.GetCreatedAtField()
 		expressions = make([]goqu.Expression, 0)
-		if field.WhereValue == nil {
+		if field.WhereValueFn == nil {
 			return nil, err
 		}
-		val, err := field.WhereValue(nil)
+		val, err := field.WhereValueFn(nil)
 		if err != nil {
 			return nil, err
 		}

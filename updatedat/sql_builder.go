@@ -23,11 +23,11 @@ func _DataFn(updatedatI UpdatedatI) sqlbuilder.DataFn {
 	col := updatedatI.GetUpdatedatField()
 	tim := time.Now().Local().Format(Time_format)
 	return func() (any, error) {
-		if col.Value == nil {
+		if col.ValueFn == nil {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := col.Value(tim)
+		val, err := col.ValueFn(tim)
 		if err != nil {
 			return nil, err
 		}
@@ -40,10 +40,10 @@ func _WhereFn(updatedatI UpdatedatI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := updatedatI.GetUpdatedatField()
 		expressions = make([]goqu.Expression, 0)
-		if field.Value == nil {
+		if field.ValueFn == nil {
 			return nil, nil
 		}
-		val, err := field.WhereValue(nil)
+		val, err := field.WhereValueFn(nil)
 		if err != nil {
 			return nil, err
 		}

@@ -1,7 +1,6 @@
 package identity
 
 import (
-	"github.com/doug-martin/goqu/v9"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -18,10 +17,10 @@ type IdentityI interface {
 func _DataFn(identityI IdentityI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		field := identityI.GetIdentityField()
-		if field.Value == nil {
+		if field.ValueFn == nil {
 			return nil, nil
 		}
-		val, err := field.Value(nil)
+		val, err := field.ValueFn(nil)
 		if err != nil {
 			return nil, err
 		}
@@ -34,22 +33,8 @@ func _DataFn(identityI IdentityI) sqlbuilder.DataFn {
 }
 
 func _WhereFn(identityI IdentityI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
-		field := identityI.GetIdentityField()
-		expressions = make([]goqu.Expression, 0)
-		if field.WhereValue == nil {
-			return nil, nil
-		}
-		val, err := field.WhereValue(nil)
-		if err != nil {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
-			return ex, nil
-		}
-		expressions = append(expressions, goqu.Ex{field.Name: val}) // 支持数组
-		return expressions, nil
-	}
+	field := identityI.GetIdentityField()
+	return sqlbuilder.Field(field).Where
 }
 
 func Insert(identityI IdentityI) sqlbuilder.InsertParam {

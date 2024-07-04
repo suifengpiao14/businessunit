@@ -27,11 +27,11 @@ type TitleI interface {
 func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		title := titleI.GetTitle()
-		if title.Title.Value == nil {
+		if title.Title.ValueFn == nil {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := title.Title.Value(nil)
+		val, err := title.Title.ValueFn(nil)
 		if err != nil {
 			return nil, err
 		}
@@ -46,10 +46,10 @@ func _WhereFn(titleI TitleI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := titleI.GetTitle().ID
 		expressions = make([]goqu.Expression, 0)
-		if field.WhereValue == nil {
+		if field.WhereValueFn == nil {
 			return nil, nil
 		}
-		val, err := field.WhereValue(nil)
+		val, err := field.WhereValueFn(nil)
 		if err != nil {
 			return nil, err
 		}

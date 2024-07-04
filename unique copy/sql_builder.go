@@ -8,6 +8,8 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
+var Time_format = sqlbuilder.Time_format
+
 type UniqueField sqlbuilder.Fields
 
 func (f UniqueField) GetUniqueFields() UniqueField {

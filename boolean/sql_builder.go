@@ -1,6 +1,9 @@
 package boolean
 
 import (
+	"strings"
+
+	"github.com/spf13/cast"
 	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/sqlbuilder"
 )
@@ -18,9 +21,60 @@ func (f BooleanField) GetTrueFalseTitle() (trueTitle enum.EnumTitle, falseTitle 
 	return f.TrueFalseTitleFn()
 }
 
+func (f BooleanField) IsTrue() (isTrue bool) {
+	if f.ValueFn == nil {
+		return false
+	}
+	val, err := f.ValueFn(nil)
+	if err != nil {
+		return false
+	}
+	trueTitle, _ := f.GetTrueFalseTitle()
+	isTrue = strings.EqualFold(trueTitle.Key, cast.ToString(val))
+	return isTrue
+}
+
 type BooleanI interface {
 	GetBooleanField() BooleanField
 	GetTrueFalseTitle() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle)
+}
+
+// Copy 生成副本，此处实际类型可能已经发生变化，只是复制了BooleanI 接口内容
+func Copy(booleanI BooleanI) (newBooleanI BooleanI) {
+	booleanField := booleanI.GetBooleanField()
+	newBooleanI = BooleanField{
+		Field: sqlbuilder.Field{
+			Name:    booleanField.Name,
+			ValueFn: booleanField.ValueFn,
+		},
+		TrueFalseTitleFn: booleanI.GetTrueFalseTitle,
+	}
+	return newBooleanI
+}
+
+// Switch  生成值反转的实体
+func Switch(booleanI BooleanI) (reversed BooleanI) {
+	booleanField := booleanI.GetBooleanField()
+	trueTitle, falseTitle := booleanI.GetTrueFalseTitle()
+	reversed = BooleanField{
+		Field: sqlbuilder.Field{
+			Name: booleanField.Name,
+			ValueFn: func(in any) (value any, err error) {
+				val, err := booleanField.ValueFn(nil)
+				if err != nil {
+					return nil, err
+				}
+				str := cast.ToString(val)
+				if trueTitle.IsSame(str) { // 原值为true ，返回 false 值
+					return falseTitle.Key, nil
+				}
+				return trueTitle.Key, nil // 原值为false ，返回 true 值
+
+			},
+		},
+		TrueFalseTitleFn: booleanI.GetTrueFalseTitle,
+	}
+	return reversed
 }
 
 func booleanI2EnumField(booleanI BooleanI) enum.EnumField {

@@ -35,15 +35,15 @@ func init() {
 }
 
 var Field_CreatedAt = sqlbuilder.Field{
-	Name:  "created_at",
-	Title: "创建时间",
-	Value: func(in any) (any, error) { return in, nil },
+	Name:    "created_at",
+	Title:   "创建时间",
+	ValueFn: func(in any) (any, error) { return in, nil },
 }
 
 var Field_UpdatedAt = sqlbuilder.Field{
-	Name:  "updated_at",
-	Title: "更新时间",
-	Value: func(in any) (any, error) { return in, nil },
+	Name:    "updated_at",
+	Title:   "更新时间",
+	ValueFn: func(in any) (any, error) { return in, nil },
 }
 
 func Migrate(table string, driver sqlbuilder.Driver, scene sqlbuilder.Scene) []string {

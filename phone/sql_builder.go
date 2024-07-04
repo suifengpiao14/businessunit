@@ -35,11 +35,11 @@ func validatePhone(phone string) (err error) {
 func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
 	col := phoneI.GetPhoneField()
 	return func() (any, error) {
-		if col.Value == nil {
+		if col.ValueFn == nil {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := col.Value(nil)
+		val, err := col.ValueFn(nil)
 		if err != nil {
 			return nil, err
 		}
@@ -56,26 +56,20 @@ func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
 func _WhereFn(phoneI PhoneI) sqlbuilder.WhereFn {
 	return func() (expressions []goqu.Expression, err error) {
 		field := phoneI.GetPhoneField()
-		expressions = make([]goqu.Expression, 0)
-		if field.Value == nil {
-			return nil, nil
+		if field.WhereValueFn != nil {
+			val, _ := field.WhereValueFn(nil)
+
+			phone := cast.ToString(val)
+			if phone == "" {
+				return nil, nil
+			}
+			err = validatePhone(phone) // 验证手机格式
+			if err != nil {
+				return nil, err
+			}
 		}
-		val, err := field.WhereValue(nil)
-		if err != nil {
-			return nil, err
-		}
-		phone := cast.ToString(val)
-		if phone == "" {
-			return nil, nil
-		}
-		err = validatePhone(phone)
-		if err != nil {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
-			return ex, nil
-		}
-		return expressions, nil
+
+		return sqlbuilder.Field(field).Where()
 	}
 }
 
