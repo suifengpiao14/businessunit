@@ -43,7 +43,7 @@ func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
 	}
 }
 
-func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.Where) sqlbuilder.DataFn {
+func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.WhereI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		totalInstance := _TotalInstance{
 			UniqueI: uniqueI,

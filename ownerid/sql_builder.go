@@ -4,7 +4,9 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type OwnerIdField sqlbuilder.Field
+type OwnerIdField struct {
+	sqlbuilder.Field
+}
 
 func (f OwnerIdField) GetOwnerIdField() OwnerIdField {
 	return f
@@ -36,8 +38,8 @@ func _DataFn(identityI OwnerIdI) sqlbuilder.DataFn {
 }
 
 func WhereFn(ownerIdI OwnerIdI) sqlbuilder.WhereFn {
-	field := ownerIdI.GetOwnerIdField()
-	return sqlbuilder.Field(field).Where
+
+	return ownerIdI.GetOwnerIdField().Where
 }
 
 func Insert(ownerIdI OwnerIdI) sqlbuilder.InsertParam {

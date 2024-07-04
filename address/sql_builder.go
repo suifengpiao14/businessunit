@@ -27,7 +27,12 @@ type AddressRule struct {
 type AddressRules []AddressRule
 
 func (rs AddressRules) GetByLabel(tenatID tenant.TenantField, ownerID ownerid.OwnerIdField, label enum.EnumField) (addressRule *AddressRule, exist bool) {
-
+	for _, r := range rs {
+		if r.TenatID.IsEqual(tenatID) && r.OwnerID.IsEqual(ownerID.Field) && r.Label.IsEqual(label.Field) {
+			return &r, true
+		}
+	}
+	return nil, false
 }
 
 // GetAddressRules 业务方重新初始化该函数，获取值
@@ -87,31 +92,20 @@ func (address Address) Fields() (fileds sqlbuilder.Fields) {
 type AddressI interface {
 	GetAddress() Address
 	sqlbuilder.Table
-	CleanDefault(rawSql string) (err error) // 清除默认记录标记(新写数据有默认属性)
+}
+
+// WithDefaultI 需要设置默认地址时,需要实现该接口
+type WithDefaultI interface {
+	CleanDefault(rawSql string) (err error)
+}
+
+type CheckRuleI interface {
+	GetCount(rawSql string) (count int, err error) // 某种类型需要限制数量时,需要实现该接口,查询数据库已有的数量
 }
 
 func _DataFn(addressI AddressI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		address := addressI.GetAddress()
-		isDefaultField := address.IsDefault
-		if isDefaultField != nil && isDefaultField.GetBooleanField().IsTrue() { // 设置为默认记录前，清除数据库当前默认标记
-			// 构造一个false 值记录
-			falseField := boolean.Switch(isDefaultField)
-			rawSql, err := sqlbuilder.NewUpdateBuilder(addressI).Merge(
-				boolean.Update(falseField),
-			).AppendWhere(
-				tenant.WhereFn(address.TenatID),
-				ownerid.WhereFn(address.OwnerID),
-				enum.WhereFn(address.Label),
-			).ToSQL()
-			if err != nil {
-				return nil, err
-			}
-			err = addressI.CleanDefault(rawSql)
-			if err != nil {
-				return nil, err
-			}
-		}
 		m, err := address.Fields().Map()
 		return m, err
 	}
@@ -163,7 +157,86 @@ func _OrderFn(booleanI boolean.BooleanI) sqlbuilder.OrderFn { // 默认记录排
 	}
 }
 
-func Insert(addressI AddressI) sqlbuilder.InsertParam {
+func _ValidateRuleFn(addressI AddressI, checkRuleI CheckRuleI) sqlbuilder.ValidateFn {
+	return func() error {
+		if checkRuleI == nil {
+			return nil
+		}
+		address := addressI.GetAddress()
+		r, ok := GetAddressRules().GetByLabel(address.TenatID, address.OwnerID, address.Label)
+		if !ok {
+			return nil
+		}
+		val, err := r.MaxNumber.ValueFn(nil)
+		if err != nil {
+			return err
+		}
+		maxNumber := cast.ToInt(val)
+		if maxNumber == 0 {
+			return nil
+		}
+		rawSql, err := sqlbuilder.NewTotalBuilder(addressI).AppendWhere(
+			tenant.WhereFn(address.TenatID),
+			ownerid.WhereFn(address.OwnerID),
+			enum.WhereFn(address.Label),
+		).ToSQL()
+		if err != nil {
+			return err
+		}
+		count, err := checkRuleI.GetCount(rawSql)
+		if err != nil {
+			return err
+		}
+		if maxNumber >= count {
+			err = errors.Errorf(
+				"%s-%s-%s-已有数量(%d)-超过最大数量限制(%d)",
+				address.TenatID.LogString(),
+				address.OwnerID.LogString(),
+				address.Label.LogString(),
+				count,
+				maxNumber,
+			)
+			return err
+		}
+
+		return nil
+	}
+}
+
+// _DealDefault 当前记录需要设置为默认记录时,清除已有的默认记录
+func _DealDefault(addressI AddressI, withDWithDefaultI WithDefaultI) sqlbuilder.ValidateFn {
+	return func() (err error) {
+		if withDWithDefaultI == nil {
+			return nil
+		}
+
+		address := addressI.GetAddress()
+		isDefaultField := address.IsDefault
+		if isDefaultField == nil || !isDefaultField.GetBooleanField().IsTrue() { //当前记录不是默认记录时,无需处理
+			return nil
+		}
+
+		// 构造一个false 值记录
+		falseField := boolean.Switch(isDefaultField)
+		rawSql, err := sqlbuilder.NewUpdateBuilder(addressI).Merge(
+			boolean.Update(falseField),
+		).AppendWhere(
+			tenant.WhereFn(address.TenatID),
+			ownerid.WhereFn(address.OwnerID),
+			enum.WhereFn(address.Label),
+		).ToSQL()
+		if err != nil {
+			return err
+		}
+		err = withDWithDefaultI.CleanDefault(rawSql)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
+func Insert(addressI AddressI, withDefaultI WithDefaultI, validateRuleI CheckRuleI) sqlbuilder.InsertParam {
 	address := addressI.GetAddress()
 	phoneField := address.ContactPhone
 	provice := address.Province
@@ -180,10 +253,10 @@ func Insert(addressI AddressI) sqlbuilder.InsertParam {
 		boolean.Insert(isDefault),
 		tenant.Insert(address.TenatID),
 		ownerid.Insert(address.OwnerID),
-	)
+	).AppendValidate(_ValidateRuleFn(addressI, validateRuleI), _DealDefault(addressI, withDefaultI))
 }
 
-func Update(addressI AddressI) sqlbuilder.UpdateParam {
+func Update(addressI AddressI, withDefaultI WithDefaultI) sqlbuilder.UpdateParam {
 	address := addressI.GetAddress()
 	provice := address.Province
 	city := address.City
@@ -200,7 +273,7 @@ func Update(addressI AddressI) sqlbuilder.UpdateParam {
 		boolean.Update(isDefault),
 		tenant.Update(address.TenatID),
 		ownerid.Update(address.OwnerID),
-	)
+	).AppendValidate(_DealDefault(addressI, withDefaultI))
 }
 
 func First(addressI AddressI) sqlbuilder.FirstParam {

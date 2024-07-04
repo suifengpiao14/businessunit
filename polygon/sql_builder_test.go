@@ -40,9 +40,11 @@ func (p InsertParam) Data() (data interface{}, err error) {
 
 func (p InsertParam) GetTenantField() tenant.TenantField {
 	return tenant.TenantField{
-		Name: "Ftenant",
-		ValueFn: func(in any) (value any, err error) {
-			return p.Tenant, nil
+		Field: sqlbuilder.Field{
+			Name: "Ftenant",
+			ValueFn: func(in any) (value any, err error) {
+				return p.Tenant, nil
+			},
 		},
 	}
 }
@@ -136,9 +138,11 @@ func (p ListParam) Where() (expressions []exp.Expression, err error) {
 
 func (p ListParam) GetTenantField() tenant.TenantField {
 	return tenant.TenantField{
-		Name: "Ftenant",
-		ValueFn: func(in any) (value any, err error) {
-			return p.Tenant, nil
+		Field: sqlbuilder.Field{
+			Name: "Ftenant",
+			ValueFn: func(in any) (value any, err error) {
+				return p.Tenant, nil
+			},
 		},
 	}
 }

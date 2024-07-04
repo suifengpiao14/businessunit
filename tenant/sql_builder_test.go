@@ -37,17 +37,21 @@ func (p InsertParam) Data() (data interface{}, err error) {
 
 func (p InsertParam) GetTenantField() tenant.TenantField {
 	return tenant.TenantField{
-		Name: "Ftenant",
-		ValueFn: func(in any) (value any, err error) {
-			return p.Tenant, nil
+		Field: sqlbuilder.Field{
+			Name: "Ftenant",
+			ValueFn: func(in any) (value any, err error) {
+				return p.Tenant, nil
+			},
 		},
 	}
 }
 
 var tenantData = tenant.TenantField{
-	Name: "Ftenant",
-	ValueFn: func(in any) (value any, err error) {
-		return "123", nil
+	Field: sqlbuilder.Field{
+		Name: "Ftenant",
+		ValueFn: func(in any) (value any, err error) {
+			return "123", nil
+		},
 	},
 }
 

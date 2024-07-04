@@ -37,21 +37,25 @@ type InsertAddress struct {
 func (addr InsertAddress) GetAddress() (addres address.Address) {
 	addres = address.Address{
 		TenatID: tenant.TenantField{
-			Name: "Fbusiness_id",
-			ValueFn: func(in any) (value any, err error) {
-				return addr.TenantID, nil
-			},
-			WhereValueFn: func(in any) (value any, err error) {
-				return addr.TenantID, nil
+			Field: sqlbuilder.Field{
+				Name: "Fbusiness_id",
+				ValueFn: func(in any) (value any, err error) {
+					return addr.TenantID, nil
+				},
+				WhereValueFn: func(in any) (value any, err error) {
+					return addr.TenantID, nil
+				},
 			},
 		},
 		OwnerID: ownerid.OwnerIdField{
-			Name: "Fowner_id",
-			ValueFn: func(in any) (value any, err error) {
-				return addr.OwnerID, nil
-			},
-			WhereValueFn: func(in any) (value any, err error) {
-				return addr.OwnerID, nil
+			Field: sqlbuilder.Field{
+				Name: "Fowner_id",
+				ValueFn: func(in any) (value any, err error) {
+					return addr.OwnerID, nil
+				},
+				WhereValueFn: func(in any) (value any, err error) {
+					return addr.OwnerID, nil
+				},
 			},
 		},
 		Label: enum.EnumField{
@@ -174,6 +178,11 @@ func (addr InsertAddress) CleanDefault(rawSql string) (err error) {
 	return nil
 }
 
+func (addr InsertAddress) GetCount(rawSql string) (count int, err error) {
+	fmt.Println(rawSql)
+	return 0, nil
+}
+
 func TestInsert(t *testing.T) {
 	var addr = InsertAddress{
 		OwnerID:      "123",
@@ -189,7 +198,7 @@ func TestInsert(t *testing.T) {
 		AreaName:     "福田",
 		IsDefault:    "1",
 	}
-	sql, err := sqlbuilder.NewInsertBuilder(addr).Merge(address.Insert(addr)).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(addr).Merge(address.Insert(addr, addr, addr)).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -197,15 +206,6 @@ func TestInsert(t *testing.T) {
 
 type UpdateAddress struct {
 	InsertAddress
-}
-
-func (addr UpdateAddress) Table() (table string) {
-	return "t_address"
-}
-
-func (addr UpdateAddress) CleanDefault(rawSql string) (err error) {
-	fmt.Println(rawSql)
-	return nil
 }
 
 func TestUpdate(t *testing.T) {
@@ -226,7 +226,7 @@ func TestUpdate(t *testing.T) {
 			IsDefault:    "1",
 		},
 	}
-	sql, err := sqlbuilder.NewUpdateBuilder(addr).Merge(address.Update(addr)).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(addr).Merge(address.Update(addr, addr)).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 

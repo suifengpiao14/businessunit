@@ -1,27 +1,18 @@
 package tenant
 
 import (
-	"strings"
-
-	"github.com/spf13/cast"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type TenantField sqlbuilder.Field
+type TenantField struct {
+	sqlbuilder.Field
+}
 
 func (f TenantField) GetTenantField() TenantField {
 	return f
 }
-func (f TenantField) IsSame(o TenantField) bool {
-	fv, err := f.ValueFn(nil)
-	if err != nil || sqlbuilder.IsNil(fv) {
-		return false
-	}
-	ov, err := f.ValueFn(nil)
-	if err != nil || sqlbuilder.IsNil(ov) {
-		return false
-	}
-	return strings.EqualFold(cast.ToString(fv), cast.ToString(ov))
+func (f TenantField) IsEqual(o TenantField) bool {
+	return sqlbuilder.Field(f.Field).IsEqual(o.Field)
 }
 
 type TenantI interface {
@@ -29,12 +20,11 @@ type TenantI interface {
 }
 
 func _DataFn(tenantI TenantI) sqlbuilder.DataFn {
-	field := tenantI.GetTenantField()
-	return sqlbuilder.Field(field).Data
+	return tenantI.GetTenantField().Data
 }
 
 func WhereFn(uniqueI TenantI) sqlbuilder.WhereFn {
-	return sqlbuilder.Field(uniqueI.GetTenantField()).Where
+	return uniqueI.GetTenantField().Where
 }
 
 func Insert(tenant TenantI) sqlbuilder.InsertParam {
