@@ -5,17 +5,21 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/spf13/cast"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type EnumField sqlbuilder.Field
+type EnumField struct {
+	sqlbuilder.Field
+	EnumTitles EnumTitles
+}
 
 func (f EnumField) GetEnumField() EnumField {
 	return f
 }
 
 type EnumTitle struct {
-	Const any    `json:"const"`
+	Key   string `json:"key"`
 	Title string `json:"title"`
 }
 
@@ -24,7 +28,7 @@ type EnumTitles []EnumTitle
 func (ets EnumTitles) String() string {
 	arr := make([]string, 0)
 	for _, et := range ets {
-		str := fmt.Sprintf("%v-%s", et.Const, et.Title)
+		str := fmt.Sprintf("%v-%s", et.Key, et.Title)
 		arr = append(arr, str)
 	}
 	out := strings.Join(arr, ",")
@@ -33,8 +37,6 @@ func (ets EnumTitles) String() string {
 
 type EnumI interface {
 	GetEnumField() EnumField
-	EnumTitles() EnumTitles
-	IsEqConst(firstConst any, secondConst any) bool // 比较2个常量是否一致
 }
 
 func _DataFn(enumI EnumI) sqlbuilder.DataFn {
@@ -47,20 +49,21 @@ func _DataFn(enumI EnumI) sqlbuilder.DataFn {
 		if err != nil {
 			return nil, err
 		}
-		enums := enumI.EnumTitles()
 		valid := false
-		for _, enum := range enums {
-			if enumI.IsEqConst(val, enum.Const) {
+		for _, enum := range col.EnumTitles {
+			if strings.EqualFold(cast.ToString(val), enum.Key) {
 				valid = true
 				break
 			}
 		}
 		if !valid {
-			err = errors.Errorf("invalid value except:%s,got:%v", enums.String(), val)
+			err = errors.Errorf("invalid value except:%s,got:%v", col.EnumTitles.String(), val)
 			return nil, err
 		}
-
-		return nil, nil
+		m := map[string]any{
+			col.Name: val,
+		}
+		return m, nil
 	}
 }
 

@@ -5,6 +5,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
+	"github.com/suifengpiao14/businessunit/boolean"
+	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/title"
 	"github.com/suifengpiao14/sqlbuilder"
@@ -40,10 +42,11 @@ CREATE TABLE `t_merchant_address_info` (
 
 type Address struct {
 	OwnerID      sqlbuilder.Field
-	Label        sqlbuilder.Field
+	Label        enum.EnumField
 	ContactPhone phone.PhoneField
 	ContactName  sqlbuilder.Field
 	Address      sqlbuilder.Field
+	IsDefault    boolean.BooleanI
 
 	Province title.TitleI
 	City     title.TitleI
@@ -54,7 +57,6 @@ func (address Address) Fields() (fileds sqlbuilder.Fields) {
 	fileds = make(sqlbuilder.Fields, 0)
 	fileds = append(fileds,
 		address.OwnerID,
-		address.Label,
 		address.ContactName,
 		address.Address,
 	)
@@ -112,11 +114,15 @@ func Insert(addressI AddressI) sqlbuilder.InsertParam {
 	provice := address.Province
 	city := address.City
 	area := address.Area
+	label := address.Label
+	isDefault := address.IsDefault
 	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(addressI)).Merge(
 		title.Insert(provice),
 		title.Insert(city),
 		title.Insert(area),
 		phone.Insert(phoneField),
+		enum.Insert(label),
+		boolean.Insert(isDefault),
 	)
 }
 
@@ -126,11 +132,15 @@ func Update(addressI AddressI) sqlbuilder.UpdateParam {
 	city := address.City
 	area := address.Area
 	phoneField := address.ContactPhone
+	label := address.Label
+	isDefault := address.IsDefault
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(addressI)).AppendWhere(_WhereFn(addressI)).Merge(
 		title.Update(provice),
 		title.Update(city),
 		title.Update(area),
 		phone.Update(phoneField),
+		enum.Update(label),
+		boolean.Update(isDefault),
 	)
 }
 
@@ -140,11 +150,15 @@ func First(addressI AddressI) sqlbuilder.FirstParam {
 	city := address.City
 	area := address.Area
 	phoneField := address.ContactPhone
+	label := address.Label
+	isDefault := address.IsDefault
 	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
 		title.First(provice),
 		title.First(city),
 		title.First(area),
 		phone.First(phoneField),
+		enum.First(label),
+		boolean.First(isDefault),
 	)
 }
 
@@ -154,11 +168,15 @@ func List(addressI AddressI) sqlbuilder.ListParam {
 	city := address.City
 	area := address.Area
 	phoneField := address.ContactPhone
+	label := address.Label
+	isDefault := address.IsDefault
 	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
 		title.List(provice),
 		title.List(city),
 		title.List(area),
 		phone.List(phoneField),
+		enum.List(label),
+		boolean.List(isDefault),
 	)
 }
 
@@ -168,10 +186,14 @@ func Total(addressI AddressI) sqlbuilder.TotalParam {
 	city := address.City
 	area := address.Area
 	phoneField := address.ContactPhone
+	label := address.Label
+	isDefault := address.IsDefault
 	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
 		title.Total(provice),
 		title.Total(city),
 		title.Total(area),
 		phone.Total(phoneField),
+		enum.Total(label),
+		boolean.Total(isDefault),
 	)
 }
