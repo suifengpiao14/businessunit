@@ -8,14 +8,20 @@ import (
 
 var Time_format = sqlbuilder.Time_format
 
-var UpdatedAtColumn = sqlbuilder.Column{
-	Name: "updated_at",
-	InsertData: func() (value any, err error) {
-		tim := time.Now().Local().Format(Time_format)
-		return tim, nil
-	},
-	UpdateData: func() (value any, err error) {
-		tim := time.Now().Local().Format(Time_format)
-		return tim, nil
-	},
+type UpdatedAtColumn sqlbuilder.Column
+
+func (c UpdatedAtColumn) InsertValue() (value any, err error) {
+	if c.InsertValueFn != nil {
+		return c.InsertValueFn()
+	}
+	tim := time.Now().Local().Format(Time_format)
+	return tim, nil
+}
+
+func (c UpdatedAtColumn) UpdateValue() (value any, err error) {
+	if c.UpdateValueFn != nil {
+		return c.UpdateValueFn()
+	}
+	tim := time.Now().Local().Format(Time_format)
+	return tim, nil
 }

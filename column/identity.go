@@ -1,27 +1,20 @@
 package column
 
 import (
-	"github.com/doug-martin/goqu/v9"
 	"github.com/rs/xid"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func init() {
-	IdentityColumnDefault.UpdateWhere = func() (expressions []goqu.Expression, err error) {
-		val, err := IdentityColumnDefault.UpdateData()
-		if err != nil {
-			return nil, err
-		}
-		expressions = sqlbuilder.ConcatExpression(goqu.Ex{IdentityColumnDefault.Name: val})
-		return
+type IdentityColumn sqlbuilder.Column
 
+func (c IdentityColumn) InsertValue() (value any, err error) {
+	if c.InsertValueFn != nil {
+		return c.InsertValueFn()
 	}
+	id := xid.New().String()
+	return id, nil
 }
 
-var IdentityColumnDefault = sqlbuilder.Column{
-	Name: "id",
-	InsertData: func() (value any, err error) {
-		id := xid.New().String()
-		return id, nil
-	},
+func (c IdentityColumn) UpdateValue() (value any, err error) {
+	return // 重写，确保不可修改
 }
