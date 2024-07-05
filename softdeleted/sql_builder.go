@@ -49,13 +49,13 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		_, field := softDeletedI.GetDeletedAtField()
-		field.WhereFormatFns.Append(WhereFormatFn(softDeletedI))
+		field.WhereFns.Append(WhereFn(softDeletedI))
 		return sqlbuilder.Field(field).Where()
 	}
 }
 
-// WhereFormatFn 单独修改 删除字段 where 条件值的变量，外部可以覆盖
-var WhereFormatFn = func(softDeletedI SoftDeletedI) sqlbuilder.FormatFn {
+// WhereFn 单独修改 删除字段 where 条件值的变量，外部可以覆盖
+var WhereFn = func(softDeletedI SoftDeletedI) sqlbuilder.ValueFn {
 	return func(in any) (value any, err error) {
 		valueType, field := softDeletedI.GetDeletedAtField()
 		if ex, ok := sqlbuilder.TryConvert2Expressions(in); ok {

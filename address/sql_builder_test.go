@@ -43,7 +43,7 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 						return addr.TenantID, nil
 					},
 				},
-				WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
+				WhereFns: sqlbuilder.ValueFns{sqlbuilder.DirectValue},
 			},
 		},
 		// OwnerID: ownerid.NewOwnerIdField("Fowner_id", func(in any) (value any, err error) {
@@ -60,7 +60,7 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 					return addr.Label, nil
 				}},
-				WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
+				WhereFns: sqlbuilder.ValueFns{sqlbuilder.DirectValue},
 			},
 			EnumTitles: enum.EnumTitles{
 				{
@@ -99,7 +99,7 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 					return addr.ContactPhone, nil
 				},
 			},
-			WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
+			WhereFns: sqlbuilder.ValueFns{sqlbuilder.DirectValue},
 		},
 		ContactName: sqlbuilder.Field{
 			Name: "Fcontact_name",
@@ -108,7 +108,7 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 					return addr.ContactName, nil
 				},
 			},
-			WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
+			WhereFns: sqlbuilder.ValueFns{sqlbuilder.DirectValue},
 		},
 		Address: sqlbuilder.Field{
 			Name: "Faddress",

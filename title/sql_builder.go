@@ -45,11 +45,12 @@ func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 func _WhereFn(titleI TitleI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		field := titleI.GetTitle().Title
-		field.WhereFormatFns.Append(func(in any) (value any, err error) {
-			if sqlbuilder.IsNil(in) {
-				return nil, nil
+		field.WhereFns.AppendWhenNotFirst(func(in any) (value any, err error) {
+			val := cast.ToString(in)
+			if val == "" {
+				return in, nil
 			}
-			likeValue := "%" + cast.ToString(in) + "%"
+			likeValue := "%" + val + "%"
 			expressions = append(expressions, goqu.C(field.Name).ILike(likeValue))
 			return expressions, nil
 		})

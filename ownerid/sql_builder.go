@@ -25,26 +25,19 @@ var OwnerIdFieldSchema = sqlbuilder.DBSchema{
 	MinLength: 1,
 }
 
-func NewOwnerIdField(fieldName string, valueFn func(in any) (value any), formatFns sqlbuilder.ValueFns, whereFormatFns sqlbuilder.FormatFns) OwnerIdField {
+func NewOwnerIdField(fieldName string, formatFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns) OwnerIdField {
 	field := OwnerIdField{
 		Field: sqlbuilder.Field{
 			Name:     fieldName,
 			DBSchema: &OwnerIdFieldSchema,
 		},
 	}
-	field.ValueFns = sqlbuilder.ValueFns{func(in any) (value any, err error) {
-		value = valueFn(in)
-		err = field.Validate(value)
-		if err != nil {
-			return value, err
-		}
-		return value, err
-	}}
-
-	field.ValueFns = sqlbuilder.ValueFns{sqlbuilder.DirectValue}
-	field.ValueFns.Append(formatFns...)
-	field.WhereFormatFns = sqlbuilder.FormatFns{sqlbuilder.DirectFormat}
-	field.WhereFormatFns.Append(whereFormatFns...)
+	if len(formatFns) > 0 {
+		field.ValueFns.Append(formatFns[0])
+		field.ValueFns.AppendWhenNotFirst(sqlbuilder.ValueFnDBSchemaValidator(field.Field))
+		field.ValueFns.Append(formatFns[1:]...)
+	}
+	field.WhereFns.Append(WhereFns...)
 	return field
 }
 
