@@ -43,9 +43,9 @@ func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 	}
 }
 func _WhereFn(titleI TitleI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
+	return func() (expressions sqlbuilder.Expressions, err error) {
 		field := titleI.GetTitle().ID
-		expressions = make([]goqu.Expression, 0)
+		expressions = make(sqlbuilder.Expressions, 0)
 		if field.WhereValueFn == nil {
 			return nil, nil
 		}

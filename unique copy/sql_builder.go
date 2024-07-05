@@ -28,9 +28,9 @@ type UniqueIForUpdate interface {
 }
 
 func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
+	return func() (expressions sqlbuilder.Expressions, err error) {
 		fields := uniqueI.GetUniqueFields()
-		expressions = make([]goqu.Expression, 0)
+		expressions = make(sqlbuilder.Expressions, 0)
 		for _, field := range fields {
 			if field.WhereValueFn == nil {
 				continue
@@ -76,7 +76,7 @@ type _TotalInstance struct {
 	UniqueI
 }
 
-func (ins _TotalInstance) Where() (expressions []goqu.Expression, err error) {
+func (ins _TotalInstance) Where() (expressions sqlbuilder.Expressions, err error) {
 	return _whereFn(ins).Where()
 }
 
@@ -86,7 +86,7 @@ func Insert(uniqueI UniqueI) sqlbuilder.InsertParam {
 
 func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
 	// 增加排除当前记录
-	whereNotID := sqlbuilder.WhereFn(func() (expressions []goqu.Expression, err error) {
+	whereNotID := sqlbuilder.WhereFn(func() (expressions sqlbuilder.Expressions, err error) {
 		identity := uniqueIForUpdate.GetIdentityField()
 		val, err := identity.ValueFn(nil)
 		if err != nil {

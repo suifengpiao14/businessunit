@@ -3,7 +3,6 @@ package phone
 import (
 	"regexp"
 
-	"github.com/doug-martin/goqu/v9"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"
 	"github.com/suifengpiao14/sqlbuilder"
@@ -54,7 +53,7 @@ func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
 }
 
 func _WhereFn(phoneI PhoneI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
+	return func() (expressions sqlbuilder.Expressions, err error) {
 		field := phoneI.GetPhoneField()
 		if field.WhereValueFn != nil {
 			val, _ := field.WhereValueFn(nil)

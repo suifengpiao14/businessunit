@@ -3,7 +3,6 @@ package column
 import (
 	"github.com/pkg/errors"
 
-	"github.com/doug-martin/goqu/v9"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -26,8 +25,8 @@ func (uc UniqueColumn) InsertValue() (value any, err error) {
 	return
 }
 
-func (uc UniqueColumn) UpdateWhere() (expressions []goqu.Expression, err error) {
-	expressions = make([]goqu.Expression, 0)
+func (uc UniqueColumn) UpdateWhere() (expressions sqlbuilder.Expressions, err error) {
+	expressions = make(sqlbuilder.Expressions, 0)
 	totalSql, err := sqlbuilder.Total(uc)
 	if err != nil {
 		return nil, err

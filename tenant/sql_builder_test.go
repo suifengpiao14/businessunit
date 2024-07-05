@@ -88,8 +88,8 @@ func (p UpdateParam) Data() (data interface{}, err error) {
 	return p, nil
 }
 
-func (p UpdateParam) Where() (expressions []goqu.Expression, err error) {
-	expressions = []goqu.Expression{
+func (p UpdateParam) Where() (expressions sqlbuilder.Expressions, err error) {
+	expressions = sqlbuilder.Expressions{
 		goqu.C("Fid").Eq(p.Id),
 		goqu.C("Fdeleted").Eq(""),
 	}
@@ -134,8 +134,8 @@ func (p FirstParam) Select() []any {
 	return nil
 }
 
-func (p FirstParam) Where() (expressions []goqu.Expression, err error) {
-	expressions = []goqu.Expression{
+func (p FirstParam) Where() (expressions sqlbuilder.Expressions, err error) {
+	expressions = sqlbuilder.Expressions{
 		goqu.C("Fid").Eq(p.Id),
 		goqu.C("Fdeleted").Eq(""),
 		goqu.C("Fname").ILike("%" + p.Name + "%"),

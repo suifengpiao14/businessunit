@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/doug-martin/goqu/v9"
 	"github.com/stretchr/testify/require"
 	"github.com/suifengpiao14/businessunit/identity"
 	"github.com/suifengpiao14/businessunit/softdeleted"
@@ -46,7 +45,7 @@ func (p UpdateParam) GetDeletedAtField() (softdeleted.ValueType, softdeleted.Sof
 	}
 }
 
-func (p UpdateParam) Where() (expressions []goqu.Expression, err error) {
+func (p UpdateParam) Where() (expressions sqlbuilder.Expressions, err error) {
 	return nil, nil
 }
 func (p UpdateParam) Table() string {

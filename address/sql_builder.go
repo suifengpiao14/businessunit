@@ -112,7 +112,7 @@ func _DataFn(addressI AddressI) sqlbuilder.DataFn {
 }
 
 func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
+	return func() (expressions sqlbuilder.Expressions, err error) {
 		address := addressI.GetAddress()
 		validate := validator.New()
 		err = validate.Struct(address)
@@ -126,7 +126,7 @@ func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
 		if cast.ToString(ownerID) == "" {
 			return nil, errors.Errorf("字段%s不能为空", address.OwnerID.Name)
 		}
-		expressions = make([]goqu.Expression, 0)
+		expressions = make(sqlbuilder.Expressions, 0)
 		for _, field := range address.Fields() {
 			if field.WhereValueFn == nil {
 				continue

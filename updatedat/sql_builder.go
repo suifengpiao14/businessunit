@@ -3,7 +3,6 @@ package updatedat
 import (
 	"time"
 
-	"github.com/doug-martin/goqu/v9"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -37,9 +36,9 @@ func _DataFn(updatedatI UpdatedatI) sqlbuilder.DataFn {
 }
 
 func _WhereFn(updatedatI UpdatedatI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
+	return func() (expressions sqlbuilder.Expressions, err error) {
 		field := updatedatI.GetUpdatedatField()
-		expressions = make([]goqu.Expression, 0)
+		expressions = make(sqlbuilder.Expressions, 0)
 		if field.ValueFn == nil {
 			return nil, nil
 		}

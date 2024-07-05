@@ -26,9 +26,9 @@ type UniqueIForUpdate interface {
 }
 
 func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
-	return func() (expressions []goqu.Expression, err error) {
+	return func() (expressions sqlbuilder.Expressions, err error) {
 		fields := uniqueI.GetUniqueFields()
-		expressions = make([]goqu.Expression, 0)
+		expressions = make(sqlbuilder.Expressions, 0)
 		for _, field := range fields {
 			if field.WhereValueFn == nil {
 				continue
@@ -45,12 +45,16 @@ func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
 
 func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.WhereI) sqlbuilder.DataFn {
 	return func() (any, error) {
-		totalInstance := _TotalInstance{
-			UniqueI: uniqueI,
-		}
-		totalParam := sqlbuilder.NewTotalBuilder(totalInstance).AppendWhere(wheres...)
+		totalParam := sqlbuilder.NewTotalBuilder(uniqueI).AppendWhere(wheres...)
 		if softdeletedI, ok := uniqueI.(softdeleted.SoftDeletedI); ok { // 如果实现了软删除接口，则排除软删除记录
 			totalParam = totalParam.Merge(softdeleted.Total(softdeletedI))
+		}
+		expressions, err := totalParam.Where()
+		if err != nil {
+			return nil, err
+		}
+		if expressions.IsEmpty() { // 条件为空，说明不需要查询唯一索引情况(如产品约定唯一索引字段不能更新)
+			return nil, nil
 		}
 
 		sql, err := totalParam.ToSQL()
@@ -70,21 +74,13 @@ func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.WhereI) sqlbuilder.DataF
 
 }
 
-type _TotalInstance struct {
-	UniqueI
-}
-
-func (ins _TotalInstance) Where() (expressions []goqu.Expression, err error) {
-	return _whereFn(ins).Where()
-}
-
 func Insert(uniqueI UniqueI) sqlbuilder.InsertParam {
 	return sqlbuilder.NewInsertBuilder(nil).AppendData(_checkExists(uniqueI))
 }
 
 func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
 	// 增加排除当前记录
-	whereNotID := sqlbuilder.WhereFn(func() (expressions []goqu.Expression, err error) {
+	whereNotID := sqlbuilder.WhereFn(func() (expressions sqlbuilder.Expressions, err error) {
 		identity := uniqueIForUpdate.GetIdentityField()
 		val, err := identity.ValueFn(nil)
 		if err != nil {

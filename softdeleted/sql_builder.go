@@ -48,7 +48,7 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 
 func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 	valueType, field := softDeletedI.GetDeletedAtField()
-	return func() (expressions []goqu.Expression, err error) {
+	return func() (expressions sqlbuilder.Expressions, err error) {
 		if field.ValueFn == nil {
 			return nil, nil
 		}
