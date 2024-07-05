@@ -46,10 +46,10 @@ type EnumI interface {
 func _DataFn(enumI EnumI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		col := enumI.GetEnumField()
-		if col.ValueFn == nil {
+		if col.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := col.ValueFn(nil)
+		val, err := col.ValueFns(nil)
 		if err != nil {
 			return nil, err
 		}

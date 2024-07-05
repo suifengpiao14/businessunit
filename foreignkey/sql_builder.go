@@ -18,17 +18,17 @@ type ForeignkeyI interface {
 func _DataFn(foreignkeyI ForeignkeyI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		col := foreignkeyI.GetForeignkeyField()
-		if col.ValueFn == nil {
+		if col.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := col.ValueFn(nil)
+		val, err := col.ValueFns(nil)
 		if err != nil {
 			return nil, err
 		}
 		m := map[string]any{}
 		redundantFields := foreignkeyI.RedundantFields()
 		for _, redundantField := range redundantFields {
-			redundantFiledValue, err := redundantField.ValueFn(val)
+			redundantFiledValue, err := redundantField.ValueFns(val)
 			if err != nil {
 				return nil, err
 			}

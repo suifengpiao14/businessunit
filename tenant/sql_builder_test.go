@@ -39,7 +39,7 @@ func (p InsertParam) GetTenantField() tenant.TenantField {
 	return tenant.TenantField{
 		Field: sqlbuilder.Field{
 			Name: "Ftenant",
-			ValueFn: func(in any) (value any, err error) {
+			ValueFns: func(in any) (value any, err error) {
 				return p.Tenant, nil
 			},
 		},
@@ -49,7 +49,7 @@ func (p InsertParam) GetTenantField() tenant.TenantField {
 var tenantData = tenant.TenantField{
 	Field: sqlbuilder.Field{
 		Name: "Ftenant",
-		ValueFn: func(in any) (value any, err error) {
+		ValueFns: func(in any) (value any, err error) {
 			return "123", nil
 		},
 	},

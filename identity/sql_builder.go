@@ -17,10 +17,10 @@ type IdentityI interface {
 func _DataFn(identityI IdentityI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		field := identityI.GetIdentityField()
-		if field.ValueFn == nil {
+		if field.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := field.ValueFn(nil)
+		val, err := field.ValueFns(nil)
 		if err != nil {
 			return nil, err
 		}

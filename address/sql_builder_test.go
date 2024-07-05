@@ -10,7 +10,6 @@ import (
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/businessunit/identity"
-	"github.com/suifengpiao14/businessunit/ownerid"
 	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/tenant"
 	"github.com/suifengpiao14/businessunit/title"
@@ -39,34 +38,27 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		TenatID: tenant.TenantField{
 			Field: sqlbuilder.Field{
 				Name: "Fbusiness_id",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.TenantID, nil
 				},
-				WhereValueFn: func(in any) (value any, err error) {
-					return addr.TenantID, nil
-				},
+				WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
 			},
 		},
-		OwnerID: ownerid.OwnerIdField{
-			Field: sqlbuilder.Field{
-				Name: "Fowner_id",
-				ValueFn: func(in any) (value any, err error) {
-					return addr.OwnerID, nil
-				},
-				WhereValueFn: func(in any) (value any, err error) {
-					return addr.OwnerID, nil
-				},
-			},
-		},
+		// OwnerID: ownerid.NewOwnerIdField("Fowner_id", func(in any) (value any, err error) {
+		// 	return addr.OwnerID, nil
+		// },
+		// 	func(in any) (value any, err error) {
+		// 		return addr.OwnerID, nil
+		// 	},
+		// 	nil,
+		// ),
 		Label: enum.EnumField{
 			Field: sqlbuilder.Field{
 				Name: "Flabel",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.Label, nil
 				},
-				WhereValueFn: func(in any) (value any, err error) {
-					return addr.Label, nil
-				},
+				WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
 			},
 			EnumTitles: enum.EnumTitles{
 				{
@@ -82,7 +74,7 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		IsDefault: boolean.BooleanField{
 			Field: sqlbuilder.Field{
 				Name: "Fis_default",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.IsDefault, nil
 				},
 			},
@@ -100,25 +92,21 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		},
 		ContactPhone: phone.PhoneField{
 			Name: "Fcontact_phone",
-			ValueFn: func(in any) (value any, err error) {
+			ValueFns: func(in any) (value any, err error) {
 				return addr.ContactPhone, nil
 			},
-			WhereValueFn: func(in any) (value any, err error) {
-				return addr.ContactPhone, nil
-			},
+			WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
 		},
 		ContactName: sqlbuilder.Field{
 			Name: "Fcontact_name",
-			ValueFn: func(in any) (value any, err error) {
+			ValueFns: func(in any) (value any, err error) {
 				return addr.ContactName, nil
 			},
-			WhereValueFn: func(in any) (value any, err error) {
-				return sqlbuilder.Ilike{"%", addr.ContactName}, nil
-			},
+			WhereFormatFns: sqlbuilder.FormatFns{sqlbuilder.DirectFormat},
 		},
 		Address: sqlbuilder.Field{
 			Name: "Faddress",
-			ValueFn: func(in any) (value any, err error) {
+			ValueFns: func(in any) (value any, err error) {
 				return addr.Address, nil
 			},
 		},
@@ -126,13 +114,13 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		Province: title.Title{
 			ID: identity.IdentityField{
 				Name: "Fprovice_id",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.ProvinceId, nil
 				},
 			},
 			Title: sqlbuilder.Field{
 				Name: "Fprovice",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.ProvinceName, nil
 				},
 			},
@@ -140,13 +128,13 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		City: title.Title{
 			ID: identity.IdentityField{
 				Name: "Fcity_id",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.CityId, nil
 				},
 			},
 			Title: sqlbuilder.Field{
 				Name: "Fcity",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.CityName, nil
 				},
 			},
@@ -154,13 +142,13 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		Area: title.Title{
 			ID: identity.IdentityField{
 				Name: "Farea_id",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.AreaId, nil
 				},
 			},
 			Title: sqlbuilder.Field{
 				Name: "Farea",
-				ValueFn: func(in any) (value any, err error) {
+				ValueFns: func(in any) (value any, err error) {
 					return addr.AreaName, nil
 				},
 			},

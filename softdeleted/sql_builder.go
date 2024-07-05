@@ -37,7 +37,7 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		_, field := softDeletedI.GetDeletedAtField()
 		m := map[string]any{}
-		val, err := field.ValueFn(time.Now().Local().Format(Time_format))
+		val, err := field.ValueFns(time.Now().Local().Format(Time_format))
 		if err != nil {
 			return nil, err
 		}
@@ -47,29 +47,31 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 }
 
 func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
-	valueType, field := softDeletedI.GetDeletedAtField()
 	return func() (expressions sqlbuilder.Expressions, err error) {
-		if field.ValueFn == nil {
-			return nil, nil
-		}
-		val, err := field.WhereValueFn("")
-		if err != nil {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryConvert2Expressions(val); ok {
+		_, field := softDeletedI.GetDeletedAtField()
+		field.ValueFormatFns.Append(WhereFormatFn(softDeletedI))
+		return sqlbuilder.Field(field).Where()
+	}
+}
+
+// WhereFormatFn 单独修改 删除字段 where 条件值的变量，外部可以覆盖
+var WhereFormatFn = func(softDeletedI SoftDeletedI) sqlbuilder.FormatFn {
+	return func(in any) (value any, err error) {
+		valueType, field := softDeletedI.GetDeletedAtField()
+		if ex, ok := sqlbuilder.TryConvert2Expressions(in); ok {
 			return ex, nil
 		}
 		var expression goqu.Expression
 		switch valueType {
 		case ValueType_OK:
-			expression = goqu.C(field.Name).Eq(val) // 确保删除字段为空
+			expression = goqu.C(field.Name).Eq(in) // 确保删除字段为空
 		case ValueType_Delete:
-			expression = goqu.C(field.Name).Neq(val) // 确保指定字段不等于 特定值
+			expression = goqu.C(field.Name).Neq(in) // 确保指定字段不等于 特定值
 		default:
 			err = errors.Errorf("invalid valueType , except %s|%s,got:%s", ValueType_OK, ValueType_Delete, valueType)
 			return nil, err
 		}
-		return sqlbuilder.ConcatExpression(expression), nil
+		return expression, nil
 	}
 }
 

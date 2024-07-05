@@ -1,13 +1,14 @@
-package unique_test
+package ownerid_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/doug-martin/goqu/v9"
 	"github.com/stretchr/testify/require"
 	"github.com/suifengpiao14/businessunit/identity"
+	"github.com/suifengpiao14/businessunit/ownerid"
 	"github.com/suifengpiao14/businessunit/softdeleted"
-	"github.com/suifengpiao14/businessunit/unique"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -24,15 +25,15 @@ func (p UpdateParam) GetIdentityField() identity.IdentityField {
 		},
 	}
 }
-func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {
-	fields = make(unique.UniqueField, 0)
-	fields = append(fields, sqlbuilder.Field{
-		Name: "Fname",
-		ValueFns: func(in any) (value any, err error) {
-			return p.Name, nil
+func (p UpdateParam) GetOwnerIdField() (fields ownerid.OwnerIdField) {
+	fields = ownerid.OwnerIdField{
+		Field: sqlbuilder.Field{
+			Name: "Fname",
+			ValueFns: func(in any) (value any, err error) {
+				return p.Name, nil
+			},
 		},
-	},
-	)
+	}
 	return fields
 }
 
@@ -45,7 +46,7 @@ func (p UpdateParam) GetDeletedAtField() (softdeleted.ValueType, softdeleted.Sof
 	}
 }
 
-func (p UpdateParam) Where() (expressions sqlbuilder.Expressions, err error) {
+func (p UpdateParam) Where() (expressions []goqu.Expression, err error) {
 	return nil, nil
 }
 func (p UpdateParam) Table() string {
@@ -65,7 +66,7 @@ func TestUpdate(t *testing.T) {
 		Name: "张三",
 	}
 
-	sql, err := sqlbuilder.NewUpdateBuilder(p).Merge(unique.Update(p), identity.Update(p), softdeleted.Update(p)).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(p).Merge(ownerid.Update(p), identity.Update(p), softdeleted.Update(p)).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -77,7 +78,7 @@ func TestInsert(t *testing.T) {
 		Name: "张三",
 	}
 
-	sql, err := sqlbuilder.NewInsertBuilder(p).Merge(unique.Insert(p), identity.Insert(p), softdeleted.Insert(p)).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(p).Merge(ownerid.Insert(p), identity.Insert(p), softdeleted.Insert(p)).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 

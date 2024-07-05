@@ -34,11 +34,11 @@ func validatePhone(phone string) (err error) {
 func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
 	col := phoneI.GetPhoneField()
 	return func() (any, error) {
-		if col.ValueFn == nil {
+		if col.ValueFns == nil {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := col.ValueFn(nil)
+		val, err := col.ValueFns(nil)
 		if err != nil {
 			return nil, err
 		}
@@ -55,19 +55,6 @@ func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
 func _WhereFn(phoneI PhoneI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		field := phoneI.GetPhoneField()
-		if field.WhereValueFn != nil {
-			val, _ := field.WhereValueFn(nil)
-
-			phone := cast.ToString(val)
-			if phone == "" {
-				return nil, nil
-			}
-			err = validatePhone(phone) // 验证手机格式
-			if err != nil {
-				return nil, err
-			}
-		}
-
 		return sqlbuilder.Field(field).Where()
 	}
 }

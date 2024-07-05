@@ -22,10 +22,10 @@ func (f BooleanField) GetTrueFalseTitle() (trueTitle enum.EnumTitle, falseTitle 
 }
 
 func (f BooleanField) IsTrue() (isTrue bool) {
-	if f.ValueFn == nil {
+	if f.ValueFns == nil {
 		return false
 	}
-	val, err := f.ValueFn(nil)
+	val, err := f.ValueFns(nil)
 	if err != nil {
 		return false
 	}
@@ -44,8 +44,8 @@ func Copy(booleanI BooleanI) (newBooleanI BooleanI) {
 	booleanField := booleanI.GetBooleanField()
 	newBooleanI = BooleanField{
 		Field: sqlbuilder.Field{
-			Name:    booleanField.Name,
-			ValueFn: booleanField.ValueFn,
+			Name:     booleanField.Name,
+			ValueFns: booleanField.ValueFns,
 		},
 		TrueFalseTitleFn: booleanI.GetTrueFalseTitle,
 	}
@@ -59,8 +59,8 @@ func Switch(booleanI BooleanI) (reversed BooleanI) {
 	reversed = BooleanField{
 		Field: sqlbuilder.Field{
 			Name: booleanField.Name,
-			ValueFn: func(in any) (value any, err error) {
-				val, err := booleanField.ValueFn(nil)
+			ValueFns: func(in any) (value any, err error) {
+				val, err := booleanField.ValueFns(nil)
 				if err != nil {
 					return nil, err
 				}

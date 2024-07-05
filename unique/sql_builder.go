@@ -30,14 +30,11 @@ func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
 		fields := uniqueI.GetUniqueFields()
 		expressions = make(sqlbuilder.Expressions, 0)
 		for _, field := range fields {
-			if field.WhereValueFn == nil {
-				continue
-			}
-			val, err := field.WhereValueFn(nil)
+			subExprs, err := field.Where()
 			if err != nil {
 				return nil, err
 			}
-			expressions = append(expressions, goqu.C(field.Name).Eq(val))
+			expressions = append(expressions, subExprs...)
 		}
 		return expressions, nil
 	}
@@ -82,7 +79,7 @@ func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
 	// 增加排除当前记录
 	whereNotID := sqlbuilder.WhereFn(func() (expressions sqlbuilder.Expressions, err error) {
 		identity := uniqueIForUpdate.GetIdentityField()
-		val, err := identity.ValueFn(nil)
+		val, err := identity.ValueFns(nil)
 		if err != nil {
 			return nil, err
 		}

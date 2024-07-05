@@ -18,15 +18,15 @@ func _DataFn(operatorI OperatorI) sqlbuilder.DataFn {
 		col := operatorI.GetOperatorField()
 		m := map[string]any{}
 
-		if col.OperatorID.ValueFn != nil {
-			val, err := col.OperatorID.ValueFn(nil)
+		if col.OperatorID.ValueFns != nil {
+			val, err := col.OperatorID.ValueFns(nil)
 			if err != nil {
 				return nil, err
 			}
 			m[col.OperatorID.Name] = val
 		}
-		if col.OperatorName.ValueFn != nil {
-			val, err := col.OperatorName.ValueFn(nil)
+		if col.OperatorName.ValueFns != nil {
+			val, err := col.OperatorName.ValueFns(nil)
 			if err != nil {
 				return nil, err
 			}

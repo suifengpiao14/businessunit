@@ -22,11 +22,11 @@ func _DataFn(updatedatI UpdatedatI) sqlbuilder.DataFn {
 	col := updatedatI.GetUpdatedatField()
 	tim := time.Now().Local().Format(Time_format)
 	return func() (any, error) {
-		if col.ValueFn == nil {
+		if col.ValueFns == nil {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := col.ValueFn(tim)
+		val, err := col.ValueFns(tim)
 		if err != nil {
 			return nil, err
 		}
@@ -36,21 +36,7 @@ func _DataFn(updatedatI UpdatedatI) sqlbuilder.DataFn {
 }
 
 func _WhereFn(updatedatI UpdatedatI) sqlbuilder.WhereFn {
-	return func() (expressions sqlbuilder.Expressions, err error) {
-		field := updatedatI.GetUpdatedatField()
-		expressions = make(sqlbuilder.Expressions, 0)
-		if field.ValueFn == nil {
-			return nil, nil
-		}
-		val, err := field.WhereValueFn(nil)
-		if err != nil {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
-			return ex, nil
-		}
-		return expressions, nil
-	}
+	return sqlbuilder.Field(updatedatI.GetUpdatedatField()).Where
 }
 
 func Insert(updatedatI UpdatedatI) sqlbuilder.InsertParam {

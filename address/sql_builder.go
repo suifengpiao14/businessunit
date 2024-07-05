@@ -5,7 +5,6 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 	"github.com/doug-martin/goqu/v9/exp"
-	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/suifengpiao14/businessunit/boolean"
@@ -114,32 +113,13 @@ func _DataFn(addressI AddressI) sqlbuilder.DataFn {
 func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		address := addressI.GetAddress()
-		validate := validator.New()
-		err = validate.Struct(address)
-		if err != nil {
-			return nil, err
-		}
-		ownerID, err := address.OwnerID.WhereValueFn(nil)
-		if err != nil {
-			return nil, err
-		}
-		if cast.ToString(ownerID) == "" {
-			return nil, errors.Errorf("字段%s不能为空", address.OwnerID.Name)
-		}
 		expressions = make(sqlbuilder.Expressions, 0)
 		for _, field := range address.Fields() {
-			if field.WhereValueFn == nil {
-				continue
-			}
-			val, err := field.WhereValueFn(nil)
+			subExprs, err := field.Where()
 			if err != nil {
 				return nil, err
 			}
-			if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
-				expressions = append(expressions, ex...)
-				continue
-			}
-			expressions = append(expressions, goqu.Ex{field.Name: val})
+			expressions = append(expressions, subExprs...)
 		}
 		return expressions, nil
 	}
@@ -158,7 +138,7 @@ func _OrderFn(booleanI boolean.BooleanI) sqlbuilder.OrderFn { // 默认记录排
 }
 
 func _ValidateRuleFn(addressI AddressI, checkRuleI CheckRuleI) sqlbuilder.ValidateFn {
-	return func() error {
+	return func(_ any) error {
 		if checkRuleI == nil {
 			return nil
 		}
@@ -167,7 +147,7 @@ func _ValidateRuleFn(addressI AddressI, checkRuleI CheckRuleI) sqlbuilder.Valida
 		if !ok {
 			return nil
 		}
-		val, err := r.MaxNumber.ValueFn(nil)
+		val, err := r.MaxNumber.ValueFns(nil)
 		if err != nil {
 			return err
 		}
@@ -205,7 +185,7 @@ func _ValidateRuleFn(addressI AddressI, checkRuleI CheckRuleI) sqlbuilder.Valida
 
 // _DealDefault 当前记录需要设置为默认记录时,清除已有的默认记录
 func _DealDefault(addressI AddressI, withDWithDefaultI WithDefaultI) sqlbuilder.ValidateFn {
-	return func() (err error) {
+	return func(val any) (err error) {
 		if withDWithDefaultI == nil {
 			return nil
 		}

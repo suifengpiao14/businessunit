@@ -27,11 +27,11 @@ type TitleI interface {
 func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		title := titleI.GetTitle()
-		if title.Title.ValueFn == nil {
+		if title.Title.ValueFns == nil {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := title.Title.ValueFn(nil)
+		val, err := title.Title.ValueFns(nil)
 		if err != nil {
 			return nil, err
 		}
@@ -44,21 +44,17 @@ func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 }
 func _WhereFn(titleI TitleI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
-		field := titleI.GetTitle().ID
-		expressions = make(sqlbuilder.Expressions, 0)
-		if field.WhereValueFn == nil {
-			return nil, nil
-		}
-		val, err := field.WhereValueFn(nil)
-		if err != nil {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryParseExpressions(field.Name, val); ok {
-			return ex, nil
-		}
-		likeValue := "%" + cast.ToString(val) + "%"
-		expressions = append(expressions, goqu.C(field.Name).ILike(likeValue))
-		return expressions, nil
+		field := titleI.GetTitle().Title
+		field.WhereFormatFns.Append(func(in any) (value any, err error) {
+			if sqlbuilder.IsNil(in) {
+				return nil, nil
+			}
+			likeValue := "%" + cast.ToString(in) + "%"
+			expressions = append(expressions, goqu.C(field.Name).ILike(likeValue))
+			return expressions, nil
+		})
+
+		return field.Where()
 	}
 }
 
