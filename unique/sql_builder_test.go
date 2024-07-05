@@ -19,18 +19,18 @@ type UpdateParam struct {
 func (p UpdateParam) GetIdentityField() identity.IdentityField {
 	return identity.IdentityField{
 		Name: "Fid",
-		ValueFns: func(in any) (any, error) {
+		ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) {
 			return p.ID, nil
-		},
+		}},
 	}
 }
 func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {
 	fields = make(unique.UniqueField, 0)
 	fields = append(fields, sqlbuilder.Field{
 		Name: "Fname",
-		ValueFns: func(in any) (value any, err error) {
+		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 			return p.Name, nil
-		},
+		}},
 	},
 	)
 	return fields
@@ -39,9 +39,9 @@ func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {
 func (p UpdateParam) GetDeletedAtField() (softdeleted.ValueType, softdeleted.SoftDeletedField) {
 	return softdeleted.ValueType_OK, softdeleted.SoftDeletedField{
 		Name: "Fdeleted_at",
-		ValueFns: func(in any) (value any, err error) {
+		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 			return "", nil
-		},
+		}},
 	}
 }
 

@@ -38,7 +38,7 @@ func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := col.ValueFns(nil)
+		val, err := sqlbuilder.Field(col).GetValue(nil)
 		if err != nil {
 			return nil, err
 		}

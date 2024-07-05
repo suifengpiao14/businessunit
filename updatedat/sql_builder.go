@@ -26,7 +26,7 @@ func _DataFn(updatedatI UpdatedatI) sqlbuilder.DataFn {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := col.ValueFns(tim)
+		val, err := sqlbuilder.Field(col).GetValue(tim)
 		if err != nil {
 			return nil, err
 		}

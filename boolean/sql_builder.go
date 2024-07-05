@@ -25,7 +25,7 @@ func (f BooleanField) IsTrue() (isTrue bool) {
 	if f.ValueFns == nil {
 		return false
 	}
-	val, err := f.ValueFns(nil)
+	val, err := f.GetValue(nil)
 	if err != nil {
 		return false
 	}
@@ -59,17 +59,19 @@ func Switch(booleanI BooleanI) (reversed BooleanI) {
 	reversed = BooleanField{
 		Field: sqlbuilder.Field{
 			Name: booleanField.Name,
-			ValueFns: func(in any) (value any, err error) {
-				val, err := booleanField.ValueFns(nil)
-				if err != nil {
-					return nil, err
-				}
-				str := cast.ToString(val)
-				if trueTitle.IsSame(str) { // 原值为true ，返回 false 值
-					return falseTitle.Key, nil
-				}
-				return trueTitle.Key, nil // 原值为false ，返回 true 值
+			ValueFns: sqlbuilder.ValueFns{
+				func(in any) (value any, err error) {
+					val, err := booleanField.GetValue(nil)
+					if err != nil {
+						return nil, err
+					}
+					str := cast.ToString(val)
+					if trueTitle.IsSame(str) { // 原值为true ，返回 false 值
+						return falseTitle.Key, nil
+					}
+					return trueTitle.Key, nil // 原值为false ，返回 true 值
 
+				},
 			},
 		},
 		TrueFalseTitleFn: booleanI.GetTrueFalseTitle,

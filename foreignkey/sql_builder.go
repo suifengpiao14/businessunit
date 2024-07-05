@@ -21,14 +21,14 @@ func _DataFn(foreignkeyI ForeignkeyI) sqlbuilder.DataFn {
 		if col.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := col.ValueFns(nil)
+		val, err := sqlbuilder.Field(col).GetValue(nil)
 		if err != nil {
 			return nil, err
 		}
 		m := map[string]any{}
 		redundantFields := foreignkeyI.RedundantFields()
 		for _, redundantField := range redundantFields {
-			redundantFiledValue, err := redundantField.ValueFns(val)
+			redundantFiledValue, err := redundantField.GetValue(val)
 			if err != nil {
 				return nil, err
 			}

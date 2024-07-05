@@ -65,6 +65,8 @@ github.com/suifengpiao14/sqlbuilder v0.0.0-20240704141536-015c53f9c419 h1:+hB5HU
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240704141536-015c53f9c419/go.mod h1:2ispZ/m3DtWB1SARIdMcRPV3BW2fJD8gcnCObrJfRqc=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240705035657-2fe4cf80f58c h1:TrtxnR6/AzjufW9IyH/VqwGJYPYm8OWfYWFl289Sapk=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240705035657-2fe4cf80f58c/go.mod h1:S+F2G8Nrf9kMN+RxJ7h5GTBNo4ltO8TWP3bage2liBI=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240705090131-ad4c4ad530a1 h1:sd4U7JlqF01gKJ+ZDjtjJq0RtSdfiJSSVBfnh5+ab94=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240705090131-ad4c4ad530a1/go.mod h1:S+F2G8Nrf9kMN+RxJ7h5GTBNo4ltO8TWP3bage2liBI=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=

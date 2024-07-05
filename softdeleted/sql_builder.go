@@ -37,7 +37,7 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 	return func() (any, error) {
 		_, field := softDeletedI.GetDeletedAtField()
 		m := map[string]any{}
-		val, err := field.ValueFns(time.Now().Local().Format(Time_format))
+		val, err := sqlbuilder.Field(field).GetValue(time.Now().Local().Format(Time_format))
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +49,7 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		_, field := softDeletedI.GetDeletedAtField()
-		field.ValueFormatFns.Append(WhereFormatFn(softDeletedI))
+		field.WhereFormatFns.Append(WhereFormatFn(softDeletedI))
 		return sqlbuilder.Field(field).Where()
 	}
 }

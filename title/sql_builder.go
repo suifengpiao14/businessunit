@@ -31,7 +31,7 @@ func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 			return nil, nil
 		}
 		m := map[string]any{}
-		val, err := title.Title.ValueFns(nil)
+		val, err := title.Title.GetValue(nil)
 		if err != nil {
 			return nil, err
 		}

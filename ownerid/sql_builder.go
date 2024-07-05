@@ -25,24 +25,24 @@ var OwnerIdFieldSchema = sqlbuilder.DBSchema{
 	MinLength: 1,
 }
 
-func NewOwnerIdField(fieldName string, valueFn func(in any) (value any), formatFns sqlbuilder.FormatFns, whereFormatFns sqlbuilder.FormatFns) OwnerIdField {
+func NewOwnerIdField(fieldName string, valueFn func(in any) (value any), formatFns sqlbuilder.ValueFns, whereFormatFns sqlbuilder.FormatFns) OwnerIdField {
 	field := OwnerIdField{
 		Field: sqlbuilder.Field{
 			Name:     fieldName,
 			DBSchema: &OwnerIdFieldSchema,
 		},
 	}
-	field.ValueFns = func(in any) (value any, err error) {
+	field.ValueFns = sqlbuilder.ValueFns{func(in any) (value any, err error) {
 		value = valueFn(in)
 		err = field.Validate(value)
 		if err != nil {
 			return value, err
 		}
 		return value, err
-	}
+	}}
 
-	field.ValueFormatFns = sqlbuilder.FormatFns{sqlbuilder.DirectValue}
-	field.ValueFormatFns.Append(formatFns...)
+	field.ValueFns = sqlbuilder.ValueFns{sqlbuilder.DirectValue}
+	field.ValueFns.Append(formatFns...)
 	field.WhereFormatFns = sqlbuilder.FormatFns{sqlbuilder.DirectFormat}
 	field.WhereFormatFns.Append(whereFormatFns...)
 	return field
@@ -54,7 +54,7 @@ func _DataFn(identityI OwnerIdI) sqlbuilder.DataFn {
 		if field.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := field.ValueFns(nil)
+		val, err := field.GetValue(nil)
 		if err != nil {
 			return nil, err
 		}

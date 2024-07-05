@@ -19,14 +19,14 @@ func _DataFn(operatorI OperatorI) sqlbuilder.DataFn {
 		m := map[string]any{}
 
 		if col.OperatorID.ValueFns != nil {
-			val, err := col.OperatorID.ValueFns(nil)
+			val, err := col.OperatorID.GetValue(nil)
 			if err != nil {
 				return nil, err
 			}
 			m[col.OperatorID.Name] = val
 		}
 		if col.OperatorName.ValueFns != nil {
-			val, err := col.OperatorName.ValueFns(nil)
+			val, err := col.OperatorName.GetValue(nil)
 			if err != nil {
 				return nil, err
 			}

@@ -29,19 +29,19 @@ func mergePolygonData(polygon PolygonI) (polygonData map[string]any, err error) 
 			return nil, err
 		}
 		boundingBoxField := polygon.GetBoundingBoxField()
-		lngMax, err := boundingBoxField.LngMax.ValueFns(boundingBox.LngMax)
+		lngMax, err := boundingBoxField.LngMax.GetValue(boundingBox.LngMax)
 		if err != nil {
 			return nil, err
 		}
-		lngMin, err := boundingBoxField.LngMin.ValueFns(boundingBox.LngMin)
+		lngMin, err := boundingBoxField.LngMin.GetValue(boundingBox.LngMin)
 		if err != nil {
 			return nil, err
 		}
-		latMax, err := boundingBoxField.LatMax.ValueFns(boundingBox.LatMax)
+		latMax, err := boundingBoxField.LatMax.GetValue(boundingBox.LatMax)
 		if err != nil {
 			return nil, err
 		}
-		latMin, err := boundingBoxField.LatMin.ValueFns(boundingBox.LatMin)
+		latMin, err := boundingBoxField.LatMin.GetValue(boundingBox.LatMin)
 		if err != nil {
 			return nil, err
 		}

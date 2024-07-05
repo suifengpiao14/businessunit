@@ -25,7 +25,7 @@ func _DataFn(createdAtI CreatedAtI) sqlbuilder.DataFn {
 		if field.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := field.ValueFns(tim)
+		val, err := sqlbuilder.Field(field).GetValue(tim)
 		if err != nil {
 			return nil, err
 		}

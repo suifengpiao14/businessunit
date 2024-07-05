@@ -49,7 +49,7 @@ func _DataFn(enumI EnumI) sqlbuilder.DataFn {
 		if col.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := col.ValueFns(nil)
+		val, err := col.GetValue(nil)
 		if err != nil {
 			return nil, err
 		}

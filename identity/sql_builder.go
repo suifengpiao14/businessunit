@@ -20,7 +20,7 @@ func _DataFn(identityI IdentityI) sqlbuilder.DataFn {
 		if field.ValueFns == nil {
 			return nil, nil
 		}
-		val, err := field.ValueFns(nil)
+		val, err := sqlbuilder.Field(field).GetValue(nil)
 		if err != nil {
 			return nil, err
 		}

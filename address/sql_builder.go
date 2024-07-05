@@ -147,7 +147,7 @@ func _ValidateRuleFn(addressI AddressI, checkRuleI CheckRuleI) sqlbuilder.Valida
 		if !ok {
 			return nil
 		}
-		val, err := r.MaxNumber.ValueFns(nil)
+		val, err := r.MaxNumber.GetValue(nil)
 		if err != nil {
 			return err
 		}
