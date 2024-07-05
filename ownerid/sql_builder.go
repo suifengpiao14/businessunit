@@ -32,11 +32,11 @@ func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sq
 			DBSchema: &OwnerIdFieldSchema,
 		},
 	}
-	field.ValueFns.Insert(-1, valueFns...)
-	field.ValueFns.Insert(1, sqlbuilder.ValueFnDBSchemaValidator(field.Field))
+	field.ValueFns.Append(valueFns...)
+	field.ValueFns.InsertAsSecond(sqlbuilder.ValueFnDBSchemaValidator(field.Field))
 
-	field.WhereFns.Insert(0, sqlbuilder.ValueFnFromData(field.Field))
-	field.WhereFns.Insert(-1, WhereFns...)
+	field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnFromData(field.Field))
+	field.WhereFns.Append(WhereFns...)
 	return field
 }
 
