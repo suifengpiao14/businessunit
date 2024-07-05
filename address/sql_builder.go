@@ -103,26 +103,11 @@ type CheckRuleI interface {
 }
 
 func _DataFn(addressI AddressI) sqlbuilder.DataFn {
-	return func() (any, error) {
-		address := addressI.GetAddress()
-		m, err := address.Fields().Map()
-		return m, err
-	}
+	return addressI.GetAddress().Fields().Data
 }
 
 func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
-	return func() (expressions sqlbuilder.Expressions, err error) {
-		address := addressI.GetAddress()
-		expressions = make(sqlbuilder.Expressions, 0)
-		for _, field := range address.Fields() {
-			subExprs, err := field.Where()
-			if err != nil {
-				return nil, err
-			}
-			expressions = append(expressions, subExprs...)
-		}
-		return expressions, nil
-	}
+	return addressI.GetAddress().Fields().Where
 }
 
 func _OrderFn(booleanI boolean.BooleanI) sqlbuilder.OrderFn { // 默认记录排前面

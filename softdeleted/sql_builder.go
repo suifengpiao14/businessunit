@@ -49,7 +49,7 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		_, field := softDeletedI.GetDeletedAtField()
-		field.WhereFns.Append(WhereFn(softDeletedI))
+		field.WhereFns.Insert(-1, WhereFn(softDeletedI))
 		return sqlbuilder.Field(field).Where()
 	}
 }

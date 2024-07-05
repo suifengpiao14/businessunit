@@ -45,7 +45,7 @@ func _DataFn(titleI TitleI) sqlbuilder.DataFn {
 func _WhereFn(titleI TitleI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		field := titleI.GetTitle().Title
-		field.WhereFns.AppendWhenNotFirst(func(in any) (value any, err error) {
+		field.WhereFns.Insert(-1, func(in any) (value any, err error) {
 			val := cast.ToString(in)
 			if val == "" {
 				return in, nil
