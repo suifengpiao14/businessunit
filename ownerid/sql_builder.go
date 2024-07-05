@@ -25,14 +25,14 @@ var OwnerIdFieldSchema = sqlbuilder.DBSchema{
 	MinLength: 1,
 }
 
-func NewOwnerIdField(fieldName string, formatFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns) OwnerIdField {
+func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns) OwnerIdField {
 	field := OwnerIdField{
 		Field: sqlbuilder.Field{
 			Name:     fieldName,
 			DBSchema: &OwnerIdFieldSchema,
 		},
 	}
-	field.ValueFns.Insert(-1, formatFns...)
+	field.ValueFns.Insert(-1, valueFns...)
 	field.ValueFns.Insert(1, sqlbuilder.ValueFnDBSchemaValidator(field.Field))
 
 	field.WhereFns.Insert(0, sqlbuilder.ValueFnFromData(field.Field))
