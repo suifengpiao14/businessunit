@@ -4,7 +4,6 @@ import (
 	"regexp"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/spf13/cast"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -16,7 +15,9 @@ func init() {
 	validate.RegisterValidation("phone", validateMobile)
 }
 
-type PhoneField sqlbuilder.Field
+type PhoneField struct {
+	sqlbuilder.Field
+}
 
 func (f PhoneField) GetPhoneField() PhoneField {
 	return f
@@ -32,31 +33,12 @@ func validatePhone(phone string) (err error) {
 }
 
 func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
-	col := phoneI.GetPhoneField()
-	return func() (any, error) {
-		if col.ValueFns == nil {
-			return nil, nil
-		}
-		m := map[string]any{}
-		val, err := sqlbuilder.Field(col).GetValue(nil)
-		if err != nil {
-			return nil, err
-		}
-		phone := cast.ToString(val)
-		err = validatePhone(phone)
-		if err != nil {
-			return nil, err
-		}
-		m[col.Name] = val
-		return m, nil
-	}
+	field := phoneI.GetPhoneField()
+	return field.Data
 }
 
 func _WhereFn(phoneI PhoneI) sqlbuilder.WhereFn {
-	return func() (expressions sqlbuilder.Expressions, err error) {
-		field := phoneI.GetPhoneField()
-		return sqlbuilder.Field(field).Where()
-	}
+	return phoneI.GetPhoneField().Where
 }
 
 func Insert(phoneI PhoneI) sqlbuilder.InsertParam {

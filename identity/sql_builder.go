@@ -42,7 +42,7 @@ func Insert(identityI IdentityI) sqlbuilder.InsertParam {
 }
 
 func Update(identityI IdentityI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(identityI)).AppendWhere(_WhereFn(identityI))
+	return sqlbuilder.NewUpdateBuilder(nil).AppendWhere(_WhereFn(identityI))
 }
 
 func First(identityI IdentityI) sqlbuilder.FirstParam {

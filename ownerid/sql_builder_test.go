@@ -13,38 +13,30 @@ import (
 )
 
 type UpdateParam struct {
-	ID   string `db:"-"`
-	Name string
+	ID      string `db:"-"`
+	Name    string
+	OwnerID int
 }
 
 func (p UpdateParam) GetIdentityField() identity.IdentityField {
 	return identity.IdentityField{
-		Name: "Fid",
-		ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) {
-			return p.ID, nil
-		}},
+		Name:     "Fid",
+		ValueFns: sqlbuilder.NewValueFns(func() (value any, err error) { return p.ID, nil }),
 	}
 }
-func (p UpdateParam) GetOwnerIdField() (fields ownerid.OwnerIdField) {
-	fields = ownerid.OwnerIdField{
-		Field: sqlbuilder.Field{
-			Name: "Fname",
-			ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-				return p.Name, nil
-			}},
-		},
-	}
-	return fields
+func (p UpdateParam) GetOwnerIdField() (field ownerid.OwnerIdField) {
+	field = ownerid.NewOwnerIdField(
+		"Fonwer_id",
+		sqlbuilder.NewValueFns(func() (value any, err error) { return p.OwnerID, nil }),
+		nil, nil,
+	)
+	return field
 }
 
 func (p UpdateParam) GetDeletedAtField() (softdeleted.ValueType, softdeleted.SoftDeletedField) {
 	return softdeleted.ValueType_OK, softdeleted.SoftDeletedField{
-		Name: "Fdeleted_at",
-		ValueFns: sqlbuilder.ValueFns{
-			func(in any) (value any, err error) {
-				return "", nil
-			},
-		},
+		Name:     "Fdeleted_at",
+		ValueFns: sqlbuilder.NewValueFns(func() (value any, err error) { return "", nil }),
 	}
 }
 
@@ -64,8 +56,9 @@ func (p UpdateParam) AlreadyExists(sql string) (exists bool, err error) {
 
 func TestUpdate(t *testing.T) {
 	p := UpdateParam{
-		ID:   "15",
-		Name: "张三",
+		ID:      "qwqwgwerst3wyt5y456u56uj5rywr",
+		Name:    "张三",
+		OwnerID: 14,
 	}
 
 	sql, err := sqlbuilder.NewUpdateBuilder(p).Merge(ownerid.Update(p), identity.Update(p), softdeleted.Update(p)).ToSQL()
@@ -76,8 +69,9 @@ func TestUpdate(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	p := UpdateParam{
-		ID:   "15",
-		Name: "张三",
+		ID:      "15",
+		Name:    "张三",
+		OwnerID: 1,
 	}
 
 	sql, err := sqlbuilder.NewInsertBuilder(p).Merge(ownerid.Insert(p), identity.Insert(p), softdeleted.Insert(p)).ToSQL()

@@ -93,13 +93,15 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 			},
 		},
 		ContactPhone: phone.PhoneField{
-			Name: "Fcontact_phone",
-			ValueFns: sqlbuilder.ValueFns{
-				func(in any) (value any, err error) {
-					return addr.ContactPhone, nil
+			Field: sqlbuilder.Field{
+				Name: "Fcontact_phone",
+				ValueFns: sqlbuilder.ValueFns{
+					func(in any) (value any, err error) {
+						return addr.ContactPhone, nil
+					},
 				},
+				WhereFns: sqlbuilder.ValueFns{sqlbuilder.ValueFnDirect},
 			},
-			WhereFns: sqlbuilder.ValueFns{sqlbuilder.ValueFnDirect},
 		},
 		ContactName: sqlbuilder.Field{
 			Name: "Fcontact_name",

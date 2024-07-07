@@ -36,13 +36,11 @@ func init() {
 
 var Field_CreatedAt = sqlbuilder.Field{
 	Name:     "created_at",
-	Title:    "创建时间",
 	ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return in, nil }},
 }
 
 var Field_UpdatedAt = sqlbuilder.Field{
 	Name:     "updated_at",
-	Title:    "更新时间",
 	ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return in, nil }},
 }
 

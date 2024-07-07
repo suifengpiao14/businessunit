@@ -23,13 +23,17 @@ var OwnerIdFieldSchema = sqlbuilder.DBSchema{
 	Type:      sqlbuilder.DBSchema_Type_string,
 	MaxLength: 64,
 	MinLength: 1,
+	Minimum:   1,
 }
 
-func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns) OwnerIdField {
+func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns, dbSchema *sqlbuilder.DBSchema) OwnerIdField {
+	if dbSchema == nil {
+		dbSchema = &OwnerIdFieldSchema
+	}
 	field := OwnerIdField{
 		Field: sqlbuilder.Field{
 			Name:     fieldName,
-			DBSchema: &OwnerIdFieldSchema,
+			DBSchema: dbSchema,
 		},
 	}
 	field.ValueFns.Append(valueFns...)
