@@ -19,10 +19,7 @@ type UpdateParam struct {
 }
 
 func (p UpdateParam) GetIdentityField() identity.IdentityField {
-	return identity.IdentityField{
-		Name:     "Fid",
-		ValueFns: sqlbuilder.NewValueFns(func() (value any, err error) { return p.ID, nil }),
-	}
+	return identity.NewIdentityField(func(in any) (any, error) { return p.ID, nil }).SetName("Fid")
 }
 func (p UpdateParam) GetOwnerIdField() (field ownerid.OwnerIdField) {
 	field = ownerid.NewOwnerIdField(

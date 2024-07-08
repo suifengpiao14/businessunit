@@ -1,19 +1,8 @@
 package phone
 
 import (
-	"regexp"
-
-	"github.com/go-playground/validator/v10"
 	"github.com/suifengpiao14/sqlbuilder"
 )
-
-// 定义一个全局的验证器
-var validate = validator.New()
-
-func init() {
-	// 注册自定义验证函数
-	validate.RegisterValidation("phone", validateMobile)
-}
 
 type PhoneField struct {
 	sqlbuilder.Field
@@ -23,13 +12,25 @@ func (f PhoneField) GetPhoneField() PhoneField {
 	return f
 }
 
-type PhoneI interface {
-	GetPhoneField() PhoneField // 使用每个包下重命名的类型，具有区分度
+// AppendWhereFn 添加Where条件，方便连续书写
+func (f PhoneField) AppendWhereFn(fns ...sqlbuilder.ValueFn) PhoneField {
+	f.Field.AppendWhereFn(fns...)
+	return f
 }
 
-func validatePhone(phone string) (err error) {
-	err = validate.Var(phone, "phone")
-	return err
+var PhoneFieldSchema = sqlbuilder.DBSchema{
+	RegExp: `^1[3-9]\d{9}$`, // 中国大陆手机号正则表达式
+}
+
+func NewPhoneField(valueFn sqlbuilder.ValueFn) (field PhoneField) {
+	field = PhoneField{
+		Field: sqlbuilder.NewField(valueFn).SetName("phone").SetTitle("手机号").MergeDBSchema(PhoneFieldSchema),
+	}
+	return field
+}
+
+type PhoneI interface {
+	GetPhoneField() PhoneField // 使用每个包下重命名的类型，具有区分度
 }
 
 func _DataFn(phoneI PhoneI) sqlbuilder.DataFn {
@@ -59,12 +60,4 @@ func List(phoneI PhoneI) sqlbuilder.ListParam {
 
 func Total(phoneI PhoneI) sqlbuilder.TotalParam {
 	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(phoneI))
-}
-
-// 自定义验证函数，使用正则表达式验证手机号格式
-func validateMobile(fl validator.FieldLevel) bool {
-	mobile := fl.Field().String()
-	// 中国大陆手机号正则表达式
-	re := regexp.MustCompile(`^1[3-9]\d{9}$`)
-	return re.MatchString(mobile)
 }

@@ -79,7 +79,7 @@ func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
 	// 增加排除当前记录
 	whereNotID := sqlbuilder.WhereFn(func() (expressions sqlbuilder.Expressions, err error) {
 		identity := uniqueIForUpdate.GetIdentityField()
-		val, err := sqlbuilder.Field(identity).GetValue(nil)
+		val, err := identity.GetValue(nil)
 		if err != nil {
 			return nil, err
 		}

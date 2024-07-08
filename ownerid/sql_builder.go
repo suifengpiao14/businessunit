@@ -37,9 +37,6 @@ func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sq
 		},
 	}
 	field.ValueFns.Append(valueFns...)
-	field.ValueFns.InsertAsSecond(sqlbuilder.ValueFnDBSchemaValidator(field.Field))
-
-	field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnFromData(field.Field))
 	field.WhereFns.Append(WhereFns...)
 	return field
 }

@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/cast"
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/enum"
+	"github.com/suifengpiao14/businessunit/idtitle"
 	"github.com/suifengpiao14/businessunit/ownerid"
 	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/tenant"
-	"github.com/suifengpiao14/businessunit/title"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -74,9 +74,9 @@ type Address struct {
 	Address      sqlbuilder.Field
 	IsDefault    boolean.BooleanI
 
-	Province title.TitleI
-	City     title.TitleI
-	Area     title.TitleI
+	Province idtitle.IdTitleI
+	City     idtitle.IdTitleI
+	Area     idtitle.IdTitleI
 }
 
 func (address Address) Fields() (fileds sqlbuilder.Fields) {
@@ -86,6 +86,30 @@ func (address Address) Fields() (fileds sqlbuilder.Fields) {
 		address.Address,
 	)
 	return fileds
+}
+
+// NewProvinceField 封装省字段
+func NewProvinceField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
+	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
+	idTitle.ID.SetName("provice_id").SetTitle("省ID")
+	idTitle.Title.SetName("provice").SetTitle("省")
+	return idTitle
+}
+
+// NewCityField 封装市字段
+func NewCityField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
+	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
+	idTitle.ID.SetName("city_id").SetTitle("城市ID")
+	idTitle.Title.SetName("city").SetTitle("城市")
+	return idTitle
+}
+
+// NewAreaField 封装区字段
+func NewAreaField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
+	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
+	idTitle.ID.SetName("area_id").SetTitle("区ID")
+	idTitle.Title.SetName("area").SetTitle("区")
+	return idTitle
 }
 
 type AddressI interface {
@@ -210,9 +234,9 @@ func Insert(addressI AddressI, withDefaultI WithDefaultI, validateRuleI CheckRul
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(addressI)).Merge(
-		title.Insert(provice),
-		title.Insert(city),
-		title.Insert(area),
+		idtitle.Insert(provice),
+		idtitle.Insert(city),
+		idtitle.Insert(area),
 		phone.Insert(phoneField),
 		enum.Insert(label),
 		boolean.Insert(isDefault),
@@ -230,9 +254,9 @@ func Update(addressI AddressI, withDefaultI WithDefaultI) sqlbuilder.UpdateParam
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(addressI)).AppendWhere(_WhereFn(addressI)).Merge(
-		title.Update(provice),
-		title.Update(city),
-		title.Update(area),
+		idtitle.Update(provice),
+		idtitle.Update(city),
+		idtitle.Update(area),
 		phone.Update(phoneField),
 		enum.Update(label),
 		boolean.Update(isDefault),
@@ -250,9 +274,9 @@ func First(addressI AddressI) sqlbuilder.FirstParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		title.First(provice),
-		title.First(city),
-		title.First(area),
+		idtitle.First(provice),
+		idtitle.First(city),
+		idtitle.First(area),
 		phone.First(phoneField),
 		enum.First(label),
 		boolean.First(isDefault),
@@ -270,9 +294,9 @@ func List(addressI AddressI) sqlbuilder.ListParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		title.List(provice),
-		title.List(city),
-		title.List(area),
+		idtitle.List(provice),
+		idtitle.List(city),
+		idtitle.List(area),
 		phone.List(phoneField),
 		enum.List(label),
 		boolean.List(isDefault),
@@ -290,9 +314,9 @@ func Total(addressI AddressI) sqlbuilder.TotalParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		title.Total(provice),
-		title.Total(city),
-		title.Total(area),
+		idtitle.Total(provice),
+		idtitle.Total(city),
+		idtitle.Total(area),
 		phone.Total(phoneField),
 		enum.Total(label),
 		boolean.Total(isDefault),

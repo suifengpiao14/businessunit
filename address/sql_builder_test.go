@@ -9,10 +9,8 @@ import (
 	"github.com/suifengpiao14/businessunit/address"
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/enum"
-	"github.com/suifengpiao14/businessunit/identity"
 	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/tenant"
-	"github.com/suifengpiao14/businessunit/title"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -92,78 +90,13 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 				return trueTitle, falseTitle
 			},
 		},
-		ContactPhone: phone.PhoneField{
-			Field: sqlbuilder.Field{
-				Name: "Fcontact_phone",
-				ValueFns: sqlbuilder.ValueFns{
-					func(in any) (value any, err error) {
-						return addr.ContactPhone, nil
-					},
-				},
-				WhereFns: sqlbuilder.ValueFns{sqlbuilder.ValueFnDirect},
-			},
-		},
-		ContactName: sqlbuilder.Field{
-			Name: "Fcontact_name",
-			ValueFns: sqlbuilder.ValueFns{
-				func(in any) (value any, err error) {
-					return addr.ContactName, nil
-				},
-			},
-			WhereFns: sqlbuilder.ValueFns{sqlbuilder.ValueFnDirect},
-		},
-		Address: sqlbuilder.Field{
-			Name: "Faddress",
-			ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-				return addr.Address, nil
-			},
-			},
-		},
+		ContactPhone: phone.NewPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect),
+		ContactName:  sqlbuilder.NewField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("Fcontact_name").SetTitle("联系人"),
+		Address:      sqlbuilder.NewField(func(in any) (any, error) { return addr.Address, nil }).SetName("Faddress").SetTitle("详细地址"),
 
-		Province: title.Title{
-			ID: identity.IdentityField{
-				Name: "Fprovice_id",
-				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-					return addr.ProvinceId, nil
-				}},
-			},
-			Title: sqlbuilder.Field{
-				Name: "Fprovice",
-				ValueFns: sqlbuilder.ValueFns{
-					func(in any) (value any, err error) {
-						return addr.ProvinceName, nil
-					},
-				},
-			},
-		},
-		City: title.Title{
-			ID: identity.IdentityField{
-				Name: "Fcity_id",
-				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-					return addr.CityId, nil
-				}},
-			},
-			Title: sqlbuilder.Field{
-				Name: "Fcity",
-				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-					return addr.CityName, nil
-				}},
-			},
-		},
-		Area: title.Title{
-			ID: identity.IdentityField{
-				Name: "Farea_id",
-				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-					return addr.AreaId, nil
-				}},
-			},
-			Title: sqlbuilder.Field{
-				Name: "Farea",
-				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-					return addr.AreaName, nil
-				}},
-			},
-		},
+		Province: address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil }),
+		City:     address.NewCityField(func(in any) (any, error) { return addr.CityId, nil }, func(in any) (any, error) { return addr.CityId, nil }),
+		Area:     address.NewAreaField(func(in any) (any, error) { return addr.AreaId, nil }, func(in any) (any, error) { return addr.AreaName, nil }),
 	}
 	return addres
 }

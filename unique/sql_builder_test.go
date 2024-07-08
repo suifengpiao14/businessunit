@@ -17,12 +17,7 @@ type UpdateParam struct {
 }
 
 func (p UpdateParam) GetIdentityField() identity.IdentityField {
-	return identity.IdentityField{
-		Name: "Fid",
-		ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) {
-			return p.ID, nil
-		}},
-	}
+	return identity.NewIdentityField(func(in any) (any, error) { return p.ID, nil })
 }
 func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {
 	fields = make(unique.UniqueField, 0)
