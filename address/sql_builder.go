@@ -88,6 +88,17 @@ func (address Address) Fields() (fileds sqlbuilder.Fields) {
 	return fileds
 }
 
+func NewContactNameField(valueFn sqlbuilder.ValueFn) sqlbuilder.Field {
+	return sqlbuilder.NewField(valueFn).SetName("contact_name").SetTitle("联系人")
+}
+func NewContactPhoneField(valueFn sqlbuilder.ValueFn) phone.PhoneField {
+	return phone.NewPhoneField(valueFn).SetName("contact_phone").SetTitle("联系手机号")
+}
+
+func NewAddressField(valueFn sqlbuilder.ValueFn) sqlbuilder.Field {
+	return sqlbuilder.NewField(valueFn).SetName("address").SetTitle("详细地址")
+}
+
 // NewProvinceField 封装省字段
 func NewProvinceField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
 	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)

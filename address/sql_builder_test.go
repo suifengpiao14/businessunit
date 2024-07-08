@@ -9,7 +9,6 @@ import (
 	"github.com/suifengpiao14/businessunit/address"
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/enum"
-	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/tenant"
 	"github.com/suifengpiao14/sqlbuilder"
 )
@@ -90,9 +89,9 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 				return trueTitle, falseTitle
 			},
 		},
-		ContactPhone: phone.NewPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect),
-		ContactName:  sqlbuilder.NewField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("Fcontact_name").SetTitle("联系人"),
-		Address:      sqlbuilder.NewField(func(in any) (any, error) { return addr.Address, nil }).SetName("Faddress").SetTitle("详细地址"),
+		ContactPhone: address.NewContactPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect),
+		ContactName:  address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }),
+		Address:      address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
 
 		Province: address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil }),
 		City:     address.NewCityField(func(in any) (any, error) { return addr.CityId, nil }, func(in any) (any, error) { return addr.CityId, nil }),

@@ -12,6 +12,15 @@ func (f PhoneField) GetPhoneField() PhoneField {
 	return f
 }
 
+func (f PhoneField) SetName(name string) PhoneField {
+	f.Field = f.Field.SetName(name)
+	return f
+}
+func (f PhoneField) SetTitle(title string) PhoneField {
+	f.Field = f.Field.SetTitle(title)
+	return f
+}
+
 // AppendWhereFn 添加Where条件，方便连续书写
 func (f PhoneField) AppendWhereFn(fns ...sqlbuilder.ValueFn) PhoneField {
 	f.Field.AppendWhereFn(fns...)
