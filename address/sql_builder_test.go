@@ -30,11 +30,11 @@ type InsertAddress struct {
 
 func (addr InsertAddress) GetAddress() (addres address.Address) {
 	addres = address.Address{
-		TenatID:      tenant.NewTenantField(func(in any) (any, error) { return addr.TenantID, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect).SetName("Fbusiness_id"),
+		TenatID:      tenant.NewTenantField(func(in any) (any, error) { return addr.TenantID, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect).SetName("businessId"),
 		Label:        address.NewLabelField(func(in any) (any, error) { return addr.Label, nil }, nil),
 		IsDefault:    address.NewIsDefaultField(func(in any) (any, error) { return addr.IsDefault, nil }, nil).AppendWhereFn(sqlbuilder.ValueFnDirect),
 		ContactPhone: address.NewContactPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect),
-		ContactName:  *address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("Fcontact_name"),
+		ContactName:  *address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("contactName"),
 		Address:      *address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
 
 		Province: address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil }),

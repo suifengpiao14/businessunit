@@ -41,7 +41,7 @@ func (p InsertParam) Data() (data interface{}, err error) {
 func (p InsertParam) GetTenantField() tenant.TenantField {
 	return tenant.TenantField{
 		Field: sqlbuilder.Field{
-			DBName: "Ftenant",
+			Name: "Ftenant",
 			ValueFns: sqlbuilder.ValueFns{
 				func(in any) (value any, err error) {
 					return p.Tenant, nil
@@ -76,19 +76,19 @@ func (p Polygon) Points() (points polygon.Points, err error) {
 func (p Polygon) GetBoundingBoxField() (boundingBoxField polygon.BoundingBoxField) {
 	return polygon.BoundingBoxField{
 		LngMax: sqlbuilder.Field{
-			DBName:   "Flng_max",
+			Name:     "Flng_max",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
 		LngMin: sqlbuilder.Field{
-			DBName:   "Flng_min",
+			Name:     "Flng_min",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
 		LatMax: sqlbuilder.Field{
-			DBName:   "Flat_max",
+			Name:     "Flat_max",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
 		LatMin: sqlbuilder.Field{
-			DBName:   "Flat_min",
+			Name:     "Flat_min",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
 	}
@@ -141,7 +141,7 @@ func (p ListParam) Where() (expressions []exp.Expression, err error) {
 func (p ListParam) GetTenantField() tenant.TenantField {
 	return tenant.TenantField{
 		Field: sqlbuilder.Field{
-			DBName: "Ftenant",
+			Name: "Ftenant",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 				return p.Tenant, nil
 			}},

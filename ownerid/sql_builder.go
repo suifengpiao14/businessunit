@@ -32,7 +32,7 @@ func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sq
 	}
 	field := OwnerIdField{
 		Field: sqlbuilder.Field{
-			DBName:   fieldName,
+			Name:     fieldName,
 			DBSchema: dbSchema,
 		},
 	}
@@ -56,7 +56,7 @@ func _DataFn(identityI OwnerIdI) sqlbuilder.DataFn {
 		}
 
 		m := map[string]any{
-			field.DBName: val,
+			sqlbuilder.FieldName2DBColumnName(field.Name): val,
 		}
 		return m, nil
 	}

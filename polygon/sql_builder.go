@@ -45,10 +45,10 @@ func mergePolygonData(polygon PolygonI) (polygonData map[string]any, err error) 
 		if err != nil {
 			return nil, err
 		}
-		polygonData[boundingBoxField.LngMax.DBName] = lngMax
-		polygonData[boundingBoxField.LngMin.DBName] = lngMin
-		polygonData[boundingBoxField.LatMax.DBName] = latMax
-		polygonData[boundingBoxField.LatMin.DBName] = latMin
+		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LngMax.Name)] = lngMax
+		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LngMin.Name)] = lngMin
+		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LatMax.Name)] = latMax
+		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LatMin.Name)] = latMin
 	}
 
 	return polygonData, nil

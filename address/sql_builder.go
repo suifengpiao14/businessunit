@@ -103,7 +103,7 @@ func NewIsDefaultField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn boolean.True
 		}
 	}
 	filed := boolean.BooleanField{
-		Field:            *sqlbuilder.NewField(valueFn).SetName("is_default").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect),
+		Field:            *sqlbuilder.NewField(valueFn).SetName("isDefault").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect),
 		TrueFalseTitleFn: trueFalseTitleFn,
 	}
 	return filed
@@ -129,10 +129,10 @@ func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles enum.EnumTitles) enum.
 	return filed
 }
 func NewContactNameField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
-	return sqlbuilder.NewField(valueFn).SetName("contact_name").SetTitle("联系人")
+	return sqlbuilder.NewField(valueFn).SetName("contactName").SetTitle("联系人")
 }
 func NewContactPhoneField(valueFn sqlbuilder.ValueFn) phone.PhoneField {
-	return phone.NewPhoneField(valueFn).SetName("contact_phone").SetTitle("联系手机号")
+	return phone.NewPhoneField(valueFn).SetName("contactPhone").SetTitle("联系手机号")
 }
 
 func NewAddressField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
@@ -142,7 +142,7 @@ func NewAddressField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 // NewProvinceField 封装省字段
 func NewProvinceField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
 	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
-	idTitle.ID.SetName("provice_id").SetTitle("省ID")
+	idTitle.ID.SetName("proviceId").SetTitle("省ID")
 	idTitle.Title.SetName("provice").SetTitle("省")
 	return idTitle
 }
@@ -150,7 +150,7 @@ func NewProvinceField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.Valu
 // NewCityField 封装市字段
 func NewCityField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
 	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
-	idTitle.ID.SetName("city_id").SetTitle("城市ID")
+	idTitle.ID.SetName("cityId").SetTitle("城市ID")
 	idTitle.Title.SetName("city").SetTitle("城市")
 	return idTitle
 }
@@ -158,7 +158,7 @@ func NewCityField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn)
 // NewAreaField 封装区字段
 func NewAreaField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
 	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
-	idTitle.ID.SetName("area_id").SetTitle("区ID")
+	idTitle.ID.SetName("areaId").SetTitle("区ID")
 	idTitle.Title.SetName("area").SetTitle("区")
 	return idTitle
 }
@@ -189,7 +189,7 @@ func _OrderFn(booleanI boolean.BooleanI) sqlbuilder.OrderFn { // 默认记录排
 	return func() (orderedExpressions []exp.OrderedExpression) {
 		field := booleanI.GetBooleanField()
 		trueTitle, falseTitle := booleanI.GetTrueFalseTitle()
-		segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", field.DBName)
+		segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", sqlbuilder.FieldName2DBColumnName(field.Name))
 		expression := goqu.L(segment, trueTitle.Key, falseTitle.Key)
 		orderedExpression := exp.NewOrderedExpression(expression, exp.AscDir, exp.NoNullsSortType)
 		orderedExpressions = sqlbuilder.ConcatOrderedExpression(orderedExpression)

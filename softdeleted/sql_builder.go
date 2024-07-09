@@ -41,7 +41,7 @@ func _DataFn(softDeletedI SoftDeletedI) sqlbuilder.DataFn {
 		if err != nil {
 			return nil, err
 		}
-		m[field.DBName] = val
+		m[sqlbuilder.FieldName2DBColumnName(field.Name)] = val
 		return m, nil
 	}
 }
@@ -64,9 +64,9 @@ var WhereFn = func(softDeletedI SoftDeletedI) sqlbuilder.ValueFn {
 		var expression goqu.Expression
 		switch valueType {
 		case ValueType_OK:
-			expression = goqu.C(field.DBName).Eq(in) // 确保删除字段为空
+			expression = goqu.C(sqlbuilder.FieldName2DBColumnName(field.Name)).Eq(in) // 确保删除字段为空
 		case ValueType_Delete:
-			expression = goqu.C(field.DBName).Neq(in) // 确保指定字段不等于 特定值
+			expression = goqu.C(sqlbuilder.FieldName2DBColumnName(field.Name)).Neq(in) // 确保指定字段不等于 特定值
 		default:
 			err = errors.Errorf("invalid valueType , except %s|%s,got:%s", ValueType_OK, ValueType_Delete, valueType)
 			return nil, err

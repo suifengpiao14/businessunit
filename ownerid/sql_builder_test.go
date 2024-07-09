@@ -32,7 +32,7 @@ func (p UpdateParam) GetOwnerIdField() (field ownerid.OwnerIdField) {
 
 func (p UpdateParam) GetDeletedAtField() (softdeleted.ValueType, softdeleted.SoftDeletedField) {
 	return softdeleted.ValueType_OK, softdeleted.SoftDeletedField{
-		DBName:   "Fdeleted_at",
+		Name:     "Fdeleted_at",
 		ValueFns: sqlbuilder.NewValueFns(func() (value any, err error) { return "", nil }),
 	}
 }

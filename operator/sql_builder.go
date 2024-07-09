@@ -23,14 +23,14 @@ func _DataFn(operatorI OperatorI) sqlbuilder.DataFn {
 			if err != nil {
 				return nil, err
 			}
-			m[col.OperatorID.DBName] = val
+			m[sqlbuilder.FieldName2DBColumnName(col.OperatorID.Name)] = val
 		}
 		if col.OperatorName.ValueFns != nil {
 			val, err := col.OperatorName.GetValue(nil)
 			if err != nil {
 				return nil, err
 			}
-			m[col.OperatorName.DBName] = val
+			m[sqlbuilder.FieldName2DBColumnName(col.OperatorName.Name)] = val
 		}
 		return m, nil
 	}
