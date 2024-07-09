@@ -16,8 +16,11 @@ func (t IdTitle) GetIdentityField() identity.IdentityField {
 	return t.ID
 }
 
-func (t IdTitle) GetTitle() IdTitle {
+func (t IdTitle) GetIdTitle() IdTitle {
 	return t
+}
+func (t IdTitle) Fields() sqlbuilder.Fields {
+	return sqlbuilder.Fields{t.Title, t.ID.Field}
 }
 
 var TitleFieldSchema = sqlbuilder.DBSchema{
@@ -44,12 +47,12 @@ func NewIdTitleFiled(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.Value
 }
 
 type IdTitleI interface {
-	GetTitle() IdTitle
+	GetIdTitle() IdTitle
 }
 
 func _DataFn(titleI IdTitleI) sqlbuilder.DataFn {
 	return func() (any, error) {
-		title := titleI.GetTitle()
+		title := titleI.GetIdTitle()
 		if title.Title.ValueFns == nil {
 			return nil, nil
 		}
@@ -67,7 +70,7 @@ func _DataFn(titleI IdTitleI) sqlbuilder.DataFn {
 }
 func _WhereFn(titleI IdTitleI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
-		field := titleI.GetTitle().Title
+		field := titleI.GetIdTitle().Title
 		field.WhereFns.Insert(-1, func(in any) (value any, err error) {
 			val := cast.ToString(in)
 			if val == "" {
@@ -83,26 +86,26 @@ func _WhereFn(titleI IdTitleI) sqlbuilder.WhereFn {
 }
 
 func Insert(titleI IdTitleI) sqlbuilder.InsertParam {
-	title := titleI.GetTitle()
+	title := titleI.GetIdTitle()
 	return sqlbuilder.NewInsertBuilder(nil).Merge(identity.Insert(title)).AppendData(_DataFn(titleI))
 }
 
 func Update(titleI IdTitleI) sqlbuilder.UpdateParam {
-	title := titleI.GetTitle()
+	title := titleI.GetIdTitle()
 	return sqlbuilder.NewUpdateBuilder(nil).Merge(identity.Update(title)).AppendData(_DataFn(titleI))
 }
 
 func First(titleI IdTitleI) sqlbuilder.FirstParam {
-	title := titleI.GetTitle()
+	title := titleI.GetIdTitle()
 	return sqlbuilder.NewFirstBuilder(nil).Merge(identity.First(title)).AppendWhere(_WhereFn(titleI))
 }
 
 func List(titleI IdTitleI) sqlbuilder.ListParam {
-	title := titleI.GetTitle()
+	title := titleI.GetIdTitle()
 	return sqlbuilder.NewListBuilder(nil).Merge(identity.List(title)).AppendWhere(_WhereFn(titleI))
 }
 
 func Total(titleI IdTitleI) sqlbuilder.TotalParam {
-	title := titleI.GetTitle()
+	title := titleI.GetIdTitle()
 	return sqlbuilder.NewTotalBuilder(nil).Merge(identity.Total(title)).AppendWhere(_WhereFn(titleI))
 }

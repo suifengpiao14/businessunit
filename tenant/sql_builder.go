@@ -15,6 +15,38 @@ func (f TenantField) IsEqual(o TenantField) bool {
 	return sqlbuilder.Field(f.Field).IsEqual(o.Field)
 }
 
+func NewTenantField(valueFn sqlbuilder.ValueFn) TenantField {
+	field := TenantField{
+		Field: sqlbuilder.NewField(valueFn).SetName("ternat_id").SetTitle("租户ID").MergeDBSchema(sqlbuilder.DBSchema{
+			Required:  true,
+			MinLength: 1,
+			MaxLength: 64,
+			Minimum:   1,
+		}),
+	}
+	return field
+}
+
+func (f TenantField) SetName(name string) TenantField {
+	f.Field.SetName(name)
+	return f
+}
+
+func (f TenantField) SetTitle(title string) TenantField {
+	f.Field.SetTitle(title)
+	return f
+}
+
+func (f TenantField) AppendWhereFn(fns ...sqlbuilder.ValueFn) TenantField {
+	f.Field = f.Field.AppendWhereFn(fns...)
+	return f
+}
+
+func (f TenantField) AppendValueFn(fns ...sqlbuilder.ValueFn) TenantField {
+	f.Field = f.Field.AppendValueFn(fns...)
+	return f
+}
+
 type TenantI interface {
 	GetTenantField() TenantField // 获取多租户标记的字段名及值
 }

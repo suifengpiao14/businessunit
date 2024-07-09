@@ -7,8 +7,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/stretchr/testify/require"
 	"github.com/suifengpiao14/businessunit/address"
-	"github.com/suifengpiao14/businessunit/boolean"
-	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/businessunit/tenant"
 	"github.com/suifengpiao14/sqlbuilder"
 )
@@ -32,65 +30,11 @@ type InsertAddress struct {
 
 func (addr InsertAddress) GetAddress() (addres address.Address) {
 	addres = address.Address{
-		TenatID: tenant.TenantField{
-			Field: sqlbuilder.Field{
-				Name: "Fbusiness_id",
-				ValueFns: sqlbuilder.ValueFns{
-					func(in any) (value any, err error) {
-						return addr.TenantID, nil
-					},
-				},
-				WhereFns: sqlbuilder.ValueFns{sqlbuilder.ValueFnDirect},
-			},
-		},
-		// OwnerID: ownerid.NewOwnerIdField("Fowner_id", func(in any) (value any, err error) {
-		// 	return addr.OwnerID, nil
-		// },
-		// 	func(in any) (value any, err error) {
-		// 		return addr.OwnerID, nil
-		// 	},
-		// 	nil,
-		// ),
-		Label: enum.EnumField{
-			Field: sqlbuilder.Field{
-				Name: "Flabel",
-				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-					return addr.Label, nil
-				}},
-				WhereFns: sqlbuilder.ValueFns{sqlbuilder.ValueFnDirect},
-			},
-			EnumTitles: enum.EnumTitles{
-				{
-					Key:   "recive",
-					Title: "收获地址",
-				},
-				{
-					Key:   "return",
-					Title: "退货地址",
-				},
-			},
-		},
-		IsDefault: boolean.BooleanField{
-			Field: sqlbuilder.Field{
-				Name: "Fis_default",
-				ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-					return addr.IsDefault, nil
-				}},
-			},
-			TrueFalseTitleFn: func() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle) {
-				trueTitle = enum.EnumTitle{
-					Key:   "1",
-					Title: "是",
-				}
-				falseTitle = enum.EnumTitle{
-					Key:   "2",
-					Title: "否",
-				}
-				return trueTitle, falseTitle
-			},
-		},
+		TenatID:      tenant.NewTenantField(func(in any) (any, error) { return addr.TenantID, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect).SetName("Fbusiness_id"),
+		Label:        address.NewLabelField(func(in any) (any, error) { return addr.Label, nil }, nil),
+		IsDefault:    address.NewIsDefaultField(func(in any) (any, error) { return addr.IsDefault, nil }, nil).AppendWhereFn(sqlbuilder.ValueFnDirect),
 		ContactPhone: address.NewContactPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect),
-		ContactName:  address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }),
+		ContactName:  address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("Fcontact_name"),
 		Address:      address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
 
 		Province: address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil }),
@@ -113,6 +57,30 @@ func (addr InsertAddress) GetCount(rawSql string) (count int, err error) {
 	fmt.Println(rawSql)
 	return 0, nil
 }
+func (addr InsertAddress) Fields() (fields sqlbuilder.Fields) {
+	address := addr.GetAddress()
+	fields = sqlbuilder.Fields{
+		address.TenatID.Field,
+		address.Label.Field,
+		address.IsDefault.GetBooleanField().Field,
+		address.ContactPhone.Field,
+		address.ContactName,
+		address.Address,
+	}
+	fields = append(fields, address.Province.GetIdTitle().Fields()...)
+	fields = append(fields, address.City.GetIdTitle().Fields()...)
+	fields = append(fields, address.Area.GetIdTitle().Fields()...)
+
+	return fields
+}
+
+func TestInsertDoc(t *testing.T) {
+	var addr = InsertAddress{}
+	reqArgs, err := addr.Fields().DocRequestArgs()
+	require.NoError(t, err)
+	markdown := reqArgs.Makedown()
+	fmt.Println(markdown)
+}
 
 func TestInsert(t *testing.T) {
 	var addr = InsertAddress{
@@ -128,6 +96,7 @@ func TestInsert(t *testing.T) {
 		AreaId:       "440301",
 		AreaName:     "福田",
 		IsDefault:    "1",
+		TenantID:     "15",
 	}
 	sql, err := sqlbuilder.NewInsertBuilder(addr).Merge(address.Insert(addr, addr, addr)).ToSQL()
 	require.NoError(t, err)

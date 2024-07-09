@@ -13,11 +13,11 @@ func (f PhoneField) GetPhoneField() PhoneField {
 }
 
 func (f PhoneField) SetName(name string) PhoneField {
-	f.Field = f.Field.SetName(name)
+	f.Field.SetName(name)
 	return f
 }
 func (f PhoneField) SetTitle(title string) PhoneField {
-	f.Field = f.Field.SetTitle(title)
+	f.Field.SetTitle(title)
 	return f
 }
 

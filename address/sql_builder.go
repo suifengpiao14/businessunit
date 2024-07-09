@@ -79,7 +79,7 @@ type Address struct {
 	Area     idtitle.IdTitleI
 }
 
-func (address Address) Fields() (fileds sqlbuilder.Fields) {
+func (address Address) CustomFields() (fileds sqlbuilder.Fields) {
 	fileds = make(sqlbuilder.Fields, 0)
 	fileds = append(fileds,
 		address.ContactName,
@@ -88,6 +88,46 @@ func (address Address) Fields() (fileds sqlbuilder.Fields) {
 	return fileds
 }
 
+func NewIsDefaultField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn boolean.TrueFalseTitleFn) boolean.BooleanField {
+	if trueFalseTitleFn == nil {
+		trueFalseTitleFn = func() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle) {
+			trueTitle = enum.EnumTitle{
+				Key:   "1",
+				Title: "是",
+			}
+			falseTitle = enum.EnumTitle{
+				Key:   "2",
+				Title: "否",
+			}
+			return trueTitle, falseTitle
+		}
+	}
+	filed := boolean.BooleanField{
+		Field:            sqlbuilder.NewField(valueFn).SetName("is_default").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect),
+		TrueFalseTitleFn: trueFalseTitleFn,
+	}
+	return filed
+}
+
+func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles enum.EnumTitles) enum.EnumField {
+	if len(enumTitles) == 0 {
+		enumTitles = enum.EnumTitles{
+			{
+				Key:   "recive",
+				Title: "收获地址",
+			},
+			{
+				Key:   "return",
+				Title: "退货地址",
+			},
+		}
+	}
+	filed := enum.EnumField{
+		Field:      sqlbuilder.NewField(valueFn).SetName("label").SetTitle("标签").AppendWhereFn(sqlbuilder.ValueFnDirect),
+		EnumTitles: enumTitles,
+	}
+	return filed
+}
 func NewContactNameField(valueFn sqlbuilder.ValueFn) sqlbuilder.Field {
 	return sqlbuilder.NewField(valueFn).SetName("contact_name").SetTitle("联系人")
 }
@@ -138,11 +178,11 @@ type CheckRuleI interface {
 }
 
 func _DataFn(addressI AddressI) sqlbuilder.DataFn {
-	return addressI.GetAddress().Fields().Data
+	return addressI.GetAddress().CustomFields().Data
 }
 
 func _WhereFn(addressI AddressI) sqlbuilder.WhereFn {
-	return addressI.GetAddress().Fields().Where
+	return addressI.GetAddress().CustomFields().Where
 }
 
 func _OrderFn(booleanI boolean.BooleanI) sqlbuilder.OrderFn { // 默认记录排前面

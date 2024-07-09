@@ -8,9 +8,11 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
+type TrueFalseTitleFn func() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle)
+
 type BooleanField struct {
 	sqlbuilder.Field
-	TrueFalseTitleFn func() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle)
+	TrueFalseTitleFn TrueFalseTitleFn
 }
 
 func (f BooleanField) GetBooleanField() BooleanField {
@@ -19,6 +21,11 @@ func (f BooleanField) GetBooleanField() BooleanField {
 
 func (f BooleanField) GetTrueFalseTitle() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle) {
 	return f.TrueFalseTitleFn()
+}
+
+func (f BooleanField) AppendWhereFn(fns ...sqlbuilder.ValueFn) BooleanField {
+	f.Field = f.Field.AppendWhereFn(fns...)
+	return f
 }
 
 func (f BooleanField) IsTrue() (isTrue bool) {

@@ -17,6 +17,11 @@ func (f IdentityField) SetName(name string) IdentityField {
 	return f
 }
 
+func (f IdentityField) SetTitle(title string) IdentityField {
+	f.Field.SetTitle(title)
+	return f
+}
+
 var IdentityFieldSchema = sqlbuilder.DBSchema{
 	Required:  true,
 	Type:      sqlbuilder.DBSchema_Type_string,
