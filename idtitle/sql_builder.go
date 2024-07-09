@@ -8,19 +8,19 @@ import (
 )
 
 type IdTitle struct {
-	Title sqlbuilder.Field
-	ID    identity.IdentityField
+	Title *sqlbuilder.Field
+	ID    *identity.IdentityField
 }
 
-func (t IdTitle) GetIdentityField() identity.IdentityField {
+func (t IdTitle) GetIdentityField() *identity.IdentityField {
 	return t.ID
 }
 
-func (t IdTitle) GetIdTitle() IdTitle {
+func (t *IdTitle) GetIdTitle() *IdTitle {
 	return t
 }
 func (t IdTitle) Fields() sqlbuilder.Fields {
-	return sqlbuilder.Fields{t.Title, t.ID.Field}
+	return sqlbuilder.Fields{*t.Title, t.ID.Field}
 }
 
 var TitleFieldSchema = sqlbuilder.DBSchema{
@@ -31,7 +31,7 @@ var TitleFieldSchema = sqlbuilder.DBSchema{
 }
 
 // NewTitleField 生成标题列，标题类一般没有逻辑，主要用于配合ID显示
-func NewTitleField(valueFn sqlbuilder.ValueFn) sqlbuilder.Field {
+func NewTitleField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 	field := sqlbuilder.NewField(valueFn).SetName("title").MergeDBSchema(TitleFieldSchema).SetTitle("标题")
 	return field
 }
@@ -39,15 +39,15 @@ func NewTitleField(valueFn sqlbuilder.ValueFn) sqlbuilder.Field {
 // NewTitleField 生成标题列，标题类一般没有逻辑，主要用于配合ID显示
 var NewIdentityField = identity.NewIdentityField
 
-func NewIdTitleFiled(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) IdTitle {
-	return IdTitle{
+func NewIdTitleFiled(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) *IdTitle {
+	return &IdTitle{
 		ID:    NewIdentityField(idValueFn),
 		Title: NewTitleField(titleValueFn),
 	}
 }
 
 type IdTitleI interface {
-	GetIdTitle() IdTitle
+	GetIdTitle() *IdTitle
 }
 
 func _DataFn(titleI IdTitleI) sqlbuilder.DataFn {

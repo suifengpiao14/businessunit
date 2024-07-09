@@ -34,8 +34,8 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		Label:        address.NewLabelField(func(in any) (any, error) { return addr.Label, nil }, nil),
 		IsDefault:    address.NewIsDefaultField(func(in any) (any, error) { return addr.IsDefault, nil }, nil).AppendWhereFn(sqlbuilder.ValueFnDirect),
 		ContactPhone: address.NewContactPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect),
-		ContactName:  address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("Fcontact_name"),
-		Address:      address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
+		ContactName:  *address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("Fcontact_name"),
+		Address:      *address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
 
 		Province: address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil }),
 		City:     address.NewCityField(func(in any) (any, error) { return addr.CityId, nil }, func(in any) (any, error) { return addr.CityId, nil }),
@@ -80,6 +80,8 @@ func TestInsertDoc(t *testing.T) {
 	require.NoError(t, err)
 	markdown := reqArgs.Makedown()
 	fmt.Println(markdown)
+	example := reqArgs.JsonExample(true)
+	fmt.Println(example)
 }
 
 func TestInsert(t *testing.T) {

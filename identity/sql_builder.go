@@ -9,15 +9,15 @@ type IdentityField struct {
 	sqlbuilder.Field
 }
 
-func (f IdentityField) GetIdentityField() IdentityField {
+func (f *IdentityField) GetIdentityField() *IdentityField {
 	return f
 }
-func (f IdentityField) SetName(name string) IdentityField {
+func (f *IdentityField) SetName(name string) *IdentityField {
 	f.Name = name
 	return f
 }
 
-func (f IdentityField) SetTitle(title string) IdentityField {
+func (f *IdentityField) SetTitle(title string) *IdentityField {
 	f.Field.SetTitle(title)
 	return f
 }
@@ -30,9 +30,9 @@ var IdentityFieldSchema = sqlbuilder.DBSchema{
 }
 
 // NewIdentityField 生成标题列，标题类一般没有逻辑，主要用于配合ID显示
-func NewIdentityField(valueFn sqlbuilder.ValueFn) IdentityField {
-	field := IdentityField{
-		Field: sqlbuilder.NewField(valueFn).SetName("id").SetTitle("ID").MergeDBSchema(IdentityFieldSchema),
+func NewIdentityField(valueFn sqlbuilder.ValueFn) *IdentityField {
+	field := &IdentityField{
+		Field: *sqlbuilder.NewField(valueFn).SetName("id").SetTitle("ID").MergeDBSchema(IdentityFieldSchema),
 	}
 	field.WhereFns.Append(func(in any) (any, error) {
 		return goqu.Ex{
@@ -43,7 +43,7 @@ func NewIdentityField(valueFn sqlbuilder.ValueFn) IdentityField {
 }
 
 type IdentityI interface {
-	GetIdentityField() IdentityField
+	GetIdentityField() *IdentityField
 }
 
 func _DataFn(identityI IdentityI) sqlbuilder.DataFn {

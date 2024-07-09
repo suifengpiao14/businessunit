@@ -24,7 +24,7 @@ func (f BooleanField) GetTrueFalseTitle() (trueTitle enum.EnumTitle, falseTitle 
 }
 
 func (f BooleanField) AppendWhereFn(fns ...sqlbuilder.ValueFn) BooleanField {
-	f.Field = f.Field.AppendWhereFn(fns...)
+	f.Field.AppendWhereFn(fns...)
 	return f
 }
 

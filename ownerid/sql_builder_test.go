@@ -18,7 +18,7 @@ type UpdateParam struct {
 	OwnerID int
 }
 
-func (p UpdateParam) GetIdentityField() identity.IdentityField {
+func (p UpdateParam) GetIdentityField() *identity.IdentityField {
 	return identity.NewIdentityField(func(in any) (any, error) { return p.ID, nil }).SetName("Fid")
 }
 func (p UpdateParam) GetOwnerIdField() (field ownerid.OwnerIdField) {

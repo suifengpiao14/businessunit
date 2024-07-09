@@ -17,7 +17,7 @@ func (f TenantField) IsEqual(o TenantField) bool {
 
 func NewTenantField(valueFn sqlbuilder.ValueFn) TenantField {
 	field := TenantField{
-		Field: sqlbuilder.NewField(valueFn).SetName("ternat_id").SetTitle("租户ID").MergeDBSchema(sqlbuilder.DBSchema{
+		Field: *sqlbuilder.NewField(valueFn).SetName("ternat_id").SetTitle("租户ID").MergeDBSchema(sqlbuilder.DBSchema{
 			Required:  true,
 			MinLength: 1,
 			MaxLength: 64,
@@ -38,12 +38,12 @@ func (f TenantField) SetTitle(title string) TenantField {
 }
 
 func (f TenantField) AppendWhereFn(fns ...sqlbuilder.ValueFn) TenantField {
-	f.Field = f.Field.AppendWhereFn(fns...)
+	f.Field.AppendWhereFn(fns...)
 	return f
 }
 
 func (f TenantField) AppendValueFn(fns ...sqlbuilder.ValueFn) TenantField {
-	f.Field = f.Field.AppendValueFn(fns...)
+	f.Field.AppendValueFn(fns...)
 	return f
 }
 

@@ -5,3 +5,19 @@
 业务简单，复用率高，增加租户概念
 **功能介绍:**
 1. 基本的 增、改、删、查 接口
+
+
+|名称|标题|必填|类型|格式|可空|默认值|案例|描述|
+|:--|:--|:--|:--|:--|:--|:--|:--|:--|
+|Fbusiness_id|租户ID|true|string||false||||
+|label|标签|false|string||false||||
+|is_default|默认|false|string||false||||
+|contact_phone|联系手机号|false|string||false||||
+|Fcontact_name|联系人|false|string||false||||
+|address|详细地址|false|string||false||||
+|provice|省|false|string|string|false||||
+|provice_id|省ID|false|string|string|false||||
+|city|城市|false|string|string|false||||
+|city_id|城市ID|false|string|string|false||||
+|area|区|false|string|string|false||||
+|area_id|区ID|false|string|string|false||||

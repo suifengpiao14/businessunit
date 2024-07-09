@@ -16,7 +16,7 @@ type UpdateParam struct {
 	Name string
 }
 
-func (p UpdateParam) GetIdentityField() identity.IdentityField {
+func (p UpdateParam) GetIdentityField() *identity.IdentityField {
 	return identity.NewIdentityField(func(in any) (any, error) { return p.ID, nil })
 }
 func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {

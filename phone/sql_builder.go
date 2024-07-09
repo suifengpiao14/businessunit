@@ -33,7 +33,7 @@ var PhoneFieldSchema = sqlbuilder.DBSchema{
 
 func NewPhoneField(valueFn sqlbuilder.ValueFn) (field PhoneField) {
 	field = PhoneField{
-		Field: sqlbuilder.NewField(valueFn).SetName("phone").SetTitle("手机号").MergeDBSchema(PhoneFieldSchema),
+		Field: *sqlbuilder.NewField(valueFn).SetName("phone").SetTitle("手机号").MergeDBSchema(PhoneFieldSchema),
 	}
 	return field
 }

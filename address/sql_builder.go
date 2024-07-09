@@ -103,7 +103,7 @@ func NewIsDefaultField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn boolean.True
 		}
 	}
 	filed := boolean.BooleanField{
-		Field:            sqlbuilder.NewField(valueFn).SetName("is_default").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect),
+		Field:            *sqlbuilder.NewField(valueFn).SetName("is_default").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect),
 		TrueFalseTitleFn: trueFalseTitleFn,
 	}
 	return filed
@@ -123,19 +123,19 @@ func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles enum.EnumTitles) enum.
 		}
 	}
 	filed := enum.EnumField{
-		Field:      sqlbuilder.NewField(valueFn).SetName("label").SetTitle("标签").AppendWhereFn(sqlbuilder.ValueFnDirect),
+		Field:      *sqlbuilder.NewField(valueFn).SetName("label").SetTitle("标签").AppendWhereFn(sqlbuilder.ValueFnDirect),
 		EnumTitles: enumTitles,
 	}
 	return filed
 }
-func NewContactNameField(valueFn sqlbuilder.ValueFn) sqlbuilder.Field {
+func NewContactNameField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 	return sqlbuilder.NewField(valueFn).SetName("contact_name").SetTitle("联系人")
 }
 func NewContactPhoneField(valueFn sqlbuilder.ValueFn) phone.PhoneField {
 	return phone.NewPhoneField(valueFn).SetName("contact_phone").SetTitle("联系手机号")
 }
 
-func NewAddressField(valueFn sqlbuilder.ValueFn) sqlbuilder.Field {
+func NewAddressField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 	return sqlbuilder.NewField(valueFn).SetName("address").SetTitle("详细地址")
 }
 
