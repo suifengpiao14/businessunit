@@ -13,7 +13,7 @@ func (f *IdentityField) GetIdentityField() *IdentityField {
 	return f
 }
 func (f *IdentityField) SetName(name string) *IdentityField {
-	f.Name = name
+	f.DBName = name
 	return f
 }
 
@@ -36,7 +36,7 @@ func NewIdentityField(valueFn sqlbuilder.ValueFn) *IdentityField {
 	}
 	field.WhereFns.Append(func(in any) (any, error) {
 		return goqu.Ex{
-			field.Name: in,
+			field.DBName: in,
 		}, nil
 	})
 	return field
@@ -58,7 +58,7 @@ func _DataFn(identityI IdentityI) sqlbuilder.DataFn {
 		}
 
 		m := map[string]any{
-			field.Name: val,
+			field.DBName: val,
 		}
 		return m, nil
 	}

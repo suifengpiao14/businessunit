@@ -13,34 +13,34 @@ func init() {
 			{
 				Dialect: sqlbuilder.Dialect_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_CREATE,
-				DDL:     fmt.Sprintf("`%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',", Field_UpdatedAt.Name),
+				DDL:     fmt.Sprintf("`%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',", Field_UpdatedAt.DBName),
 			},
 			{
 				Dialect: sqlbuilder.Dialect_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_APPEND,
-				DDL:     fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN `%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间' %s;", table, Field_CreatedAt.Name, mysqlAfter.String()),
+				DDL:     fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN `%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间' %s;", table, Field_CreatedAt.DBName, mysqlAfter.String()),
 			},
 			{
 				Dialect: sqlbuilder.Dialect_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_MODIFY,
-				DDL:     fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',", table, Field_UpdatedAt.Name),
+				DDL:     fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',", table, Field_UpdatedAt.DBName),
 			},
 			{
 				Dialect: sqlbuilder.Dialect_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_DELETE,
-				DDL:     fmt.Sprintf("ALTER TABLE `%s` DROP `%s` ;", table, Field_UpdatedAt.Name),
+				DDL:     fmt.Sprintf("ALTER TABLE `%s` DROP `%s` ;", table, Field_UpdatedAt.DBName),
 			},
 		}
 	}
 }
 
 var Field_CreatedAt = sqlbuilder.Field{
-	Name:     "created_at",
+	DBName:   "created_at",
 	ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return in, nil }},
 }
 
 var Field_UpdatedAt = sqlbuilder.Field{
-	Name:     "updated_at",
+	DBName:   "updated_at",
 	ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return in, nil }},
 }
 

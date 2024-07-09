@@ -64,7 +64,7 @@ func _DataFn(titleI IdTitleI) sqlbuilder.DataFn {
 		if sqlbuilder.IsNil(val) {
 			return nil, nil
 		}
-		m[title.Title.Name] = val
+		m[title.Title.DBName] = val
 		return m, nil
 	}
 }
@@ -77,7 +77,7 @@ func _WhereFn(titleI IdTitleI) sqlbuilder.WhereFn {
 				return in, nil
 			}
 			likeValue := "%" + val + "%"
-			expressions = append(expressions, goqu.C(field.Name).ILike(likeValue))
+			expressions = append(expressions, goqu.C(field.DBName).ILike(likeValue))
 			return expressions, nil
 		})
 

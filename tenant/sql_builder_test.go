@@ -38,7 +38,7 @@ func (p InsertParam) Data() (data interface{}, err error) {
 func (p InsertParam) GetTenantField() tenant.TenantField {
 	return tenant.TenantField{
 		Field: sqlbuilder.Field{
-			Name: "Ftenant",
+			DBName: "Ftenant",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 				return p.Tenant, nil
 			}},
@@ -48,7 +48,7 @@ func (p InsertParam) GetTenantField() tenant.TenantField {
 
 var tenantData = tenant.TenantField{
 	Field: sqlbuilder.Field{
-		Name: "Ftenant",
+		DBName: "Ftenant",
 		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 			return "123", nil
 		}},

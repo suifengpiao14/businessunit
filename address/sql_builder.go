@@ -189,7 +189,7 @@ func _OrderFn(booleanI boolean.BooleanI) sqlbuilder.OrderFn { // 默认记录排
 	return func() (orderedExpressions []exp.OrderedExpression) {
 		field := booleanI.GetBooleanField()
 		trueTitle, falseTitle := booleanI.GetTrueFalseTitle()
-		segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", field.Name)
+		segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", field.DBName)
 		expression := goqu.L(segment, trueTitle.Key, falseTitle.Key)
 		orderedExpression := exp.NewOrderedExpression(expression, exp.AscDir, exp.NoNullsSortType)
 		orderedExpressions = sqlbuilder.ConcatOrderedExpression(orderedExpression)

@@ -30,7 +30,7 @@ func _DataFn(createdAtI CreatedAtI) sqlbuilder.DataFn {
 			return nil, err
 		}
 		m := map[string]any{
-			field.Name: val,
+			field.DBName: val,
 		}
 		return m, nil
 	}

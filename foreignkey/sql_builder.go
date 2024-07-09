@@ -33,7 +33,7 @@ func _DataFn(foreignkeyI ForeignkeyI) sqlbuilder.DataFn {
 				return nil, err
 			}
 			if !sqlbuilder.IsNil(redundantFiledValue) {
-				m[redundantField.Name] = redundantFiledValue
+				m[redundantField.DBName] = redundantFiledValue
 			}
 		}
 		return m, nil

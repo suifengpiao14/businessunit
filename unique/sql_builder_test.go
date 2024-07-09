@@ -22,7 +22,7 @@ func (p UpdateParam) GetIdentityField() *identity.IdentityField {
 func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {
 	fields = make(unique.UniqueField, 0)
 	fields = append(fields, sqlbuilder.Field{
-		Name: "Fname",
+		DBName: "Fname",
 		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 			return p.Name, nil
 		}},
@@ -33,7 +33,7 @@ func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {
 
 func (p UpdateParam) GetDeletedAtField() (softdeleted.ValueType, softdeleted.SoftDeletedField) {
 	return softdeleted.ValueType_OK, softdeleted.SoftDeletedField{
-		Name: "Fdeleted_at",
+		DBName: "Fdeleted_at",
 		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
 			return "", nil
 		}},

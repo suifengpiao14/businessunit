@@ -83,10 +83,10 @@ func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
 		if err != nil {
 			return nil, err
 		}
-		if ex, ok := sqlbuilder.TryParseExpressions(identity.Name, val); ok {
+		if ex, ok := sqlbuilder.TryParseExpressions(identity.DBName, val); ok {
 			return ex, nil
 		}
-		return sqlbuilder.ConcatExpression(goqu.C(identity.Name).Neq(val)), nil
+		return sqlbuilder.ConcatExpression(goqu.C(identity.DBName).Neq(val)), nil
 	})
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_checkExists(uniqueIForUpdate, whereNotID))
 }

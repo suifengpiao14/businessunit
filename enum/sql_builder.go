@@ -65,7 +65,7 @@ func _DataFn(enumI EnumI) sqlbuilder.DataFn {
 			return nil, err
 		}
 		m := map[string]any{
-			col.Name: val,
+			col.DBName: val,
 		}
 		return m, nil
 	}
