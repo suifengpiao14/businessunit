@@ -165,7 +165,7 @@ func NewAreaField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn)
 
 type AddressI interface {
 	GetAddress() Address
-	sqlbuilder.Table
+	sqlbuilder.TableI
 }
 
 // WithDefaultI 需要设置默认地址时,需要实现该接口

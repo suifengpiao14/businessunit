@@ -16,7 +16,7 @@ func (f UniqueField) GetUniqueFields() UniqueField {
 
 type UniqueI interface {
 	GetUniqueFields() UniqueField
-	sqlbuilder.Table
+	sqlbuilder.TableI
 	AlreadyExists(sql string) (exists bool, err error)
 }
 
