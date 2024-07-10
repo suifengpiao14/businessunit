@@ -26,18 +26,7 @@ type UniqueIForUpdate interface {
 }
 
 func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
-	return func() (expressions sqlbuilder.Expressions, err error) {
-		fields := uniqueI.GetUniqueFields()
-		expressions = make(sqlbuilder.Expressions, 0)
-		for _, field := range fields {
-			subExprs, err := field.Where()
-			if err != nil {
-				return nil, err
-			}
-			expressions = append(expressions, subExprs...)
-		}
-		return expressions, nil
-	}
+	return sqlbuilder.Fields(uniqueI.GetUniqueFields()).Where
 }
 
 func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.WhereI) sqlbuilder.DataFn {
@@ -92,13 +81,13 @@ func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
 }
 
 func First(uniqueI UniqueI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil)
+	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_whereFn(uniqueI))
 }
 
 func List(uniqueI UniqueI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil)
+	return sqlbuilder.NewListBuilder(nil).AppendWhere(_whereFn(uniqueI))
 }
 
 func Total(uniqueI UniqueI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil)
+	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_whereFn(uniqueI))
 }
