@@ -56,7 +56,7 @@ func _DataFn(identityI OwnerIdI) sqlbuilder.DataFn {
 		}
 
 		m := map[string]any{
-			field.Name: val,
+			sqlbuilder.FieldName2DBColumnName(field.Name): val,
 		}
 		return m, nil
 	}

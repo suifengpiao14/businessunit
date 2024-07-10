@@ -45,6 +45,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240705154022-57fcf998327a h1:vZKZwh84UJswjeT2kqLOBEPdzHoc4S1YGF3Sv6Fo9uo=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240705154022-57fcf998327a/go.mod h1:S+F2G8Nrf9kMN+RxJ7h5GTBNo4ltO8TWP3bage2liBI=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240709144700-6ed38a883c63 h1:PUGfjgPZQkNpn/1p+ron0/lLRkX1fOrZjVKcegknVA8=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240709144700-6ed38a883c63/go.mod h1:2N8VTtKY/HvpmAO0j3pVgb5Z+FKy8C+b32UHD0N7WYI=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=

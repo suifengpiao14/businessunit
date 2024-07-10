@@ -9,7 +9,7 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.8.4
-	github.com/suifengpiao14/sqlbuilder v0.0.0-20240705154022-57fcf998327a
+	github.com/suifengpiao14/sqlbuilder v0.0.0-20240709144700-6ed38a883c63
 )
 
 require (
@@ -18,6 +18,7 @@ require (
 	github.com/kylelemons/go-gypsy v1.0.0 // indirect
 	github.com/lib/pq v1.10.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/suifengpiao14/funcs v0.0.18 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

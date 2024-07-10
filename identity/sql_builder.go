@@ -36,7 +36,7 @@ func NewIdentityField(valueFn sqlbuilder.ValueFn) *IdentityField {
 	}
 	field.WhereFns.Append(func(in any) (any, error) {
 		return goqu.Ex{
-			field.Name: in,
+			sqlbuilder.FieldName2DBColumnName(field.Name): in,
 		}, nil
 	})
 	return field
@@ -58,7 +58,7 @@ func _DataFn(identityI IdentityI) sqlbuilder.DataFn {
 		}
 
 		m := map[string]any{
-			field.Name: val,
+			sqlbuilder.FieldName2DBColumnName(field.Name): val,
 		}
 		return m, nil
 	}

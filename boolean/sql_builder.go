@@ -51,7 +51,6 @@ func Copy(booleanI BooleanI) (newBooleanI BooleanI) {
 	booleanField := booleanI.GetBooleanField()
 	newBooleanI = BooleanField{
 		Field: sqlbuilder.Field{
-			Name:     booleanField.Name,
 			ValueFns: booleanField.ValueFns,
 		},
 		TrueFalseTitleFn: booleanI.GetTrueFalseTitle,
@@ -65,7 +64,6 @@ func Switch(booleanI BooleanI) (reversed BooleanI) {
 	trueTitle, falseTitle := booleanI.GetTrueFalseTitle()
 	reversed = BooleanField{
 		Field: sqlbuilder.Field{
-			Name: booleanField.Name,
 			ValueFns: sqlbuilder.ValueFns{
 				func(in any) (value any, err error) {
 					val, err := booleanField.GetValue(nil)

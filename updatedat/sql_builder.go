@@ -30,7 +30,7 @@ func _DataFn(updatedatI UpdatedatI) sqlbuilder.DataFn {
 		if err != nil {
 			return nil, err
 		}
-		m[col.Name] = val
+		m[sqlbuilder.FieldName2DBColumnName(col.Name)] = val
 		return m, nil
 	}
 }
