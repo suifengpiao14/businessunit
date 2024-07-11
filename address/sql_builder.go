@@ -102,10 +102,8 @@ func NewIsDefaultField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn boolean.True
 			return trueTitle, falseTitle
 		}
 	}
-	filed := boolean.BooleanField{
-		Field:            *sqlbuilder.NewField(valueFn).SetName("isDefault").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect),
-		TrueFalseTitleFn: trueFalseTitleFn,
-	}
+	filed := boolean.NewBooleanField(valueFn, trueFalseTitleFn)
+	filed.SetName("isDefault").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect)
 	return filed
 }
 
@@ -144,6 +142,7 @@ func NewProvinceField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.Valu
 	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
 	idTitle.ID.SetName("proviceId").SetTitle("省ID")
 	idTitle.Title.SetName("provice").SetTitle("省")
+	idTitle.ID.MergeSchema(sqlbuilder.Schema{})
 	return idTitle
 }
 

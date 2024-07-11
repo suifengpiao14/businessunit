@@ -15,6 +15,26 @@ type BooleanField struct {
 	TrueFalseTitleFn TrueFalseTitleFn
 }
 
+func NewBooleanField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn TrueFalseTitleFn) BooleanField {
+	trueTitle, falseTitle := trueFalseTitleFn()
+	schema := sqlbuilder.Schema{
+		Enums: sqlbuilder.Enums{
+			{
+				Title: trueTitle.Title,
+				Key:   trueTitle.Key,
+			},
+			{
+				Title: falseTitle.Title,
+				Key:   falseTitle.Key,
+			},
+		},
+	}
+	return BooleanField{
+		Field:            *sqlbuilder.NewField(valueFn).MergeSchema(schema),
+		TrueFalseTitleFn: trueFalseTitleFn,
+	}
+}
+
 func (f BooleanField) GetBooleanField() BooleanField {
 	return f
 }

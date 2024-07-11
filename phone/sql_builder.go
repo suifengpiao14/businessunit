@@ -28,12 +28,14 @@ func (f PhoneField) AppendWhereFn(fns ...sqlbuilder.ValueFn) PhoneField {
 }
 
 var PhoneFieldSchema = sqlbuilder.Schema{
-	RegExp: `^1[3-9]\d{9}$`, // 中国大陆手机号正则表达式
+	Type:      sqlbuilder.Schema_Type_string,
+	MaxLength: 15,
+	RegExp:    `^1[3-9]\d{9}$`, // 中国大陆手机号正则表达式
 }
 
 func NewPhoneField(valueFn sqlbuilder.ValueFn) (field PhoneField) {
 	field = PhoneField{
-		Field: *sqlbuilder.NewField(valueFn).SetName("phone").SetTitle("手机号").MergeDBSchema(PhoneFieldSchema),
+		Field: *sqlbuilder.NewField(valueFn).SetName("phone").SetTitle("手机号").MergeSchema(PhoneFieldSchema),
 	}
 	return field
 }

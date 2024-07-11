@@ -24,7 +24,7 @@ func (f *IdentityField) SetTitle(title string) *IdentityField {
 
 var IdentityFieldSchema = sqlbuilder.Schema{
 	Required:  true,
-	Type:      sqlbuilder.DBSchema_Type_string,
+	Type:      sqlbuilder.Schema_Type_string,
 	MaxLength: 64,
 	MinLength: 1,
 }
@@ -32,7 +32,7 @@ var IdentityFieldSchema = sqlbuilder.Schema{
 // NewIdentityField 生成标题列，标题类一般没有逻辑，主要用于配合ID显示
 func NewIdentityField(valueFn sqlbuilder.ValueFn) *IdentityField {
 	field := &IdentityField{
-		Field: *sqlbuilder.NewField(valueFn).SetName("id").SetTitle("ID").MergeDBSchema(IdentityFieldSchema),
+		Field: *sqlbuilder.NewField(valueFn).SetName("id").SetTitle("ID").MergeSchema(IdentityFieldSchema),
 	}
 	field.WhereFns.Append(func(in any) (any, error) {
 		return goqu.Ex{

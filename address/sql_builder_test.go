@@ -84,6 +84,14 @@ func TestInsertDoc(t *testing.T) {
 	fmt.Println(example)
 }
 
+func TestInsertDDL(t *testing.T) {
+	var addr = InsertAddress{}
+	columns, err := addr.Fields().DBColumns()
+	require.NoError(t, err)
+	ddl := columns.DDL(sqlbuilder.Dialect_mysql)
+	fmt.Println(ddl)
+}
+
 func TestInsert(t *testing.T) {
 	var addr = InsertAddress{
 		OwnerID:      "123",

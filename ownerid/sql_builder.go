@@ -20,7 +20,7 @@ var OwnerIdFieldSchema = sqlbuilder.Schema{
 	Title:     "所有者",
 	Required:  true,
 	Comment:   "对象标识,缺失时记录无意义",
-	Type:      sqlbuilder.DBSchema_Type_string,
+	Type:      sqlbuilder.Schema_Type_string,
 	MaxLength: 64,
 	MinLength: 1,
 	Minimum:   1,

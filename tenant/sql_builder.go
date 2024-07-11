@@ -17,7 +17,7 @@ func (f TenantField) IsEqual(o TenantField) bool {
 
 func NewTenantField(valueFn sqlbuilder.ValueFn) TenantField {
 	field := TenantField{
-		Field: *sqlbuilder.NewField(valueFn).SetName("ternat_id").SetTitle("租户ID").MergeDBSchema(sqlbuilder.Schema{
+		Field: *sqlbuilder.NewField(valueFn).SetName("ternat_id").SetTitle("租户ID").MergeSchema(sqlbuilder.Schema{
 			Required:  true,
 			MinLength: 1,
 			MaxLength: 64,

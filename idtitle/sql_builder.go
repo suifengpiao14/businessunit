@@ -25,14 +25,14 @@ func (t IdTitle) Fields() sqlbuilder.Fields {
 
 var TitleFieldSchema = sqlbuilder.Schema{
 	Required:  false,
-	Type:      sqlbuilder.DBSchema_Type_string,
+	Type:      sqlbuilder.Schema_Type_string,
 	MaxLength: 64,
 	MinLength: 1,
 }
 
 // NewTitleField 生成标题列，标题类一般没有逻辑，主要用于配合ID显示
 func NewTitleField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
-	field := sqlbuilder.NewField(valueFn).SetName("title").MergeDBSchema(TitleFieldSchema).SetTitle("标题")
+	field := sqlbuilder.NewField(valueFn).SetName("title").MergeSchema(TitleFieldSchema).SetTitle("标题")
 	return field
 }
 
