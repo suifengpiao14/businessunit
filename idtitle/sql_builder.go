@@ -23,7 +23,7 @@ func (t IdTitle) Fields() sqlbuilder.Fields {
 	return sqlbuilder.Fields{*t.Title, t.ID.Field}
 }
 
-var TitleFieldSchema = sqlbuilder.DBSchema{
+var TitleFieldSchema = sqlbuilder.Schema{
 	Required:  false,
 	Type:      sqlbuilder.DBSchema_Type_string,
 	MaxLength: 64,

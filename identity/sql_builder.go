@@ -22,7 +22,7 @@ func (f *IdentityField) SetTitle(title string) *IdentityField {
 	return f
 }
 
-var IdentityFieldSchema = sqlbuilder.DBSchema{
+var IdentityFieldSchema = sqlbuilder.Schema{
 	Required:  true,
 	Type:      sqlbuilder.DBSchema_Type_string,
 	MaxLength: 64,

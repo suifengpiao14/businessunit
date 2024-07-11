@@ -27,7 +27,7 @@ func (f PhoneField) AppendWhereFn(fns ...sqlbuilder.ValueFn) PhoneField {
 	return f
 }
 
-var PhoneFieldSchema = sqlbuilder.DBSchema{
+var PhoneFieldSchema = sqlbuilder.Schema{
 	RegExp: `^1[3-9]\d{9}$`, // 中国大陆手机号正则表达式
 }
 

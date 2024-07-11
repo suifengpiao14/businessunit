@@ -16,7 +16,7 @@ type OwnerIdI interface {
 	GetOwnerIdField() OwnerIdField
 }
 
-var OwnerIdFieldSchema = sqlbuilder.DBSchema{
+var OwnerIdFieldSchema = sqlbuilder.Schema{
 	Title:     "所有者",
 	Required:  true,
 	Comment:   "对象标识,缺失时记录无意义",
@@ -26,14 +26,14 @@ var OwnerIdFieldSchema = sqlbuilder.DBSchema{
 	Minimum:   1,
 }
 
-func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns, dbSchema *sqlbuilder.DBSchema) OwnerIdField {
+func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns, dbSchema *sqlbuilder.Schema) OwnerIdField {
 	if dbSchema == nil {
 		dbSchema = &OwnerIdFieldSchema
 	}
 	field := OwnerIdField{
 		Field: sqlbuilder.Field{
-			Name:     fieldName,
-			DBSchema: dbSchema,
+			Name:   fieldName,
+			Schema: dbSchema,
 		},
 	}
 	field.ValueFns.Append(valueFns...)
