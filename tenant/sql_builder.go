@@ -21,6 +21,7 @@ func NewTenantField(valueFn sqlbuilder.ValueFn) TenantField {
 			Required:  true,
 			MinLength: 1,
 			MaxLength: 64,
+			Maximum:   sqlbuilder.UnsinedInt_maximum_bigint,
 			Minimum:   1,
 		}),
 	}
