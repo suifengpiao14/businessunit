@@ -75,9 +75,9 @@ type Address struct {
 	Address      sqlbuilder.Field
 	IsDefault    boolean.BooleanI
 
-	Province idtitle.IdTitleI
-	City     idtitle.IdTitleI
-	Area     idtitle.IdTitleI
+	Province districtcode.DistrictField
+	City     districtcode.DistrictField
+	Area     districtcode.DistrictField
 }
 
 func (address Address) CustomFields() (fileds sqlbuilder.Fields) {
@@ -146,13 +146,32 @@ func NewAddressField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 	return field
 }
 
-var (
-	NewProvinceField = districtcode.NewProvinceField
+// NewProvinceField 封装省字段
+func NewProvinceField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) districtcode.DistrictField {
+	districtField := districtcode.NewDistrictField(idValueFn, titleValueFn)
+	districtField.ID.SetName("proviceId").SetTitle("省ID")
+	districtField.Title.SetName("provice").SetTitle("省")
+	districtField.ID.MergeSchema(sqlbuilder.Schema{})
+	return districtField
+}
 
-	NewCityField = districtcode.NewCityField
+// NewCityField 封装市字段
+func NewCityField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) districtcode.DistrictField {
+	districtField := districtcode.NewDistrictField(idValueFn, titleValueFn)
+	districtField.ID.SetName("cityId").SetTitle("城市ID")
+	districtField.Title.SetName("city").SetTitle("城市").MergeSchema(sqlbuilder.Schema{
+		MaxLength: 32, //海南省黎母山林场（海南黎母山省级自然保护区管理站）线上最长 25，设置32 2的倍数
+	})
+	return districtField
+}
 
-	NewAreaField = districtcode.NewAreaField
-)
+// NewAreaField 封装区字段
+func NewAreaField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) districtcode.DistrictField {
+	districtField := districtcode.NewDistrictField(idValueFn, titleValueFn)
+	districtField.ID.SetName("areaId").SetTitle("区ID")
+	districtField.Title.SetName("area").SetTitle("区")
+	return districtField
+}
 
 type AddressI interface {
 	GetAddress() Address
@@ -276,9 +295,9 @@ func Insert(addressI AddressI, withDefaultI WithDefaultI, validateRuleI CheckRul
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(addressI)).Merge(
-		idtitle.Insert(provice),
-		idtitle.Insert(city),
-		idtitle.Insert(area),
+		idtitle.Insert(provice.IdTitleField),
+		idtitle.Insert(city.IdTitleField),
+		idtitle.Insert(area.IdTitleField),
 		phone.Insert(phoneField),
 		enum.Insert(label),
 		boolean.Insert(isDefault),
@@ -296,9 +315,9 @@ func Update(addressI AddressI, withDefaultI WithDefaultI) sqlbuilder.UpdateParam
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(addressI)).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.Update(provice),
-		idtitle.Update(city),
-		idtitle.Update(area),
+		idtitle.Update(provice.IdTitleField),
+		idtitle.Update(city.IdTitleField),
+		idtitle.Update(area.IdTitleField),
 		phone.Update(phoneField),
 		enum.Update(label),
 		boolean.Update(isDefault),
@@ -316,9 +335,9 @@ func First(addressI AddressI) sqlbuilder.FirstParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.First(provice),
-		idtitle.First(city),
-		idtitle.First(area),
+		idtitle.First(provice.IdTitleField),
+		idtitle.First(city.IdTitleField),
+		idtitle.First(area.IdTitleField),
 		phone.First(phoneField),
 		enum.First(label),
 		boolean.First(isDefault),
@@ -336,9 +355,9 @@ func List(addressI AddressI) sqlbuilder.ListParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.List(provice),
-		idtitle.List(city),
-		idtitle.List(area),
+		idtitle.List(provice.IdTitleField),
+		idtitle.List(city.IdTitleField),
+		idtitle.List(area.IdTitleField),
 		phone.List(phoneField),
 		enum.List(label),
 		boolean.List(isDefault),
@@ -356,9 +375,9 @@ func Total(addressI AddressI) sqlbuilder.TotalParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.Total(provice),
-		idtitle.Total(city),
-		idtitle.Total(area),
+		idtitle.Total(provice.IdTitleField),
+		idtitle.Total(city.IdTitleField),
+		idtitle.Total(area.IdTitleField),
 		phone.Total(phoneField),
 		enum.Total(label),
 		boolean.Total(isDefault),

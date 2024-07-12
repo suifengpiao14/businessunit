@@ -33,8 +33,6 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
-github.com/rs/xid v1.5.0 h1:mKX4bl4iPYJtEIxp6CYiUuLQ/8DYMoz0PUdtGgMFRVc=
-github.com/rs/xid v1.5.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/spf13/cast v1.6.0 h1:GEiTHELF+vaR5dhz3VqZfFSzZjYbgeKDpBxQVS4GYJ0=
 github.com/spf13/cast v1.6.0/go.mod h1:ancEpBxwJDODSW/UG4rDrAqiKolqNNh2DX3mk86cAdo=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -45,12 +43,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/suifengpiao14/funcs v0.0.18 h1:TQZ9EPPnzGBFNIIpHO+I/y38ufO0osZlGtm49P2DNkA=
 github.com/suifengpiao14/funcs v0.0.18/go.mod h1:g95inzlUrS2Vtyvv5SjVFOnOeX7ZBPWwyKuEMMW+g7U=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240705154022-57fcf998327a h1:vZKZwh84UJswjeT2kqLOBEPdzHoc4S1YGF3Sv6Fo9uo=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240705154022-57fcf998327a/go.mod h1:S+F2G8Nrf9kMN+RxJ7h5GTBNo4ltO8TWP3bage2liBI=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240709144700-6ed38a883c63 h1:PUGfjgPZQkNpn/1p+ron0/lLRkX1fOrZjVKcegknVA8=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240709144700-6ed38a883c63/go.mod h1:2N8VTtKY/HvpmAO0j3pVgb5Z+FKy8C+b32UHD0N7WYI=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240710030519-54f848e6cb2c h1:O5WaTE0KqLbnJngZlwxRs9e6MBDgUncryf6OQF/XRhE=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240710030519-54f848e6cb2c/go.mod h1:2N8VTtKY/HvpmAO0j3pVgb5Z+FKy8C+b32UHD0N7WYI=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240712055943-e942bc8f7bd2 h1:dte4o54j6l0Xu5Ry9BhRH7WCzUoLJnQD5tWHRri8Dbs=
+github.com/suifengpiao14/sqlbuilder v0.0.0-20240712055943-e942bc8f7bd2/go.mod h1:2N8VTtKY/HvpmAO0j3pVgb5Z+FKy8C+b32UHD0N7WYI=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=

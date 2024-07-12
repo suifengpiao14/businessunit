@@ -6,10 +6,9 @@ require (
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/kellydunn/golang-geo v0.7.0
 	github.com/pkg/errors v0.9.1
-	github.com/rs/xid v1.5.0
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.8.4
-	github.com/suifengpiao14/sqlbuilder v0.0.0-20240710030519-54f848e6cb2c
+	github.com/suifengpiao14/sqlbuilder v0.0.0-20240712055943-e942bc8f7bd2
 )
 
 require (

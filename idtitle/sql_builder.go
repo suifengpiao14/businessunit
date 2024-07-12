@@ -7,19 +7,19 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type IdTitle struct {
-	Title *sqlbuilder.Field
+type IdTitleField struct {
 	ID    *identity.IdentityField
+	Title *sqlbuilder.Field
 }
 
-func (t IdTitle) GetIdentityField() *identity.IdentityField {
+func (t IdTitleField) GetIdentityField() *identity.IdentityField {
 	return t.ID
 }
 
-func (t *IdTitle) GetIdTitle() *IdTitle {
+func (t *IdTitleField) GetIdTitle() *IdTitleField {
 	return t
 }
-func (t IdTitle) Fields() sqlbuilder.Fields {
+func (t IdTitleField) Fields() sqlbuilder.Fields {
 	return sqlbuilder.Fields{*t.Title, t.ID.Field}
 }
 
@@ -39,15 +39,15 @@ func NewTitleField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 // NewTitleField 生成标题列，标题类一般没有逻辑，主要用于配合ID显示
 var NewIdentityField = identity.NewIdentityField
 
-func NewIdTitleFiled(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) *IdTitle {
-	return &IdTitle{
+func NewIdTitleFiled(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) *IdTitleField {
+	return &IdTitleField{
 		ID:    NewIdentityField(idValueFn),
 		Title: NewTitleField(titleValueFn),
 	}
 }
 
 type IdTitleI interface {
-	GetIdTitle() *IdTitle
+	GetIdTitle() *IdTitleField
 }
 
 func _DataFn(titleI IdTitleI) sqlbuilder.DataFn {
@@ -60,9 +60,6 @@ func _DataFn(titleI IdTitleI) sqlbuilder.DataFn {
 		val, err := title.Title.GetValue(nil)
 		if err != nil {
 			return nil, err
-		}
-		if sqlbuilder.IsNil(val) {
-			return nil, nil
 		}
 		m[sqlbuilder.FieldName2DBColumnName(title.Title.Name)] = val
 		return m, nil
@@ -86,26 +83,26 @@ func _WhereFn(titleI IdTitleI) sqlbuilder.WhereFn {
 }
 
 func Insert(titleI IdTitleI) sqlbuilder.InsertParam {
-	title := titleI.GetIdTitle()
-	return sqlbuilder.NewInsertBuilder(nil).Merge(identity.Insert(title)).AppendData(_DataFn(titleI))
+	id := titleI.GetIdTitle().ID
+	return sqlbuilder.NewInsertBuilder(nil).Merge(identity.Insert(id)).AppendData(_DataFn(titleI))
 }
 
 func Update(titleI IdTitleI) sqlbuilder.UpdateParam {
-	title := titleI.GetIdTitle()
-	return sqlbuilder.NewUpdateBuilder(nil).Merge(identity.Update(title)).AppendData(_DataFn(titleI))
+	id := titleI.GetIdTitle().ID
+	return sqlbuilder.NewUpdateBuilder(nil).Merge(identity.Update(id)).AppendData(_DataFn(titleI))
 }
 
 func First(titleI IdTitleI) sqlbuilder.FirstParam {
-	title := titleI.GetIdTitle()
-	return sqlbuilder.NewFirstBuilder(nil).Merge(identity.First(title)).AppendWhere(_WhereFn(titleI))
+	id := titleI.GetIdTitle().ID
+	return sqlbuilder.NewFirstBuilder(nil).Merge(identity.First(id)).AppendWhere(_WhereFn(titleI))
 }
 
 func List(titleI IdTitleI) sqlbuilder.ListParam {
-	title := titleI.GetIdTitle()
-	return sqlbuilder.NewListBuilder(nil).Merge(identity.List(title)).AppendWhere(_WhereFn(titleI))
+	id := titleI.GetIdTitle().ID
+	return sqlbuilder.NewListBuilder(nil).Merge(identity.List(id)).AppendWhere(_WhereFn(titleI))
 }
 
 func Total(titleI IdTitleI) sqlbuilder.TotalParam {
-	title := titleI.GetIdTitle()
-	return sqlbuilder.NewTotalBuilder(nil).Merge(identity.Total(title)).AppendWhere(_WhereFn(titleI))
+	id := titleI.GetIdTitle().ID
+	return sqlbuilder.NewTotalBuilder(nil).Merge(identity.Total(id)).AppendWhere(_WhereFn(titleI))
 }
