@@ -49,7 +49,7 @@ func (rs Records) RecordIs() (recordIs []districtcode.RecordI) {
 
 var records = Records{
 	{
-		Code: "44030001",
+		Code: "440301",
 		Name: "福田区",
 	},
 	{
