@@ -22,8 +22,8 @@ func (f PhoneField) SetTitle(title string) PhoneField {
 }
 
 // AppendWhereFn 添加Where条件，方便连续书写
-func (f PhoneField) AppendWhereFn(fns ...sqlbuilder.ValueFn) PhoneField {
-	f.Field.AppendWhereFn(fns...)
+func (f PhoneField) AppendWhereFn(fns ...sqlbuilder.WhereValueFn) PhoneField {
+	f.Field.WhereFns.Append(fns...)
 	return f
 }
 

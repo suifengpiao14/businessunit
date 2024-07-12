@@ -1,7 +1,6 @@
 package identity
 
 import (
-	"github.com/doug-martin/goqu/v9"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -34,11 +33,6 @@ func NewIdentityField(valueFn sqlbuilder.ValueFn) *IdentityField {
 	field := &IdentityField{
 		Field: *sqlbuilder.NewField(valueFn).SetName("id").SetTitle("ID").MergeSchema(IdentityFieldSchema),
 	}
-	field.WhereFns.Append(func(in any) (any, error) {
-		return goqu.Ex{
-			sqlbuilder.FieldName2DBColumnName(field.Name): in,
-		}, nil
-	})
 	return field
 }
 

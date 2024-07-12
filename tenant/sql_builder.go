@@ -38,13 +38,13 @@ func (f TenantField) SetTitle(title string) TenantField {
 	return f
 }
 
-func (f TenantField) AppendWhereFn(fns ...sqlbuilder.ValueFn) TenantField {
-	f.Field.AppendWhereFn(fns...)
+func (f TenantField) AppendWhereFn(fns ...sqlbuilder.WhereValueFn) TenantField {
+	f.Field.WhereFns.Append(fns...)
 	return f
 }
 
 func (f TenantField) AppendValueFn(fns ...sqlbuilder.ValueFn) TenantField {
-	f.Field.AppendValueFn(fns...)
+	f.Field.ValueFns.Append(fns...)
 	return f
 }
 

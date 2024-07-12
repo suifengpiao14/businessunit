@@ -104,7 +104,7 @@ func NewIsDefaultField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn boolean.True
 		}
 	}
 	filed := boolean.NewBooleanField(valueFn, trueFalseTitleFn)
-	filed.SetName("isDefault").SetTitle("默认").AppendWhereFn(sqlbuilder.ValueFnDirect)
+	filed.SetName("isDefault").SetTitle("默认")
 	return filed
 }
 
@@ -123,7 +123,7 @@ func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles sqlbuilder.Enums) enum
 		}
 	}
 	field := enum.NewEnumField(valueFn, enumTitles)
-	field.SetName("label").SetTitle("标签").AppendWhereFn(sqlbuilder.ValueFnDirect)
+	field.SetName("label").SetTitle("标签")
 	return field
 }
 func NewContactNameField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {

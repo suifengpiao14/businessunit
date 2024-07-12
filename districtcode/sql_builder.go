@@ -22,18 +22,22 @@ type District struct {
 	*DistrictField
 }
 
-func (address District) CustomFields() (fileds sqlbuilder.Fields) {
+func (d District) GetDistrict() District {
+	return d
+}
+
+func (d District) CustomFields() (fileds sqlbuilder.Fields) {
 	fileds = make(sqlbuilder.Fields, 0)
 	return fileds
 }
 
 type DistrictI interface {
-	GetDistrict() *District
-	sqlbuilder.TableI
+	GetDistrict() District
+	//sqlbuilder.TableI
 }
 
-func _DataFn(districtI DistrictI) sqlbuilder.DataFn {
-	return districtI.GetDistrict().CustomFields().Data
+func _DataFn(district DistrictI) sqlbuilder.DataFn {
+	return district.GetDistrict().CustomFields().Data
 }
 
 func _WhereFn(districtI DistrictI) sqlbuilder.WhereFn {
@@ -80,9 +84,23 @@ func Total(districtI DistrictI) sqlbuilder.TotalParam {
 	)
 }
 
+const (
+	Depth_max = 5 // 省市区最大5级
+)
+
+func GetChildren(districtI DistrictI, depth int) sqlbuilder.ListParam {
+	district := districtI.GetDistrict()
+	idtitleField := district.DistrictField.IdTitleField
+	idtitleField.ID.WhereFns.InsertAsFirst(GetChildrenWhereFn(depth)) // 获取值后立即应用该修改函数
+	idtitleField.Title.WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnShield)
+	return sqlbuilder.NewListBuilder(nil).Merge(
+		idtitle.List(idtitleField),
+	)
+}
+
 // GetChildrenWhereFn 获取子集where 函数(包含自己)depth<=0 不限制子级层级
-func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.ValueFn) {
-	return func(in any) (value any, err error) {
+func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.WhereValueFn) {
+	return func(dbColumnName string, in any) (value any, err error) {
 		if depth <= 0 {
 			depth = math.MaxInt
 		}

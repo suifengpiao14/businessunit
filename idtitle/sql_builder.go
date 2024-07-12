@@ -68,7 +68,7 @@ func _DataFn(titleI IdTitleI) sqlbuilder.DataFn {
 func _WhereFn(titleI IdTitleI) sqlbuilder.WhereFn {
 	return func() (expressions sqlbuilder.Expressions, err error) {
 		field := titleI.GetIdTitle().Title
-		field.WhereFns.Insert(-1, func(in any) (value any, err error) {
+		field.WhereFns.Insert(-1, func(dbColumnName string, in any) (value any, err error) {
 			val := cast.ToString(in)
 			if val == "" {
 				return in, nil

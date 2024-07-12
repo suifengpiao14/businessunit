@@ -55,8 +55,8 @@ func _WhereFn(softDeletedI SoftDeletedI) sqlbuilder.WhereFn {
 }
 
 // WhereFn 单独修改 删除字段 where 条件值的变量，外部可以覆盖
-var WhereFn = func(softDeletedI SoftDeletedI) sqlbuilder.ValueFn {
-	return func(in any) (value any, err error) {
+var WhereFn = func(softDeletedI SoftDeletedI) sqlbuilder.WhereValueFn {
+	return func(dbColumnName string, in any) (value any, err error) {
 		valueType, field := softDeletedI.GetDeletedAtField()
 		if ex, ok := sqlbuilder.TryConvert2Expressions(in); ok {
 			return ex, nil

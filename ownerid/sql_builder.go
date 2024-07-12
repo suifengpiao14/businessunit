@@ -26,7 +26,7 @@ var OwnerIdFieldSchema = sqlbuilder.Schema{
 	Minimum:   1,
 }
 
-func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.ValueFns, dbSchema *sqlbuilder.Schema) OwnerIdField {
+func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.WhereValueFns, dbSchema *sqlbuilder.Schema) OwnerIdField {
 	if dbSchema == nil {
 		dbSchema = &OwnerIdFieldSchema
 	}

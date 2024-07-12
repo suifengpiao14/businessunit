@@ -41,8 +41,8 @@ func (f BooleanField) GetTrueFalseTitle() (trueTitle sqlbuilder.Enum, falseTitle
 	return f.TrueFalseTitleFn()
 }
 
-func (f BooleanField) AppendWhereFn(fns ...sqlbuilder.ValueFn) BooleanField {
-	f.Field.AppendWhereFn(fns...)
+func (f BooleanField) AppendWhereFn(fns ...sqlbuilder.WhereValueFn) BooleanField {
+	f.Field.WhereFns.Append(fns...)
 	return f
 }
 
