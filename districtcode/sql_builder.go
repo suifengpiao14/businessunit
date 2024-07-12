@@ -30,13 +30,6 @@ func (address District) CustomFields() (fileds sqlbuilder.Fields) {
 	return fileds
 }
 
-type DistrictRecord struct {
-	Code string `json:"code"`
-	Name string `json:"name"`
-}
-
-type DistrictRecords []DistrictRecord
-
 type DistrictI interface {
 	GetDistrict() *District
 	sqlbuilder.TableI
@@ -131,6 +124,11 @@ func (ls Levels) IsChildrenWithSelf(target Levels, depth int) (ok bool) {
 			return false // 超过指定级别后不计算为子类
 		}
 		depth-- //当前级别容许不同
+		clLevelInt := cast.ToInt(clLevel.Code)
+		targetLevelInt := cast.ToInt(targetLevel.Code)
+		if targetLevelInt < clLevelInt {
+			return false // 父类值小于子级
+		}
 	}
 	return true
 }
@@ -228,11 +226,6 @@ func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.ValueFn) {
 	}
 }
 
-type RecordI interface {
-	GetCode() string
-	AddChildren(childrens ...RecordI)
-}
-
 type CodeLevels []*CodeLevel
 
 func (a CodeLevels) Len() int           { return len(a) }
@@ -259,34 +252,4 @@ func (cls CodeLevels) GetChildren(parent CodeLevel) (children CodeLevels) {
 		}
 	}
 	return children
-}
-
-// Tree 行列式改成Tree 格式
-func Tree(records []RecordI) (trees []RecordI) {
-	trees = make([]RecordI, 0)
-	cls := make(CodeLevels, 0)
-	for _, record := range records {
-		cl := &CodeLevel{}
-		cl = cl.Deserialize(record.GetCode())
-		cl.ref = record
-		cls = append(cls, cl)
-	}
-	for _, cl := range cls {
-		children := cls.GetChildren(*cl)
-		cl.ref.AddChildren(children.getAllRef()...)
-	}
-	sort.Sort(cls)
-	topLevel := 0
-	for i, cl := range cls {
-		if i == 0 {
-			topLevel = cl.Level()
-		}
-		if topLevel == cl.Level() {
-			trees = append(trees, cl.ref)
-			continue
-		}
-		return trees
-
-	}
-	return trees
 }
