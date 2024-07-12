@@ -1,42 +1,26 @@
 package enum
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/pkg/errors"
-	"github.com/spf13/cast"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
 type EnumField struct {
 	sqlbuilder.Field
-	EnumTitles EnumTitles
+	EnumTitles sqlbuilder.Enums
 }
 
 func (f EnumField) GetEnumField() EnumField {
 	return f
 }
 
-type EnumTitle struct {
-	Key   string `json:"key"`
-	Title string `json:"title"`
-}
-
-type EnumTitles []EnumTitle
-
-func (ets EnumTitles) String() string {
-	arr := make([]string, 0)
-	for _, et := range ets {
-		str := fmt.Sprintf("%v-%s", et.Key, et.Title)
-		arr = append(arr, str)
+func NewEnumField(valueFn sqlbuilder.ValueFn, enums ...sqlbuilder.Enum) EnumField {
+	schema := sqlbuilder.Schema{
+		Enums: enums,
 	}
-	out := strings.Join(arr, ",")
-	return out
-}
-
-func (enumTitle EnumTitle) IsSame(key string) bool {
-	return strings.EqualFold(key, enumTitle.Key)
+	return EnumField{
+		Field: *sqlbuilder.NewField(valueFn).MergeSchema(schema),
+	}
 }
 
 type EnumI interface {
@@ -53,13 +37,7 @@ func _DataFn(enumI EnumI) sqlbuilder.DataFn {
 		if err != nil {
 			return nil, err
 		}
-		valid := false
-		for _, enum := range col.EnumTitles {
-			if strings.EqualFold(cast.ToString(val), enum.Key) {
-				valid = true
-				break
-			}
-		}
+		valid := col.EnumTitles.Contains(val)
 		if !valid {
 			err = errors.Errorf("invalid value except:%s,got:%v", col.EnumTitles.String(), val)
 			return nil, err

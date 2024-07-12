@@ -1,14 +1,11 @@
 package boolean
 
 import (
-	"strings"
-
-	"github.com/spf13/cast"
 	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type TrueFalseTitleFn func() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle)
+type TrueFalseTitleFn func() (trueTitle sqlbuilder.Enum, falseTitle sqlbuilder.Enum)
 
 type BooleanField struct {
 	sqlbuilder.Field
@@ -39,7 +36,7 @@ func (f BooleanField) GetBooleanField() BooleanField {
 	return f
 }
 
-func (f BooleanField) GetTrueFalseTitle() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle) {
+func (f BooleanField) GetTrueFalseTitle() (trueTitle sqlbuilder.Enum, falseTitle sqlbuilder.Enum) {
 	return f.TrueFalseTitleFn()
 }
 
@@ -57,13 +54,13 @@ func (f BooleanField) IsTrue() (isTrue bool) {
 		return false
 	}
 	trueTitle, _ := f.GetTrueFalseTitle()
-	isTrue = strings.EqualFold(trueTitle.Key, cast.ToString(val))
+	isTrue = trueTitle.IsEqual(val)
 	return isTrue
 }
 
 type BooleanI interface {
 	GetBooleanField() BooleanField
-	GetTrueFalseTitle() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle)
+	GetTrueFalseTitle() (trueTitle sqlbuilder.Enum, falseTitle sqlbuilder.Enum)
 }
 
 // Copy 生成副本，此处实际类型可能已经发生变化，只是复制了BooleanI 接口内容
@@ -90,8 +87,7 @@ func Switch(booleanI BooleanI) (reversed BooleanI) {
 					if err != nil {
 						return nil, err
 					}
-					str := cast.ToString(val)
-					if trueTitle.IsSame(str) { // 原值为true ，返回 false 值
+					if trueTitle.IsEqual(val) { // 原值为true ，返回 false 值
 						return falseTitle.Key, nil
 					}
 					return trueTitle.Key, nil // 原值为false ，返回 true 值
@@ -108,7 +104,7 @@ func booleanI2EnumField(booleanI BooleanI) enum.EnumField {
 	trueTitle, falseTitle := booleanI.GetTrueFalseTitle()
 	enumFiled := enum.EnumField{
 		Field: sqlbuilder.Field(booleanI.GetBooleanField().Field),
-		EnumTitles: enum.EnumTitles{
+		EnumTitles: sqlbuilder.Enums{
 			trueTitle, falseTitle,
 		},
 	}

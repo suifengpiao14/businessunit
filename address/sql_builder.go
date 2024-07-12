@@ -90,12 +90,12 @@ func (address Address) CustomFields() (fileds sqlbuilder.Fields) {
 
 func NewIsDefaultField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn boolean.TrueFalseTitleFn) boolean.BooleanField {
 	if trueFalseTitleFn == nil {
-		trueFalseTitleFn = func() (trueTitle enum.EnumTitle, falseTitle enum.EnumTitle) {
-			trueTitle = enum.EnumTitle{
+		trueFalseTitleFn = func() (trueTitle sqlbuilder.Enum, falseTitle sqlbuilder.Enum) {
+			trueTitle = sqlbuilder.Enum{
 				Key:   "1",
 				Title: "是",
 			}
-			falseTitle = enum.EnumTitle{
+			falseTitle = sqlbuilder.Enum{
 				Key:   "2",
 				Title: "否",
 			}
@@ -107,9 +107,9 @@ func NewIsDefaultField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn boolean.True
 	return filed
 }
 
-func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles enum.EnumTitles) enum.EnumField {
+func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles sqlbuilder.Enums) enum.EnumField {
 	if len(enumTitles) == 0 {
-		enumTitles = enum.EnumTitles{
+		enumTitles = sqlbuilder.Enums{
 			{
 				Key:   "recive",
 				Title: "收获地址",
@@ -120,11 +120,9 @@ func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles enum.EnumTitles) enum.
 			},
 		}
 	}
-	filed := enum.EnumField{
-		Field:      *sqlbuilder.NewField(valueFn).SetName("label").SetTitle("标签").AppendWhereFn(sqlbuilder.ValueFnDirect),
-		EnumTitles: enumTitles,
-	}
-	return filed
+	field := enum.NewEnumField(valueFn)
+	field.SetName("label").SetTitle("标签").AppendWhereFn(sqlbuilder.ValueFnDirect)
+	return field
 }
 func NewContactNameField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 	return sqlbuilder.NewField(valueFn).SetName("contactName").SetTitle("联系人")
