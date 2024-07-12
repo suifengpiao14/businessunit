@@ -29,6 +29,13 @@ type InsertAddress struct {
 }
 
 func (addr InsertAddress) GetAddress() (addres address.Address) {
+	province := address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil })
+	city := address.NewCityField(func(in any) (any, error) { return addr.CityId, nil }, func(in any) (any, error) { return addr.CityId, nil })
+	area := address.NewAreaField(func(in any) (any, error) { return addr.AreaId, nil }, func(in any) (any, error) { return addr.AreaName, nil })
+	province.ID.SetName("provinceId")
+	city.ID.SetName("cityId")
+	area.ID.SetName("areaId")
+
 	addres = address.Address{
 		TenatID:      tenant.NewTenantField(func(in any) (any, error) { return addr.TenantID, nil }).AppendWhereFn(sqlbuilder.ValueFnDirect).SetName("businessId"),
 		Label:        address.NewLabelField(func(in any) (any, error) { return addr.Label, nil }, nil),
@@ -37,9 +44,9 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		ContactName:  *address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("contactName"),
 		Address:      *address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
 
-		Province: address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil }),
-		City:     address.NewCityField(func(in any) (any, error) { return addr.CityId, nil }, func(in any) (any, error) { return addr.CityId, nil }),
-		Area:     address.NewAreaField(func(in any) (any, error) { return addr.AreaId, nil }, func(in any) (any, error) { return addr.AreaName, nil }),
+		Province: province,
+		City:     city,
+		Area:     area,
 	}
 	return addres
 }
@@ -88,7 +95,7 @@ func TestInsertDDL(t *testing.T) {
 	var addr = InsertAddress{}
 	columns, err := addr.Fields().DBColumns()
 	require.NoError(t, err)
-	ddl := columns.DDL(sqlbuilder.Dialect_mysql)
+	ddl := columns.DDL(sqlbuilder.Driver_mysql)
 	fmt.Println(ddl)
 }
 

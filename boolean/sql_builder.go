@@ -21,8 +21,9 @@ func NewBooleanField(valueFn sqlbuilder.ValueFn, trueFalseTitleFn TrueFalseTitle
 				Key:   trueTitle.Key,
 			},
 			{
-				Title: falseTitle.Title,
-				Key:   falseTitle.Key,
+				Title:     falseTitle.Title,
+				Key:       falseTitle.Key,
+				IsDefault: true,
 			},
 		},
 	}

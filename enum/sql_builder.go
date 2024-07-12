@@ -14,7 +14,7 @@ func (f EnumField) GetEnumField() EnumField {
 	return f
 }
 
-func NewEnumField(valueFn sqlbuilder.ValueFn, enums ...sqlbuilder.Enum) EnumField {
+func NewEnumField(valueFn sqlbuilder.ValueFn, enums sqlbuilder.Enums) EnumField {
 	schema := sqlbuilder.Schema{
 		Enums: enums,
 	}

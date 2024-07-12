@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/suifengpiao14/businessunit/boolean"
+	"github.com/suifengpiao14/businessunit/districtcode"
 	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/businessunit/idtitle"
 	"github.com/suifengpiao14/businessunit/ownerid"
@@ -111,8 +112,9 @@ func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles sqlbuilder.Enums) enum
 	if len(enumTitles) == 0 {
 		enumTitles = sqlbuilder.Enums{
 			{
-				Key:   "recive",
-				Title: "收获地址",
+				Key:       "recive",
+				Title:     "收获地址",
+				IsDefault: true,
 			},
 			{
 				Key:   "return",
@@ -120,45 +122,37 @@ func NewLabelField(valueFn sqlbuilder.ValueFn, enumTitles sqlbuilder.Enums) enum
 			},
 		}
 	}
-	field := enum.NewEnumField(valueFn)
+	field := enum.NewEnumField(valueFn, enumTitles)
 	field.SetName("label").SetTitle("标签").AppendWhereFn(sqlbuilder.ValueFnDirect)
 	return field
 }
 func NewContactNameField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
-	return sqlbuilder.NewField(valueFn).SetName("contactName").SetTitle("联系人")
+	return sqlbuilder.NewField(valueFn).SetName("contactName").SetTitle("联系人").MergeSchema(sqlbuilder.Schema{
+		Required:  true,
+		MinLength: 1,
+		MaxLength: 20, // 常规名称在20个字以内
+		Type:      sqlbuilder.Schema_Type_string,
+	})
 }
 func NewContactPhoneField(valueFn sqlbuilder.ValueFn) phone.PhoneField {
 	return phone.NewPhoneField(valueFn).SetName("contactPhone").SetTitle("联系手机号")
 }
 
 func NewAddressField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
-	return sqlbuilder.NewField(valueFn).SetName("address").SetTitle("详细地址")
+	field := sqlbuilder.NewField(valueFn).SetName("address").SetTitle("详细地址")
+	field.MergeSchema(sqlbuilder.Schema{
+		MaxLength: 100, // 线上统计最大55个字符，设置100 应该适合大部分场景大小
+	})
+	return field
 }
 
-// NewProvinceField 封装省字段
-func NewProvinceField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
-	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
-	idTitle.ID.SetName("proviceId").SetTitle("省ID")
-	idTitle.Title.SetName("provice").SetTitle("省")
-	idTitle.ID.MergeSchema(sqlbuilder.Schema{})
-	return idTitle
-}
+var (
+	NewProvinceField = districtcode.NewProvinceField
 
-// NewCityField 封装市字段
-func NewCityField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
-	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
-	idTitle.ID.SetName("cityId").SetTitle("城市ID")
-	idTitle.Title.SetName("city").SetTitle("城市")
-	return idTitle
-}
+	NewCityField = districtcode.NewCityField
 
-// NewAreaField 封装区字段
-func NewAreaField(idValueFn sqlbuilder.ValueFn, titleValueFn sqlbuilder.ValueFn) idtitle.IdTitleI {
-	idTitle := idtitle.NewIdTitleFiled(idValueFn, titleValueFn)
-	idTitle.ID.SetName("areaId").SetTitle("区ID")
-	idTitle.Title.SetName("area").SetTitle("区")
-	return idTitle
-}
+	NewAreaField = districtcode.NewAreaField
+)
 
 type AddressI interface {
 	GetAddress() Address

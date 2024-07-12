@@ -11,22 +11,22 @@ func init() {
 		mysqlAfter := sqlbuilder.GetMigrateOpion(sqlbuilder.MigrateOptionMysqlAfter(""), options...)
 		return sqlbuilder.Migrates{
 			{
-				Dialect: sqlbuilder.Dialect_mysql,
+				Dialect: sqlbuilder.Driver_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_CREATE,
 				DDL:     fmt.Sprintf("`%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',", sqlbuilder.FieldName2DBColumnName),
 			},
 			{
-				Dialect: sqlbuilder.Dialect_mysql,
+				Dialect: sqlbuilder.Driver_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_APPEND,
 				DDL:     fmt.Sprintf("ALTER TABLE `%s` ADD COLUMN `%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间' %s;", table, sqlbuilder.FieldName2DBColumnName, mysqlAfter.String()),
 			},
 			{
-				Dialect: sqlbuilder.Dialect_mysql,
+				Dialect: sqlbuilder.Driver_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_MODIFY,
 				DDL:     fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',", table, sqlbuilder.FieldName2DBColumnName),
 			},
 			{
-				Dialect: sqlbuilder.Dialect_mysql,
+				Dialect: sqlbuilder.Driver_mysql,
 				Scene:   sqlbuilder.SCENE_DDL_DELETE,
 				DDL:     fmt.Sprintf("ALTER TABLE `%s` DROP `%s` ;", table, sqlbuilder.FieldName2DBColumnName),
 			},
