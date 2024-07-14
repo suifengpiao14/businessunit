@@ -5,10 +5,19 @@ import (
 )
 
 type BoundingBoxField struct {
-	LngMax sqlbuilder.Field
-	LngMin sqlbuilder.Field
-	LatMax sqlbuilder.Field
-	LatMin sqlbuilder.Field
+	LngMax *sqlbuilder.Field
+	LngMin *sqlbuilder.Field
+	LatMax *sqlbuilder.Field
+	LatMin *sqlbuilder.Field
+}
+
+func (boundingBoxField BoundingBoxField) Fields() sqlbuilder.Fields {
+	return sqlbuilder.Fields{
+		boundingBoxField.LatMax,
+		boundingBoxField.LatMin,
+		boundingBoxField.LngMax,
+		boundingBoxField.LngMin,
+	}
 }
 
 type PolygonI interface {
@@ -16,76 +25,56 @@ type PolygonI interface {
 	GetBoundingBoxField() (boundingBoxField BoundingBoxField)
 }
 
-func mergePolygonData(polygon PolygonI) (polygonData map[string]any, err error) {
-	points, err := polygon.Points()
+func SetBoundingBoxFieldValue(polygonI PolygonI) (er error) {
+	points, err := polygonI.Points()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	polygonData = make(map[string]interface{})
-	if len(points) > 0 {
-		boundingBox, err := points.GetBoundingBox()
-		if err != nil {
-			return nil, err
-		}
-		boundingBoxField := polygon.GetBoundingBoxField()
-		lngMax, err := boundingBoxField.LngMax.GetValue(boundingBox.LngMax)
-		if err != nil {
-			return nil, err
-		}
-		lngMin, err := boundingBoxField.LngMin.GetValue(boundingBox.LngMin)
-		if err != nil {
-			return nil, err
-		}
-		latMax, err := boundingBoxField.LatMax.GetValue(boundingBox.LatMax)
-		if err != nil {
-			return nil, err
-		}
-		latMin, err := boundingBoxField.LatMin.GetValue(boundingBox.LatMin)
-		if err != nil {
-			return nil, err
-		}
-		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LngMax.Name)] = lngMax
-		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LngMin.Name)] = lngMin
-		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LatMax.Name)] = latMax
-		polygonData[sqlbuilder.FieldName2DBColumnName(boundingBoxField.LatMin.Name)] = latMin
+	if len(points) == 0 {
+		return
 	}
-
-	return polygonData, nil
-}
-
-type _Polygon struct {
-	PolygonI
-}
-
-func (t _Polygon) Data() (data interface{}, err error) {
-	return mergePolygonData(t)
-}
-
-func NewPolygon(polygonI PolygonI) _Polygon {
-	return _Polygon{
-		PolygonI: polygonI,
+	boundingBox, err := points.GetBoundingBox()
+	if err != nil {
+		return err
 	}
+	boundingBoxField := polygonI.GetBoundingBoxField()
+	boundingBoxField.LngMax.ValueFns.InsertAsFirst(func(in any) (any, error) {
+		return boundingBox.LngMax, nil
+	})
+	boundingBoxField.LngMin.ValueFns.InsertAsFirst(func(in any) (any, error) {
+		return boundingBox.LngMin, nil
+	})
+	boundingBoxField.LatMax.ValueFns.InsertAsFirst(func(in any) (any, error) {
+		return boundingBox.LatMax, nil
+	})
+	boundingBoxField.LatMin.ValueFns.InsertAsFirst(func(in any) (any, error) {
+		return boundingBox.LatMin, nil
+	})
+	return nil
 }
 
-func Insert(param PolygonI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(NewPolygon(param))
+func Insert(polygonI PolygonI) (err error) {
+	return SetBoundingBoxFieldValue(polygonI)
 }
 
-func Update(param PolygonI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(NewPolygon(param))
+func Update(polygonI PolygonI) (err error) {
+	return SetBoundingBoxFieldValue(polygonI)
 }
 
-/**以下仅仅为了完备,方便调用方使用,减少调用方心智负担, 统一格式后,也方便调用方批量处理中间件**/
+func Select(boundingBox BoundingBoxField) {
+	boundingBox.LatMax.WhereFns.AppendIfNotFirst(func(data any) (any, error) {
+		if sqlbuilder.IsNil(data) {
+			return nil, nil
+		}
+		return sqlbuilder.Between{boundingBox.LatMin.DBName(), boundingBox.LatMax.DBName()}, nil
+	})
+	boundingBox.LatMax.WhereFns.Append(sqlbuilder.ValueFnShield)
 
-func First(param PolygonI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil)
-}
-
-func List(param PolygonI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil)
-}
-
-func Total(param PolygonI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil)
+	boundingBox.LngMax.WhereFns.AppendIfNotFirst(func(data any) (any, error) {
+		if sqlbuilder.IsNil(data) {
+			return nil, nil
+		}
+		return sqlbuilder.Between{boundingBox.LngMin.DBName(), boundingBox.LngMax.DBName()}, nil
+	})
+	boundingBox.LngMax.WhereFns.Append(sqlbuilder.ValueFnShield)
 }

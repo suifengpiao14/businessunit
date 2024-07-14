@@ -4,87 +4,30 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type OwnerIdField struct {
-	sqlbuilder.Field
+func OptionOwnerID(f *sqlbuilder.Field) {
+	f.SetName("ownerId").SetTitle("所有者").MergeSchema(sqlbuilder.Schema{
+		Comment:      "对象标识,缺失时记录无意义",
+		Type:         sqlbuilder.Schema_Type_string,
+		MaxLength:    64,
+		MinLength:    1,
+		Minimum:      1,
+		ShieldUpdate: true, // 所有者不可跟新
+	})
 }
 
-func (f OwnerIdField) GetOwnerIdField() OwnerIdField {
-	return f
+func Insert(f *sqlbuilder.Field) {
+	f.WithOptions(OptionOwnerID).SetRequired(true) // 新增时不能为空
 }
 
-type OwnerIdI interface {
-	GetOwnerIdField() OwnerIdField
+func Update(f *sqlbuilder.Field) {
+	f.WithOptions(OptionOwnerID).ShieldUpdate(true) // 不可更新
+	f.ValueFns.AppendIfNotFirst(sqlbuilder.ValueFnEmpty2Nil)
+	f.WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnDirect)
+
 }
+func Select(f *sqlbuilder.Field) {
+	f.WithOptions(OptionOwnerID)
+	f.ValueFns.AppendIfNotFirst(sqlbuilder.ValueFnEmpty2Nil)
+	f.WhereFns.InsertAsSecond(sqlbuilder.WhereValueFnDirect)
 
-var OwnerIdFieldSchema = sqlbuilder.Schema{
-	Title:     "所有者",
-	Required:  true,
-	Comment:   "对象标识,缺失时记录无意义",
-	Type:      sqlbuilder.Schema_Type_string,
-	MaxLength: 64,
-	MinLength: 1,
-	Minimum:   1,
-}
-
-func NewOwnerIdField(fieldName string, valueFns sqlbuilder.ValueFns, WhereFns sqlbuilder.WhereValueFns, dbSchema *sqlbuilder.Schema) OwnerIdField {
-	if dbSchema == nil {
-		dbSchema = &OwnerIdFieldSchema
-	}
-	field := OwnerIdField{
-		Field: sqlbuilder.Field{
-			Name:   fieldName,
-			Schema: dbSchema,
-		},
-	}
-	field.ValueFns.Append(valueFns...)
-	field.WhereFns.Append(WhereFns...)
-	return field
-}
-
-func _DataFn(identityI OwnerIdI) sqlbuilder.DataFn {
-	return func() (any, error) {
-		field := identityI.GetOwnerIdField()
-		if field.ValueFns == nil {
-			return nil, nil
-		}
-		val, err := field.GetValue(nil)
-		if err != nil {
-			return nil, err
-		}
-		if sqlbuilder.IsNil(val) {
-			return nil, err
-		}
-
-		m := map[string]any{
-			sqlbuilder.FieldName2DBColumnName(field.Name): val,
-		}
-		return m, nil
-	}
-}
-
-func WhereFn(ownerIdI OwnerIdI) sqlbuilder.WhereFn {
-
-	return ownerIdI.GetOwnerIdField().Where
-}
-
-func Insert(ownerIdI OwnerIdI) sqlbuilder.InsertParam {
-	// 所有者新增必须写入数据
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(ownerIdI))
-}
-
-func Update(ownerIdI OwnerIdI) sqlbuilder.UpdateParam {
-	// 所有者不可修改
-	return sqlbuilder.NewUpdateBuilder(nil).AppendWhere(WhereFn(ownerIdI))
-}
-
-func First(ownerIdI OwnerIdI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(WhereFn(ownerIdI))
-}
-
-func List(ownerIdI OwnerIdI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil).AppendWhere(WhereFn(ownerIdI))
-}
-
-func Total(ownerIdI OwnerIdI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(WhereFn(ownerIdI))
 }

@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/spf13/cast"
-	"github.com/suifengpiao14/businessunit/idtitle"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -18,84 +17,13 @@ CREATE TABLE `t_city_info` (
 ) ENGINE=InnoDB AUTO_INCREMENT=4294967295 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='地区表(主要数据来源于国家统计局并作清洗)';
 **/
 
-type District struct {
-	*DistrictField
-}
-
-func (d District) GetDistrict() District {
-	return d
-}
-
-func (d District) CustomFields() (fileds sqlbuilder.Fields) {
-	fileds = make(sqlbuilder.Fields, 0)
-	return fileds
-}
-
-type DistrictI interface {
-	GetDistrict() District
-	//sqlbuilder.TableI
-}
-
-func _DataFn(district DistrictI) sqlbuilder.DataFn {
-	return district.GetDistrict().CustomFields().Data
-}
-
-func _WhereFn(districtI DistrictI) sqlbuilder.WhereFn {
-	return districtI.GetDistrict().CustomFields().Where
-}
-
-func Insert(districtI DistrictI) sqlbuilder.InsertParam {
-	district := districtI.GetDistrict()
-	idtitleField := district.DistrictField.IdTitleField
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(districtI)).Merge(
-		idtitle.Insert(idtitleField),
-	)
-}
-
-func Update(districtI DistrictI) sqlbuilder.UpdateParam {
-	district := districtI.GetDistrict()
-	idtitleField := district.DistrictField.IdTitleField
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(districtI)).AppendWhere(_WhereFn(districtI)).Merge(
-		idtitle.Update(idtitleField),
-	)
-}
-
-func First(districtI DistrictI) sqlbuilder.FirstParam {
-	district := districtI.GetDistrict()
-	idtitleField := district.DistrictField.IdTitleField
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(districtI)).Merge(
-		idtitle.First(idtitleField),
-	)
-}
-
-func List(districtI DistrictI) sqlbuilder.ListParam {
-	district := districtI.GetDistrict()
-	idtitleField := district.DistrictField.IdTitleField
-	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(districtI)).Merge(
-		idtitle.List(idtitleField),
-	)
-}
-
-func Total(districtI DistrictI) sqlbuilder.TotalParam {
-	district := districtI.GetDistrict()
-	idtitleField := district.DistrictField.IdTitleField
-	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(districtI)).Merge(
-		idtitle.Total(idtitleField),
-	)
-}
-
 const (
 	Depth_max = 5 // 省市区最大5级
 )
 
-func GetChildren(districtI DistrictI, depth int) sqlbuilder.ListParam {
-	district := districtI.GetDistrict()
-	idtitleField := district.DistrictField.IdTitleField
-	idtitleField.ID.WhereFns.InsertAsFirst(GetChildrenWhereFn(depth)) // 获取值后立即应用该修改函数
-	idtitleField.Title.WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnShield)
-	return sqlbuilder.NewListBuilder(nil).Merge(
-		idtitle.List(idtitleField),
-	)
+func OptionsGetChildren(codeField *sqlbuilder.Field, nameField *sqlbuilder.Field, depth int) {
+	codeField.WhereFns.AppendIfNotFirst(GetChildrenWhereFn(depth))
+	nameField.WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnShield)
 }
 
 // GetChildrenWhereFn 获取子集where 函数(包含自己)depth<=0 不限制子级层级

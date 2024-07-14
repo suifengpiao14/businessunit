@@ -75,19 +75,19 @@ func (p Polygon) Points() (points polygon.Points, err error) {
 }
 func (p Polygon) GetBoundingBoxField() (boundingBoxField polygon.BoundingBoxField) {
 	return polygon.BoundingBoxField{
-		LngMax: sqlbuilder.Field{
+		LngMax: &sqlbuilder.Field{
 			Name:     "Flng_max",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
-		LngMin: sqlbuilder.Field{
+		LngMin: &sqlbuilder.Field{
 			Name:     "Flng_min",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
-		LatMax: sqlbuilder.Field{
+		LatMax: &sqlbuilder.Field{
 			Name:     "Flat_max",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
-		LatMin: sqlbuilder.Field{
+		LatMin: &sqlbuilder.Field{
 			Name:     "Flat_min",
 			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
 		},
@@ -102,7 +102,10 @@ func TestInsert(t *testing.T) {
 		Tenant: "1000001",
 	}
 	polyg := Polygon{Path: row.Path}
-	sql, err := sqlbuilder.NewInsertBuilder(row).Merge(tenant.Insert(row), polygon.Insert(polyg)).ToSQL()
+	tenantField := sqlbuilder.NewField(func(in any) (any, error) { return row.Tenant, nil }).WithOptions(tenant.OptionTenant)
+	err := polygon.Insert(polyg)
+	require.NoError(t, err)
+	sql, err := sqlbuilder.NewInsertBuilder(row).AppendField(tenantField).AppendField(polyg.GetBoundingBoxField().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

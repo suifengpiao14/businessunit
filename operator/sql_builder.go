@@ -1,6 +1,8 @@
 package operator
 
 import (
+	"github.com/suifengpiao14/businessunit/identity"
+	"github.com/suifengpiao14/businessunit/name"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -36,8 +38,9 @@ func _DataFn(operatorI OperatorI) sqlbuilder.DataFn {
 	}
 }
 
-func Insert(operatorI OperatorI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(operatorI))
+func Insert(operatorIdField *sqlbuilder.Field, operatorNameField *sqlbuilder.Field) {
+	identity.Insert(operatorIdField)
+	name.Insert(operatorIdField)
 }
 
 func Update(operatorI OperatorI) sqlbuilder.UpdateParam {
