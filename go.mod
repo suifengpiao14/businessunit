@@ -17,6 +17,7 @@ require (
 	github.com/kylelemons/go-gypsy v1.0.0 // indirect
 	github.com/lib/pq v1.10.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rs/xid v1.5.0 // indirect
 	github.com/suifengpiao14/funcs v0.0.18 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/text v0.16.0 // indirect

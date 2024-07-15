@@ -1,18 +1,18 @@
-package id
+package uuid
 
 import (
+	"github.com/rs/xid"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func OptionID(field *sqlbuilder.Field) {
+func OptionUUID(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.SetName("id").SetTitle("ID").MergeSchema(sqlbuilder.Schema{
-		Required:  false, // insert 场景不一定必须
+	field.SetName("uuid").SetTitle("UUID").MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
-		Minimum:   1,
+		MinLength: 1,
 		Primary:   true,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 }
@@ -21,14 +21,16 @@ func Insert(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.WithOptions(OptionID)
+	field.WithOptions(OptionUUID).ValueFns.InsertAsFirst(func(in any) (any, error) {
+		return xid.New().String(), nil
+	})
 }
 
 func Update(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.WithOptions(OptionID).ShieldUpdate(true) // id 不能更新
+	field.WithOptions(OptionUUID).ShieldUpdate(true) // uuid 不能更新
 	field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }
 
@@ -36,5 +38,5 @@ func Select(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.WithOptions(OptionID).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+	field.WithOptions(OptionUUID).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }

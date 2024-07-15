@@ -8,7 +8,9 @@ import (
 	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+	"github.com/suifengpiao14/businessunit/name"
 	"github.com/suifengpiao14/businessunit/tenant"
+	"github.com/suifengpiao14/businessunit/uuid"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -27,27 +29,14 @@ func (p InsertParam) Table() string {
 	return "t_user"
 }
 
-func (p InsertParam) Validate() (err error) {
-	return nil
-}
+func (p InsertParam) Fields() sqlbuilder.Fields {
+	fields := make(sqlbuilder.Fields, 0)
+	fields = append(fields, sqlbuilder.NewField(func(in any) (any, error) { return p.Id, nil }).WithOptions(uuid.Insert))
+	fields = append(fields, sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).WithOptions(name.Insert))
+	fields = append(fields, sqlbuilder.NewField(func(in any) (any, error) { return p.Email, nil }).WithOptions(email.Insert))
+	fields = append(fields, sqlbuilder.NewField(func(in any) (any, error) { return p.Tenant, nil }).WithOptions(tenant.Insert))
+	return fields
 
-func (p InsertParam) Data() (data interface{}, err error) {
-	return p, nil
-}
-
-func (p InsertParam) GetTenantField() tenant.TenantField {
-	return tenant.TenantField{
-		Field: *sqlbuilder.NewField(func(in any) (any, error) { return p.Tenant, nil }),
-	}
-}
-
-var tenantData = tenant.TenantField{
-	Field: sqlbuilder.Field{
-		Name: "Ftenant",
-		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-			return "123", nil
-		}},
-	},
 }
 
 func TestInsert(t *testing.T) {
@@ -57,7 +46,8 @@ func TestInsert(t *testing.T) {
 		Email:  "莉丝",
 		Tenant: "1000001",
 	}
-	sql, err := sqlbuilder.NewInsertBuilder(row).Merge(tenant.Insert(row)).ToSQL()
+	tenantField := sqlbuilder.NewField(func(in any) (any, error) { return row.Tenant, nil }).WithOptions(tenant.Insert)
+	sql, err := sqlbuilder.NewInsertBuilder(row).AppendField(tenantField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

@@ -1,60 +1,18 @@
 package operator
 
 import (
-	"github.com/suifengpiao14/businessunit/identity"
-	"github.com/suifengpiao14/businessunit/name"
+	"github.com/suifengpiao14/businessunit/keytitle"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type OperatorField struct {
-	OperatorID   sqlbuilder.Field
-	OperatorName sqlbuilder.Field
-}
-
-type OperatorI interface {
-	GetOperatorField() OperatorField
-}
-
-func _DataFn(operatorI OperatorI) sqlbuilder.DataFn {
-	return func() (any, error) {
-		col := operatorI.GetOperatorField()
-		m := map[string]any{}
-
-		if col.OperatorID.ValueFns != nil {
-			val, err := col.OperatorID.GetValue(nil)
-			if err != nil {
-				return nil, err
-			}
-			m[sqlbuilder.FieldName2DBColumnName(col.OperatorID.Name)] = val
-		}
-		if col.OperatorName.ValueFns != nil {
-			val, err := col.OperatorName.GetValue(nil)
-			if err != nil {
-				return nil, err
-			}
-			m[sqlbuilder.FieldName2DBColumnName(col.OperatorName.Name)] = val
-		}
-		return m, nil
-	}
-}
-
 func Insert(operatorIdField *sqlbuilder.Field, operatorNameField *sqlbuilder.Field) {
-	identity.Insert(operatorIdField)
-	name.Insert(operatorIdField)
+	keytitle.Insert(operatorIdField, operatorNameField)
 }
 
-func Update(operatorI OperatorI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(operatorI))
+func Update(operatorIdField *sqlbuilder.Field, operatorNameField *sqlbuilder.Field) {
+	keytitle.Insert(operatorIdField, operatorNameField)
 }
 
-func First(operatorI OperatorI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil)
-}
-
-func List(operatorI OperatorI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil)
-}
-
-func Total(operatorI OperatorI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil)
+func Select(operatorIdField *sqlbuilder.Field, operatorNameField *sqlbuilder.Field) {
+	keytitle.Insert(operatorIdField, operatorNameField)
 }

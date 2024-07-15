@@ -13,7 +13,7 @@ func OptionTenant(f *sqlbuilder.Field) {
 		Maximum:   sqlbuilder.UnsinedInt_maximum_bigint,
 		Minimum:   1,
 	})
-	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
+
 }
 
 func Insert(f *sqlbuilder.Field) {
@@ -28,6 +28,7 @@ func Update(f *sqlbuilder.Field) {
 		return
 	}
 	f.WithOptions(OptionTenant)
+	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
 }
 
 func Select(f *sqlbuilder.Field) {
@@ -35,4 +36,5 @@ func Select(f *sqlbuilder.Field) {
 		return
 	}
 	f.WithOptions(OptionTenant)
+	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
 }
