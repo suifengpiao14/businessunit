@@ -3,44 +3,40 @@ package unique
 import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/pkg/errors"
-	"github.com/suifengpiao14/businessunit/identity"
-	"github.com/suifengpiao14/businessunit/softdeleted"
+	"github.com/suifengpiao14/businessunit/id"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type UniqueField sqlbuilder.Fields
-
-func (f UniqueField) GetUniqueFields() UniqueField {
-	return f
-}
-
-type UniqueI interface {
-	GetUniqueFields() UniqueField
+type CheckUniqueI interface {
 	sqlbuilder.TableI
-	AlreadyExists(sql string) (exists bool, err error)
+	AlreadyExists(sql string) (exists bool, err error) //
 }
 
-type UniqueIForUpdate interface {
-	UniqueI
-	identity.IdentityI
-}
-
-func _whereFn(uniqueI UniqueI) sqlbuilder.WhereFn {
-	return sqlbuilder.Fields(uniqueI.GetUniqueFields()).Where
-}
-
-func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.WhereI) sqlbuilder.DataFn {
-	return func() (any, error) {
-		totalParam := sqlbuilder.NewTotalBuilder(uniqueI).AppendWhere(wheres...)
-		if softdeletedI, ok := uniqueI.(softdeleted.SoftDeletedI); ok { // 如果实现了软删除接口，则排除软删除记录
-			totalParam = totalParam.Merge(softdeleted.Total(softdeletedI))
+func _checkExists(uniqueI CheckUniqueI, uniqueField sqlbuilder.Fields, idField *sqlbuilder.Field) {
+	if len(uniqueField) == 0 {
+		return
+	}
+	firstField := uniqueField[0] // 先获取原始的第一个元素
+	//  在第一列中，增加查询唯一键是否存在条件,放到valueFns 内部，新增、修改都能检测到,放到whereFn, insert 时检测不到
+	firstField.ValueFns.Append(func(in any) (any, error) { // 放到闭包函数内，延迟执行
+		uniqueField = uniqueField.Copy() // 复制一份数据，不影响外部
+		uniqueField.AppendWhereValueFn(sqlbuilder.ValueFnForward)
+		if idField != nil {
+			idField = idField.Copy() // 复制一份，不影响外部的
 		}
+		totalParam := sqlbuilder.NewTotalBuilder(sqlbuilder.TableFn(uniqueI.Table)).AppendFields(uniqueField...)
 		expressions, err := totalParam.Where()
 		if err != nil {
 			return nil, err
 		}
 		if expressions.IsEmpty() { // 条件为空，说明不需要查询唯一索引情况(如产品约定唯一索引字段不能更新)
 			return nil, nil
+		}
+		if idField != nil {
+			idField.WithOptions(id.Select).WhereFns.Append(func(in any) (any, error) {
+				return goqu.C(idField.DBName()).Neq(in), nil
+			})
+			totalParam = totalParam.AppendFields(idField)
 		}
 
 		sql, err := totalParam.ToSQL()
@@ -52,42 +48,29 @@ func _checkExists(uniqueI UniqueI, wheres ...sqlbuilder.WhereI) sqlbuilder.DataF
 			return nil, err
 		}
 		if exists {
-			err = errors.Errorf("unique exists:%s", sqlbuilder.Fields(uniqueI.GetUniqueFields()).String())
+			err = errors.Errorf("unique exists:%s", sqlbuilder.Fields(uniqueField).String())
 			return nil, err
 		}
-		return nil, err
-	}
+		return in, nil
 
-}
-
-func Insert(uniqueI UniqueI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_checkExists(uniqueI))
-}
-
-func Update(uniqueIForUpdate UniqueIForUpdate) sqlbuilder.UpdateParam {
-	// 增加排除当前记录
-	whereNotID := sqlbuilder.WhereFn(func() (expressions sqlbuilder.Expressions, err error) {
-		identity := uniqueIForUpdate.GetIdentityField()
-		val, err := identity.GetValue(nil)
-		if err != nil {
-			return nil, err
-		}
-		if ex, ok := sqlbuilder.TryParseExpressions(sqlbuilder.FieldName2DBColumnName(identity.Name), val); ok {
-			return ex, nil
-		}
-		return sqlbuilder.ConcatExpression(goqu.C(sqlbuilder.FieldName2DBColumnName(identity.Name)).Neq(val)), nil
 	})
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_checkExists(uniqueIForUpdate, whereNotID))
+
 }
 
-func First(uniqueI UniqueI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_whereFn(uniqueI))
+func Insert(checkUniqueI CheckUniqueI) func(fields ...*sqlbuilder.Field) {
+	return func(fields ...*sqlbuilder.Field) {
+		_checkExists(checkUniqueI, fields, nil)
+	}
 }
 
-func List(uniqueI UniqueI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil).AppendWhere(_whereFn(uniqueI))
+func UpdateFn(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) func(fields ...*sqlbuilder.Field) {
+	return func(fields ...*sqlbuilder.Field) {
+		_checkExists(checkUniqueI, fields, idField)
+	}
 }
 
-func Total(uniqueI UniqueI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_whereFn(uniqueI))
+func Select(uniqueField sqlbuilder.Fields) func(fields ...*sqlbuilder.Field) {
+	return func(fields ...*sqlbuilder.Field) {
+
+	}
 }

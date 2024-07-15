@@ -10,7 +10,7 @@ import (
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/districtcode"
 	"github.com/suifengpiao14/businessunit/enum"
-	"github.com/suifengpiao14/businessunit/idtitle"
+	"github.com/suifengpiao14/businessunit/keytitle"
 	"github.com/suifengpiao14/businessunit/ownerid"
 	"github.com/suifengpiao14/businessunit/phone"
 	"github.com/suifengpiao14/businessunit/tenant"
@@ -295,9 +295,9 @@ func Insert(addressI AddressI, withDefaultI WithDefaultI, validateRuleI CheckRul
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(addressI)).Merge(
-		idtitle.Insert(provice.IdTitleField),
-		idtitle.Insert(city.IdTitleField),
-		idtitle.Insert(area.IdTitleField),
+		keytitle.Insert(provice.IdTitleField),
+		keytitle.Insert(city.IdTitleField),
+		keytitle.Insert(area.IdTitleField),
 		phone.Insert(phoneField),
 		enum.Insert(label),
 		boolean.Insert(isDefault),
@@ -315,9 +315,9 @@ func Update(addressI AddressI, withDefaultI WithDefaultI) sqlbuilder.UpdateParam
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(addressI)).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.Update(provice.IdTitleField),
-		idtitle.Update(city.IdTitleField),
-		idtitle.Update(area.IdTitleField),
+		keytitle.Update(provice.IdTitleField),
+		keytitle.Update(city.IdTitleField),
+		keytitle.Update(area.IdTitleField),
 		phone.Update(phoneField),
 		enum.Update(label),
 		boolean.Update(isDefault),
@@ -335,9 +335,9 @@ func First(addressI AddressI) sqlbuilder.FirstParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.First(provice.IdTitleField),
-		idtitle.First(city.IdTitleField),
-		idtitle.First(area.IdTitleField),
+		keytitle.First(provice.IdTitleField),
+		keytitle.First(city.IdTitleField),
+		keytitle.First(area.IdTitleField),
 		phone.First(phoneField),
 		enum.First(label),
 		boolean.First(isDefault),
@@ -355,9 +355,9 @@ func List(addressI AddressI) sqlbuilder.ListParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.List(provice.IdTitleField),
-		idtitle.List(city.IdTitleField),
-		idtitle.List(area.IdTitleField),
+		keytitle.List(provice.IdTitleField),
+		keytitle.List(city.IdTitleField),
+		keytitle.List(area.IdTitleField),
 		phone.List(phoneField),
 		enum.List(label),
 		boolean.List(isDefault),
@@ -375,9 +375,9 @@ func Total(addressI AddressI) sqlbuilder.TotalParam {
 	label := address.Label
 	isDefault := address.IsDefault
 	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		idtitle.Total(provice.IdTitleField),
-		idtitle.Total(city.IdTitleField),
-		idtitle.Total(area.IdTitleField),
+		keytitle.Total(provice.IdTitleField),
+		keytitle.Total(city.IdTitleField),
+		keytitle.Total(area.IdTitleField),
 		phone.Total(phoneField),
 		enum.Total(label),
 		boolean.Total(isDefault),

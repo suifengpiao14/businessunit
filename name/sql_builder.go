@@ -31,5 +31,5 @@ func Select(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.WithOptions(OptionName).WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnDirect, sqlbuilder.WhereValueFnLike)
+	field.WithOptions(OptionName).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward, sqlbuilder.ValueFnWhereLike)
 }

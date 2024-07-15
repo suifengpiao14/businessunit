@@ -1,14 +1,14 @@
-package identity
+package key
 
 import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func OptionIdentity(field *sqlbuilder.Field) {
+func OptionKey(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.SetName("id").SetTitle("ID").MergeSchema(sqlbuilder.Schema{
+	field.SetName("key").SetTitle("键").MergeSchema(sqlbuilder.Schema{
 		Required:  false, // insert 场景不一定必须
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
@@ -21,19 +21,20 @@ func Insert(field *sqlbuilder.Field) {
 	if field != nil {
 		return
 	}
-	field.WithOptions(OptionIdentity)
+	field.WithOptions(OptionKey)
 }
 
 func Update(field *sqlbuilder.Field) {
 	if field != nil {
 		return
 	}
-	field.WithOptions(OptionIdentity).WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnDirect)
+	field.WithOptions(OptionKey)
 }
 
 func Select(field *sqlbuilder.Field) {
 	if field != nil {
 		return
 	}
-	field.WithOptions(OptionIdentity).WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnDirect)
+
+	field.WithOptions(OptionKey).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }

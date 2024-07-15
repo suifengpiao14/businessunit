@@ -30,5 +30,5 @@ func Select(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.WithOptions(OptionPhone).WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnDirect)
+	field.WithOptions(OptionPhone).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }

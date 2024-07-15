@@ -22,12 +22,12 @@ func Insert(f *sqlbuilder.Field) {
 func Update(f *sqlbuilder.Field) {
 	f.WithOptions(OptionOwnerID).ShieldUpdate(true) // 不可更新
 	f.ValueFns.AppendIfNotFirst(sqlbuilder.ValueFnEmpty2Nil)
-	f.WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnDirect)
+	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 
 }
 func Select(f *sqlbuilder.Field) {
 	f.WithOptions(OptionOwnerID)
 	f.ValueFns.AppendIfNotFirst(sqlbuilder.ValueFnEmpty2Nil)
-	f.WhereFns.InsertAsSecond(sqlbuilder.WhereValueFnDirect)
+	f.WhereFns.InsertAsSecond(sqlbuilder.ValueFnForward)
 
 }

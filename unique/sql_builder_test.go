@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/suifengpiao14/businessunit/identity"
-	"github.com/suifengpiao14/businessunit/softdeleted"
+	"github.com/suifengpiao14/businessunit/id"
+	"github.com/suifengpiao14/businessunit/name"
 	"github.com/suifengpiao14/businessunit/unique"
 	"github.com/suifengpiao14/sqlbuilder"
 )
@@ -16,42 +16,13 @@ type UpdateParam struct {
 	Name string
 }
 
-func (p UpdateParam) GetIdentityField() *identity.IdentityField {
-	return identity.NewIdentityField(func(in any) (any, error) { return p.ID, nil })
-}
-func (p UpdateParam) GetUniqueFields() (fields unique.UniqueField) {
-	fields = make(unique.UniqueField, 0)
-	fields = append(fields, sqlbuilder.Field{
-		Name: "Fname",
-		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-			return p.Name, nil
-		}},
-	},
-	)
-	return fields
-}
-
-func (p UpdateParam) GetDeletedAtField() (softdeleted.ValueType, softdeleted.SoftDeletedField) {
-	return softdeleted.ValueType_OK, softdeleted.SoftDeletedField{
-		Name: "Fdeleted_at",
-		ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-			return "", nil
-		}},
-	}
-}
-
-func (p UpdateParam) Where() (expressions sqlbuilder.Expressions, err error) {
-	return nil, nil
-}
 func (p UpdateParam) Table() string {
 	return "t_table"
 }
-func (p UpdateParam) Data() (data any, err error) {
-	return p, nil
-}
+
 func (p UpdateParam) AlreadyExists(sql string) (exists bool, err error) {
 	fmt.Println(sql)
-	return true, err
+	return false, err
 }
 
 func TestUpdate(t *testing.T) {
@@ -60,7 +31,9 @@ func TestUpdate(t *testing.T) {
 		Name: "张三",
 	}
 
-	sql, err := sqlbuilder.NewUpdateBuilder(p).Merge(unique.Update(p), identity.Update(p), softdeleted.Update(p)).ToSQL()
+	idField := sqlbuilder.NewField(func(in any) (any, error) { return p.ID, nil }).WithOptions(id.Update)
+	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).WithOptions(name.Update)).WithOptions(unique.UpdateFn(p, idField))
+	sql, err := sqlbuilder.NewUpdateBuilder(sqlbuilder.TableFn(p.Table)).AppendField(*uniqueFields...).AppendField(idField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -71,8 +44,8 @@ func TestInsert(t *testing.T) {
 		ID:   "15",
 		Name: "张三",
 	}
-
-	sql, err := sqlbuilder.NewInsertBuilder(p).Merge(unique.Insert(p), identity.Insert(p), softdeleted.Insert(p)).ToSQL()
+	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).WithOptions(name.Update)).WithOptions(unique.Insert(p))
+	sql, err := sqlbuilder.NewInsertBuilder(sqlbuilder.TableFn(p.Table)).AppendField(*uniqueFields...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 

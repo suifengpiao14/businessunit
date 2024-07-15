@@ -9,9 +9,8 @@ func OptionTitle(field *sqlbuilder.Field) {
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-	field.WhereFns.Append(sqlbuilder.WhereValueFnLike)
+	field.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
 }
-
 func Insert(field *sqlbuilder.Field) {
 	if field == nil {
 		return
@@ -30,5 +29,5 @@ func Select(field *sqlbuilder.Field) {
 	if field == nil {
 		return
 	}
-	field.WithOptions(OptionTitle).WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnDirect)
+	field.WithOptions(OptionTitle).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }
