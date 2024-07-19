@@ -3,7 +3,7 @@ package unique
 import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/pkg/errors"
-	"github.com/suifengpiao14/businessunit/id"
+	"github.com/suifengpiao14/businessunit/autoid"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -33,7 +33,7 @@ func _checkExists(uniqueI CheckUniqueI, uniqueField sqlbuilder.Fields, idField *
 			return nil, nil
 		}
 		if idField != nil {
-			idField.WithOptions(id.Select).WhereFns.Append(func(in any) (any, error) {
+			idField.WithOptions(autoid.Select).WhereFns.Append(func(in any) (any, error) {
 				return goqu.C(idField.DBName()).Neq(in), nil
 			})
 			totalParam = totalParam.AppendFields(idField)

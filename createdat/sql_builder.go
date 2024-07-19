@@ -8,57 +8,16 @@ import (
 
 var Time_format = sqlbuilder.Time_format
 
-type CreatedAtField sqlbuilder.Field
-
-func (f CreatedAtField) GetCreatedAtField() CreatedAtField {
-	return f
-}
-
-type CreatedAtI interface {
-	GetCreatedAtField() CreatedAtField
-}
-
-func _DataFn(createdAtI CreatedAtI) sqlbuilder.DataFn {
-	return func() (any, error) {
-		tim := time.Now().Local().Format(Time_format)
-		field := createdAtI.GetCreatedAtField()
-		if field.ValueFns == nil {
-			return nil, nil
-		}
-		val, err := sqlbuilder.Field(field).GetValue(tim)
-		if err != nil {
-			return nil, err
-		}
-		m := map[string]any{
-			sqlbuilder.FieldName2DBColumnName(field.Name): val,
-		}
-		return m, nil
+func OptionCreatedAt(f *sqlbuilder.Field) {
+	f.SetName("created_at").SetTitle("创建时间")
+	if f.SceneIsInsert() {
+		f.ValueFns.InsertAsFirst(func(in any) (any, error) {
+			return time.Now().Local().Format(Time_format), nil
+		})
 	}
-}
 
-func _WhereFn(createdAtI CreatedAtI) sqlbuilder.WhereFn {
-	return func() (expressions sqlbuilder.Expressions, err error) {
-		field := createdAtI.GetCreatedAtField()
-		return sqlbuilder.Field(field).Where()
+	if f.SceneIsUpdate() {
+		f.ValueFns.Append(sqlbuilder.ValueFnShield) // 更新时屏蔽
 	}
-}
 
-func Insert(createdAtI CreatedAtI) sqlbuilder.InsertParam {
-	return sqlbuilder.NewInsertBuilder(nil).AppendData(_DataFn(createdAtI))
-}
-
-func Update(createdAtI CreatedAtI) sqlbuilder.UpdateParam {
-	return sqlbuilder.NewUpdateBuilder(nil)
-}
-
-func First(createdAtI CreatedAtI) sqlbuilder.FirstParam {
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(createdAtI))
-}
-
-func List(createdAtI CreatedAtI) sqlbuilder.ListParam {
-	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(createdAtI))
-}
-
-func Total(createdAtI CreatedAtI) sqlbuilder.TotalParam {
-	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(createdAtI))
 }

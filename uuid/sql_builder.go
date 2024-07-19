@@ -13,30 +13,20 @@ func OptionUUID(field *sqlbuilder.Field) {
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
 		MinLength: 1,
-		Primary:   true,
-	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-}
-
-func Insert(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionUUID).ValueFns.InsertAsFirst(func(in any) (any, error) {
-		return xid.New().String(), nil
 	})
-}
-
-func Update(field *sqlbuilder.Field) {
-	if field == nil {
-		return
+	if field.SceneIsInsert() {
+		field.SetRequired(true)
+		field.ValueFns.InsertAsFirst(func(in any) (any, error) {
+			return xid.New().String(), nil
+		})
 	}
-	field.WithOptions(OptionUUID).ShieldUpdate(true) // uuid 不能更新
-	field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
-}
 
-func Select(field *sqlbuilder.Field) {
-	if field == nil {
-		return
+	if field.SceneIsUpdate() {
+		field.WithOptions(OptionUUID).ShieldUpdate(true) // uuid 不能更新
+		field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil, sqlbuilder.ValueFnForward)
 	}
-	field.WithOptions(OptionUUID).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+
+	if field.SceneIsSelect() {
+		field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+	}
 }

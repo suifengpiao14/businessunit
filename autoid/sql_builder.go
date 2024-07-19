@@ -13,27 +13,13 @@ func OptionAutoID(field *sqlbuilder.Field) {
 		MaxLength: 64,
 		Minimum:   1,
 		Primary:   true,
-	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-}
-
-func Insert(field *sqlbuilder.Field) {
-	if field == nil {
-		return
+	})
+	if field.SceneIsInsert() {
+		field.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	} else if field.SceneIsUpdate() {
+		field.WithOptions(OptionAutoID).ShieldUpdate(true) // id 不能更新
+		field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+	} else if field.SceneIsSelect() {
+		field.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	}
-	field.WithOptions(OptionAutoID)
-}
-
-func Update(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionAutoID).ShieldUpdate(true) // id 不能更新
-	field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
-}
-
-func Select(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionAutoID).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }
