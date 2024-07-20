@@ -15,26 +15,7 @@ func OptionKey(field *sqlbuilder.Field) {
 		Minimum:   1,
 		Primary:   true,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-}
-
-func Insert(field *sqlbuilder.Field) {
-	if field != nil {
-		return
+	if field.SceneIsSelect() {
+		field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 	}
-	field.WithOptions(OptionKey)
-}
-
-func Update(field *sqlbuilder.Field) {
-	if field != nil {
-		return
-	}
-	field.WithOptions(OptionKey)
-}
-
-func Select(field *sqlbuilder.Field) {
-	if field != nil {
-		return
-	}
-
-	field.WithOptions(OptionKey).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }

@@ -14,12 +14,16 @@ func OptionAutoID(field *sqlbuilder.Field) {
 		Minimum:   1,
 		Primary:   true,
 	})
-	if field.SceneIsInsert() {
-		field.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-	} else if field.SceneIsUpdate() {
-		field.WithOptions(OptionAutoID).ShieldUpdate(true) // id 不能更新
-		field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
-	} else if field.SceneIsSelect() {
-		field.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-	}
+
+	field.SceneInsert(func(f *sqlbuilder.Field) {
+		f.ValueFns.Append(sqlbuilder.ValueFnShield)
+	})
+	field.SceneUpdate(func(f *sqlbuilder.Field) {
+		f.ShieldUpdate(true) // id 不能更新
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	})
+
+	field.SceneSelect(func(f *sqlbuilder.Field) {
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	})
 }

@@ -11,25 +11,7 @@ func OptionEmail(f *sqlbuilder.Field) {
 		MinLength: 5,
 		RegExp:    `([A-Za-z0-9\-]+\.)+[A-Za-z]{2,6}`, // 邮箱验证表达式
 	})
-}
-
-func Insert(field *sqlbuilder.Field) {
-	if field == nil {
-		return
+	if f.SceneIsSelect() {
+		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 	}
-	field.WithOptions(OptionEmail)
-}
-
-func Update(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionEmail).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
-}
-
-func Select(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionEmail).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 }

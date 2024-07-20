@@ -22,13 +22,13 @@ const (
 )
 
 func OptionsGetChildren(codeField *sqlbuilder.Field, nameField *sqlbuilder.Field, depth int) {
-	codeField.WhereFns.AppendIfNotFirst(GetChildrenWhereFn(depth))
-	nameField.WhereFns.InsertAsFirst(sqlbuilder.WhereValueFnShield)
+	codeField.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil, GetChildrenWhereFn(depth))
+	nameField.WhereFns.InsertAsFirst(sqlbuilder.ValueFnShield)
 }
 
 // GetChildrenWhereFn 获取子集where 函数(包含自己)depth<=0 不限制子级层级
-func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.WhereValueFn) {
-	return func(dbColumnName string, in any) (value any, err error) {
+func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.ValueFn) {
+	return func(in any) (value any, err error) {
 		if depth <= 0 {
 			depth = math.MaxInt
 		}

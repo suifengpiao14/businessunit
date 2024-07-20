@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/districtcode"
-	"github.com/suifengpiao14/businessunit/enum"
 	"github.com/suifengpiao14/businessunit/keytitle"
 	"github.com/suifengpiao14/businessunit/ownerid"
 	"github.com/suifengpiao14/businessunit/phone"
@@ -18,17 +17,17 @@ import (
 )
 
 type AddressRule struct {
-	TenatID   tenant.TenantField // 业务、应用、租户等唯一标识
-	OwnerID   ownerid.OwnerIdField
-	Label     enum.EnumField
+	TenatID   sqlbuilder.Field // 业务、应用、租户等唯一标识
+	OwnerID   sqlbuilder.Field
+	Label     sqlbuilder.Field
 	MaxNumber sqlbuilder.Field // 单个业务下指定类型可配置最大条数
 }
 
 type AddressRules []AddressRule
 
-func (rs AddressRules) GetByLabel(tenatID tenant.TenantField, ownerID ownerid.OwnerIdField, label enum.EnumField) (addressRule *AddressRule, exist bool) {
+func (rs AddressRules) GetByLabel(tenatID *sqlbuilder.Field, ownerID *sqlbuilder.Field, label *sqlbuilder.Field) (addressRule *AddressRule, exist bool) {
 	for _, r := range rs {
-		if r.TenatID.IsEqual(tenatID) && r.OwnerID.IsEqual(ownerID.Field) && r.Label.IsEqual(label.Field) {
+		if r.TenatID.IsEqual(*tenatID) && r.OwnerID.IsEqual(*ownerID) && r.Label.IsEqual(*label) {
 			return &r, true
 		}
 	}

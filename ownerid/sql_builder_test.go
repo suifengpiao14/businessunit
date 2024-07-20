@@ -20,29 +20,32 @@ func (p UpdateParam) Table() string {
 	return "t_table"
 }
 
-func TestUpdate(t *testing.T) {
-	p := UpdateParam{
-		ID:      "qwqwgwerst3wyt5y456u56uj5rywr",
-		Name:    "张三",
-		OwnerID: 14,
-	}
-
-	sql, err := sqlbuilder.NewUpdateBuilder(p).ToSQL()
-	require.NoError(t, err)
-	fmt.Println(sql)
-
-}
-
 func TestInsert(t *testing.T) {
 	p := UpdateParam{
 		ID:      "",
 		Name:    "张三",
 		OwnerID: 1,
 	}
-	identityField := sqlbuilder.NewField(func(in any) (any, error) { return p.ID, nil }).WithOptions(autoid.Insert)
-	ownerIdField := sqlbuilder.NewField(func(in any) (any, error) { return p.OwnerID, nil }).WithOptions(ownerid.Insert)
+	identityField := sqlbuilder.NewField(func(in any) (any, error) { return p.ID, nil }).WithOptions(autoid.OptionAutoID)
+	ownerIdField := sqlbuilder.NewField(func(in any) (any, error) { return p.OwnerID, nil }).WithOptions(ownerid.OptionOwnerID)
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
 	sql, err := sqlbuilder.NewInsertBuilder(p).AppendField(identityField, ownerIdField, nameField).ToSQL()
+	require.NoError(t, err)
+	fmt.Println(sql)
+
+}
+
+func TestUpdate(t *testing.T) {
+	p := UpdateParam{
+		ID:      "",
+		Name:    "张三",
+		OwnerID: 1,
+	}
+	identityField := sqlbuilder.NewField(func(in any) (any, error) { return p.ID, nil }).WithOptions(autoid.OptionAutoID)
+	ownerIdField := sqlbuilder.NewField(func(in any) (any, error) { return p.OwnerID, nil }).WithOptions(ownerid.OptionOwnerID)
+	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
+
+	sql, err := sqlbuilder.NewUpdateBuilder(p).AppendField(identityField, ownerIdField, nameField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

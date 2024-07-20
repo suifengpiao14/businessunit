@@ -14,15 +14,6 @@ type District struct {
 	Name string `json:"name"`
 }
 
-func (d District) GetDistrict() districtcode.District {
-	filed := districtcode.NewDistrictField(
-		func(in any) (any, error) { return d.Code, nil },
-		func(in any) (any, error) { return d.Name, nil },
-	)
-	return districtcode.District{
-		DistrictField: &filed,
-	}
-}
 func (d District) Table() string {
 	return "t_city_info"
 }
@@ -38,7 +29,10 @@ func TestGetChildren(t *testing.T) {
 		Code: "440300",
 		Name: "深圳",
 	}
-	sql, err := sqlbuilder.NewListBuilder(d).Merge(districtcode.GetChildren(d, districtcode.Depth_max)).ToSQL()
+	codeField := sqlbuilder.NewField(func(in any) (any, error) { return d.Code, nil }).SetName("code")
+	nameField := sqlbuilder.NewField(func(in any) (any, error) { return d.Name, nil }).SetName("name")
+	districtcode.OptionsGetChildren(codeField, nameField, districtcode.Depth_max)
+	sql, err := sqlbuilder.NewListBuilder(d).AppendFields(codeField, nameField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

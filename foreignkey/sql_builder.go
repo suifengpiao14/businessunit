@@ -24,7 +24,6 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 			}
 			return m, nil
 		})
-
 	}
 
 }

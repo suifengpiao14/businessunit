@@ -13,21 +13,17 @@ func OptionOwnerID(f *sqlbuilder.Field) {
 		Minimum:      1,
 		ShieldUpdate: true, // 所有者不可跟新
 	})
-}
+	f.SceneInsert(func(f *sqlbuilder.Field) {
+		f.SetRequired(true)
+	})
 
-func Insert(f *sqlbuilder.Field) {
-	f.WithOptions(OptionOwnerID).SetRequired(true) // 新增时不能为空
-}
+	f.SceneUpdate(func(f *sqlbuilder.Field) {
+		f.ShieldUpdate(true)
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	})
 
-func Update(f *sqlbuilder.Field) {
-	f.WithOptions(OptionOwnerID).ShieldUpdate(true) // 不可更新
-	f.ValueFns.AppendIfNotFirst(sqlbuilder.ValueFnEmpty2Nil)
-	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
-
-}
-func Select(f *sqlbuilder.Field) {
-	f.WithOptions(OptionOwnerID)
-	f.ValueFns.AppendIfNotFirst(sqlbuilder.ValueFnEmpty2Nil)
-	f.WhereFns.InsertAsSecond(sqlbuilder.ValueFnForward)
-
+	f.SceneSelect(func(f *sqlbuilder.Field) {
+		f.ValueFns.AppendIfNotFirst(sqlbuilder.ValueFnEmpty2Nil)
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	})
 }
