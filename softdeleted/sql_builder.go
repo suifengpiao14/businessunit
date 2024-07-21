@@ -13,10 +13,10 @@ func NewSoftDeletedField(valueType ValueType) (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
 		return time.Now().Local().Format(Time_format), nil
 	})
-	f.SceneInsert(func(f *sqlbuilder.Field) {
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield)
 	})
-	f.SceneUpdate(func(f *sqlbuilder.Field) {
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true)
 		f.WhereFns.Append(func(in any) (any, error) {
 			if valueType == ValueType_Delete {
@@ -25,7 +25,7 @@ func NewSoftDeletedField(valueType ValueType) (f *sqlbuilder.Field) {
 			return in, nil
 		})
 	})
-	f.SceneSelect(func(f *sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(func(in any) (any, error) {
 			if valueType == ValueType_Delete {
 				return sqlbuilder.Neq(in), nil

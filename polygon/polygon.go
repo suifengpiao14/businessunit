@@ -37,7 +37,7 @@ func (ps Points) geoPolygon() (polygon *geo.Polygon, err error) {
 }
 
 // GetBoundingBox 获取多边形 Bounding Box
-func (ps Points) GetBoundingBox() (boundingBox *BoundingBox, err error) {
+func (ps Points) GetBoundingBox() (boundingBox *BoundingBox) {
 	minLat := math.MaxFloat64
 	maxLat := -math.MaxFloat64
 	minLng := math.MaxFloat64
@@ -62,15 +62,12 @@ func (ps Points) GetBoundingBox() (boundingBox *BoundingBox, err error) {
 		LngMin: minLng,
 		LngMax: maxLng,
 	}
-	return boundingBox, nil
+	return boundingBox
 }
 
 // ContainsPoint 判断点是否在多边形内
 func (ps Points) ContainsPoint(targetPoint *geo.Point) (ok bool, err error) {
-	boundingBox, err := ps.GetBoundingBox()
-	if err != nil {
-		return false, err
-	}
+	boundingBox := ps.GetBoundingBox()
 	ok = boundingBox.ContainsPoint(targetPoint)
 	if !ok {
 		return false, nil

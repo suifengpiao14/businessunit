@@ -30,27 +30,6 @@ func (p InsertParam) Table() string {
 	return "t_polygon"
 }
 
-func (p InsertParam) Validate() (err error) {
-	return nil
-}
-
-func (p InsertParam) Data() (data interface{}, err error) {
-	return p, nil
-}
-
-func (p InsertParam) GetTenantField() tenant.TenantField {
-	return tenant.TenantField{
-		Field: sqlbuilder.Field{
-			Name: "Ftenant",
-			ValueFns: sqlbuilder.ValueFns{
-				func(in any) (value any, err error) {
-					return p.Tenant, nil
-				},
-			},
-		},
-	}
-}
-
 type Polygon struct {
 	Path string `json:"path"`
 }
@@ -73,26 +52,6 @@ func (p Polygon) Points() (points polygon.Points, err error) {
 	}
 	return geoPointSet, nil
 }
-func (p Polygon) GetBoundingBoxField() (boundingBoxField polygon.BoundingBoxField) {
-	return polygon.BoundingBoxField{
-		LngMax: &sqlbuilder.Field{
-			Name:     "Flng_max",
-			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
-		},
-		LngMin: &sqlbuilder.Field{
-			Name:     "Flng_min",
-			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
-		},
-		LatMax: &sqlbuilder.Field{
-			Name:     "Flat_max",
-			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
-		},
-		LatMin: &sqlbuilder.Field{
-			Name:     "Flat_min",
-			ValueFns: sqlbuilder.ValueFns{func(in any) (any, error) { return cast.ToString(in), nil }},
-		},
-	}
-}
 
 func TestInsert(t *testing.T) {
 	row := InsertParam{
@@ -102,10 +61,11 @@ func TestInsert(t *testing.T) {
 		Tenant: "1000001",
 	}
 	polyg := Polygon{Path: row.Path}
-	tenantField := sqlbuilder.NewField(func(in any) (any, error) { return row.Tenant, nil }).WithOptions(tenant.OptionTenant)
-	err := polygon.Insert(polyg)
+	tenantField := tenant.NewTenant(row.Tenant).Field
+	points, err := polyg.Points()
 	require.NoError(t, err)
-	sql, err := sqlbuilder.NewInsertBuilder(row).AppendField(tenantField).AppendField(polyg.GetBoundingBoxField().Fields()...).ToSQL()
+	boxField := points.GetBoundingBox()
+	sql, err := sqlbuilder.NewInsertBuilder(row).AppendField(tenantField).AppendField(boxField.Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }
@@ -141,17 +101,6 @@ func (p ListParam) Where() (expressions []exp.Expression, err error) {
 	return
 }
 
-func (p ListParam) GetTenantField() tenant.TenantField {
-	return tenant.TenantField{
-		Field: sqlbuilder.Field{
-			Name: "Ftenant",
-			ValueFns: sqlbuilder.ValueFns{func(in any) (value any, err error) {
-				return p.Tenant, nil
-			}},
-		},
-	}
-}
-
 func TestList(t *testing.T) {
 	row := ListParam{
 		Id:     "123",
@@ -160,7 +109,11 @@ func TestList(t *testing.T) {
 		Tenant: "1000001",
 	}
 	polyg := Polygon{Path: row.Path}
-	sql, err := sqlbuilder.NewListBuilder(row).Merge(tenant.List(row), polygon.List(polyg)).ToSQL()
+	points, err := polyg.Points()
+	require.NoError(t, err)
+	tenantField := tenant.NewTenant(row.Tenant).Field
+	boxField := points.GetBoundingBox()
+	sql, err := sqlbuilder.NewListBuilder(row).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

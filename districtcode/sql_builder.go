@@ -7,6 +7,46 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
+type District struct {
+	Code      string `json:"code"`
+	Name      string `json:"name"`
+	CodeField *sqlbuilder.Field
+	NameField *sqlbuilder.Field
+}
+
+func (d *District) Init() {
+	d.CodeField = sqlbuilder.NewField(func(in any) (any, error) { return d.Code, nil }).SetName("code").SetTitle("行政区代码").MergeSchema(sqlbuilder.Schema{
+		Required:  true,
+		Type:      sqlbuilder.Schema_Type_string,
+		MaxLength: 16, //统计局统一是使用12位，如 659008103505
+		MinLength: 2,  // 只使用省时，为2位
+	})
+	d.NameField = sqlbuilder.NewField(func(in any) (any, error) { return d.Name, nil }).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
+		Required:  true,
+		Type:      sqlbuilder.Schema_Type_string,
+		MaxLength: 16, //统计局统一是使用12位，如 659008103505
+		MinLength: 2,  // 只使用省时，为2位
+	})
+}
+
+func (d District) Fields() (fs sqlbuilder.Fields) {
+	fs = sqlbuilder.Fields{
+		d.CodeField,
+		d.NameField,
+	}
+
+	return fs
+}
+
+func NewDistrict(code string, name string) *District {
+	d := &District{
+		Code: code,
+		Name: name,
+	}
+	d.Init()
+	return d
+}
+
 /**
 CREATE TABLE `t_city_info` (
   `Farea_id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '城市ID',

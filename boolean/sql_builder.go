@@ -5,24 +5,50 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func OptionBooleanFn(trueTitle sqlbuilder.Enum, falseTitle sqlbuilder.Enum) sqlbuilder.OptionFn {
-	return func(field *sqlbuilder.Field) {
-		field.SetName("boolean").SetTitle("布尔值")
-		trueTitle.Tag = sqlbuilder.Enum_tag_true
-		falseTitle.Tag = sqlbuilder.Enum_tag_false
-		field.MergeSchema(sqlbuilder.Schema{
-			Enums: sqlbuilder.Enums{
-				trueTitle,
-				falseTitle,
-			},
-		})
+type Boolean struct {
+	Value     any `json:"value"`
+	TrueEnum  sqlbuilder.Enum
+	FalseEnum sqlbuilder.Enum
+	Field     *sqlbuilder.Field
+}
+
+func NewBoolean(value any, trueEnum, falseEnum sqlbuilder.Enum) *Boolean {
+	b := &Boolean{
+		Value:     value,
+		TrueEnum:  trueEnum,
+		FalseEnum: falseEnum,
 	}
+	b.Init()
+	return b
+}
+
+func (b *Boolean) Init() {
+	b.Field = sqlbuilder.NewField(func(in any) (any, error) { return b.Value, nil }).SetName("bool").SetTag("布尔列")
+	b.TrueEnum.Tag = sqlbuilder.Enum_tag_true
+	b.FalseEnum.Tag = sqlbuilder.Enum_tag_false
+	b.Field.AppendEnum(b.TrueEnum, b.FalseEnum)
+}
+
+func (b Boolean) Fields() sqlbuilder.Fields {
+	return *sqlbuilder.NewFields(b.Field)
+}
+
+func (b Boolean) IsTrue() bool {
+	val, err := b.Field.GetValue()
+	if err != nil {
+		return false
+	}
+	return b.FalseEnum.IsEqual(val)
 }
 
 // Switch  将值反转
-func Switch(f *sqlbuilder.Field) {
-	f.ValueFns.InsertAsSecond(func(in any) (any, error) {
-		enums := f.Schema.Enums
+func Switch(f Boolean) *Boolean {
+	cp := &Boolean{
+		Value: f.Value,
+		Field: f.Field.Copy(),
+	}
+	cp.Field.ValueFns.InsertAsSecond(func(in any) (any, error) {
+		enums := cp.Field.Schema.Enums
 		for _, enum := range enums {
 			if !enum.IsEqual(in) {
 				return enum.Key, nil
@@ -31,6 +57,7 @@ func Switch(f *sqlbuilder.Field) {
 		err := errors.Errorf("not found reversed enum key ;current:%v", in)
 		return nil, err
 	})
+	return cp
 }
 
 // TrunOff  改成false

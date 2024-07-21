@@ -27,9 +27,9 @@ func TestInsert(t *testing.T) {
 		OwnerID: 1,
 	}
 	identityField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
-	ownerIdField := sqlbuilder.NewField(func(in any) (any, error) { return p.OwnerID, nil }).WithOptions(ownerid.OptionOwnerID)
+	ownerId := ownerid.NewOwnerID(p.OwnerID)
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
-	sql, err := sqlbuilder.NewInsertBuilder(p).AppendField(identityField, ownerIdField, nameField).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(p).AppendField(identityField, ownerId.Field, nameField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -42,10 +42,9 @@ func TestUpdate(t *testing.T) {
 		OwnerID: 1,
 	}
 	identityField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
-	ownerIdField := sqlbuilder.NewField(func(in any) (any, error) { return p.OwnerID, nil }).WithOptions(ownerid.OptionOwnerID)
+	ownerId := ownerid.NewOwnerID(p.OwnerID)
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
-
-	sql, err := sqlbuilder.NewUpdateBuilder(p).AppendField(identityField, ownerIdField, nameField).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(p).AppendField(identityField, ownerId.Field, nameField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

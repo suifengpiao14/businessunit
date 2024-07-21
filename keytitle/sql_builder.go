@@ -1,27 +1,27 @@
 package keytitle
 
 import (
-	"github.com/suifengpiao14/businessunit/key"
-	"github.com/suifengpiao14/businessunit/title"
+	"github.com/suifengpiao14/businessunit/identity"
+	"github.com/suifengpiao14/businessunit/name"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type KeyTitle struct {
-	Key        string `json:"key"`
-	Title      string `json:"title"`
-	KeyField   *sqlbuilder.Field
-	TitleField *sqlbuilder.Field
+type IdName struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	IdField   *identity.Identifier
+	NameField *name.Name
 }
 
-func (kt KeyTitle) Fields() sqlbuilder.Fields {
+func (idName IdName) Fields() sqlbuilder.Fields {
 	fs := sqlbuilder.Fields{
-		kt.KeyField,
-		kt.TitleField,
+		idName.IdField.Field,
+		idName.NameField.Field,
 	}
 	return fs
 }
 
-func (kt KeyTitle) InitField() {
-	kt.KeyField = key.NewKeyField(func(in any) (any, error) { return kt.Key, nil })
-	kt.TitleField = title.NewTitleField(func(in any) (any, error) { return kt.Title, nil })
+func (idName *IdName) Init() {
+	idName.IdField = identity.NewIdentifier(idName.Id)
+	idName.NameField = name.NewName(idName.Name)
 }

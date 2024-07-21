@@ -4,9 +4,14 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func NewTenantField(valueFn sqlbuilder.ValueFn) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(valueFn).SetName("ternatId").SetTitle("租户ID")
-	f.MergeSchema(sqlbuilder.Schema{
+type Tenant struct {
+	Value any `json:"value"`
+	Field *sqlbuilder.Field
+}
+
+func (t *Tenant) Init() {
+	t.Field = sqlbuilder.NewField(func(in any) (any, error) { return t.Value, nil }).SetName("ternatId").SetTitle("租户ID")
+	t.Field.MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		MinLength: 1,
 		Type:      sqlbuilder.Schema_Type_string,
@@ -14,9 +19,14 @@ func NewTenantField(valueFn sqlbuilder.ValueFn) (f *sqlbuilder.Field) {
 		Maximum:   sqlbuilder.UnsinedInt_maximum_bigint,
 		Minimum:   1,
 	})
-	f.SceneUpdate(func(f *sqlbuilder.Field) {
+	t.Field.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // 不可更新
 	})
-	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
-	return f
+	t.Field.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
+}
+
+func NewTenant(value any) *Tenant {
+	t := &Tenant{Value: value}
+	t.Init()
+	return t
 }

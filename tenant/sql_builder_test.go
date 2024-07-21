@@ -33,9 +33,9 @@ func (p InsertParam) Table() string {
 func (p InsertParam) Fields() sqlbuilder.Fields {
 	return sqlbuilder.Fields{
 		uuid.NewUuidField(func(in any) (any, error) { return p.Id, nil }),
-		name.NewNameField(func(in any) (any, error) { return p.Name, nil }),
+		name.NewName(p.Name).Field,
 		email.NewEmailField(func(in any) (any, error) { return p.Email, nil }),
-		tenant.NewTenantField(func(in any) (any, error) { return p.Tenant, nil }),
+		tenant.NewTenant(p.Tenant).Field,
 	}
 
 }
@@ -62,9 +62,9 @@ type UpdateParam struct {
 func (p UpdateParam) Fields() sqlbuilder.Fields {
 	return sqlbuilder.Fields{
 		uuid.NewUuidField(func(in any) (any, error) { return p.Id, nil }),
-		name.NewNameField(func(in any) (any, error) { return p.Name, nil }),
+		name.NewName(p.Name).Field,
 		email.NewEmailField(func(in any) (any, error) { return p.Email, nil }),
-		tenant.NewTenantField(func(in any) (any, error) { return p.Tenant, nil }),
+		tenant.NewTenant(p.Tenant).Field,
 	}
 
 }
@@ -150,7 +150,7 @@ func TestFirst(t *testing.T) {
 		Name:   "张三",
 		Tenant: "1000001",
 	}
-	tenantField := tenant.NewTenantField(func(in any) (any, error) { return row.Tenant, nil })
+	tenantField := tenant.NewTenant(row.Tenant).Field
 	sql, err := sqlbuilder.NewFirstBuilder(row).AppendField(tenantField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)

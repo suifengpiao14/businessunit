@@ -62,10 +62,10 @@ func OptionUnique(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) func(fie
 			return
 		}
 		first := fields[0]
-		first.SceneInsert(func(f *sqlbuilder.Field) {
+		first.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			_checkExists(checkUniqueI, fields, nil)
 		})
-		first.SceneUpdate(func(f *sqlbuilder.Field) {
+		first.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			_checkExists(checkUniqueI, fields, idField)
 		})
 	}

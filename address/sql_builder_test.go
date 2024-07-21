@@ -37,16 +37,16 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 	area.ID.SetName("areaId")
 
 	addres = address.Address{
-		TenatID:      tenant.NewTenantField(func(in any) (any, error) { return addr.TenantID, nil }).SetName("businessId"),
-		Label:        address.NewLabelField(func(in any) (any, error) { return addr.Label, nil }, nil),
-		IsDefault:    address.NewIsDefaultField(func(in any) (any, error) { return addr.IsDefault, nil }, nil),
-		ContactPhone: address.NewContactPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }),
-		ContactName:  *address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("contactName"),
-		Address:      *address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
+		TenatIDField:      tenant.NewTenant(func(in any) (any, error) { return addr.TenantID, nil }).SetName("businessId"),
+		LabelField:        address.NewLabelField(func(in any) (any, error) { return addr.Label, nil }, nil),
+		IsDefaultField:    address.NewIsDefaultField(func(in any) (any, error) { return addr.IsDefault, nil }, nil),
+		ContactPhoneField: address.NewContactPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }),
+		ContactNameField:  *address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("contactName"),
+		AddressField:      *address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
 
-		Province: province,
-		City:     city,
-		Area:     area,
+		ProvinceField: province,
+		CityField:     city,
+		AreaField:     area,
 	}
 	return addres
 }
@@ -67,16 +67,16 @@ func (addr InsertAddress) GetCount(rawSql string) (count int, err error) {
 func (addr InsertAddress) Fields() (fields sqlbuilder.Fields) {
 	address := addr.GetAddress()
 	fields = sqlbuilder.Fields{
-		address.TenatID.Field,
-		address.Label.Field,
-		address.IsDefault.GetBooleanField().Field,
-		address.ContactPhone.Field,
-		address.ContactName,
-		address.Address,
+		address.TenatIDField.Field,
+		address.LabelField.Field,
+		address.IsDefaultField.GetBooleanField().Field,
+		address.ContactPhoneField.Field,
+		address.ContactNameField,
+		address.AddressField,
 	}
-	fields = append(fields, address.Province.GetIdTitle().Fields()...)
-	fields = append(fields, address.City.GetIdTitle().Fields()...)
-	fields = append(fields, address.Area.GetIdTitle().Fields()...)
+	fields = append(fields, address.ProvinceField.GetIdTitle().Fields()...)
+	fields = append(fields, address.CityField.GetIdTitle().Fields()...)
+	fields = append(fields, address.AreaField.GetIdTitle().Fields()...)
 
 	return fields
 }

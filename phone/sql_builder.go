@@ -4,31 +4,36 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func OptionPhone(f *sqlbuilder.Field) {
+type Phone struct {
+	Value any `json:"phone"`
+	Field *sqlbuilder.Field
+}
+
+var DefaultInitFieldFn sqlbuilder.InitFieldFn = func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 	f.SetName("phone").SetTitle("手机号").MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 15,
 		RegExp:    `^1[3-9]\d{9}$`, // 中国大陆手机号正则表达式
 	})
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	})
 }
 
-func Insert(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionPhone)
+func (p *Phone) Apply(initFns ...sqlbuilder.InitFieldFn) *Phone {
+	sqlbuilder.InitFieldFns(initFns).Apply(p.Field)
+	return p
 }
 
-func Update(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionPhone)
+func (p Phone) Fields() sqlbuilder.Fields {
+	return *sqlbuilder.NewFields(p.Field)
 }
 
-func Select(field *sqlbuilder.Field) {
-	if field == nil {
-		return
+func NewPhone(value any) *Phone {
+	p := &Phone{
+		Value: value,
+		Field: sqlbuilder.NewField(func(in any) (any, error) { return value, nil }),
 	}
-	field.WithOptions(OptionPhone).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+	p.Apply(DefaultInitFieldFn)
+	return p
 }

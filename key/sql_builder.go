@@ -13,7 +13,7 @@ func NewKeyField(valueFn sqlbuilder.ValueFn) *sqlbuilder.Field {
 		Minimum:   1,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 
-	f.SceneSelect(func(f *sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f

@@ -12,7 +12,7 @@ func NewEmailField(valueFn sqlbuilder.ValueFn) (f *sqlbuilder.Field) {
 		MinLength: 5,
 		RegExp:    `([A-Za-z0-9\-]+\.)+[A-Za-z]{2,6}`, // 邮箱验证表达式
 	})
-	f.SceneSelect(func(f *sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 	})
 	return f

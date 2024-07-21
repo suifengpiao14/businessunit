@@ -11,7 +11,7 @@ func NewTitleField(valueFn sqlbuilder.ValueFn) (f *sqlbuilder.Field) {
 		MaxLength: 64,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 
-	f.SceneSelect(func(f *sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
 	})
 	return f
