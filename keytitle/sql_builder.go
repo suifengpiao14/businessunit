@@ -6,29 +6,22 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func Insert(idField *sqlbuilder.Field, titleField *sqlbuilder.Field) {
-	if idField != nil {
-		idField.WithOptions(key.Insert)
-	}
-	if titleField != nil {
-		titleField.WithOptions(title.Insert)
-	}
+type KeyTitle struct {
+	Key        string `json:"key"`
+	Title      string `json:"title"`
+	KeyField   *sqlbuilder.Field
+	TitleField *sqlbuilder.Field
 }
 
-func Update(idField *sqlbuilder.Field, titleField *sqlbuilder.Field) {
-	if idField != nil {
-		idField.WithOptions(key.Update)
+func (kt KeyTitle) Fields() sqlbuilder.Fields {
+	fs := sqlbuilder.Fields{
+		kt.KeyField,
+		kt.TitleField,
 	}
-	if titleField != nil {
-		titleField.WithOptions(title.Update)
-	}
+	return fs
 }
 
-func Select(idField *sqlbuilder.Field, titleField *sqlbuilder.Field) {
-	if idField != nil {
-		idField.WithOptions(key.Update)
-	}
-	if titleField != nil {
-		titleField.WithOptions(title.Update)
-	}
+func (kt KeyTitle) InitField() {
+	kt.KeyField = key.NewKeyField(func(in any) (any, error) { return kt.Key, nil })
+	kt.TitleField = title.NewTitleField(func(in any) (any, error) { return kt.Title, nil })
 }

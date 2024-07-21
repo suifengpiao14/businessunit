@@ -26,7 +26,7 @@ func TestInsert(t *testing.T) {
 		Name:    "张三",
 		OwnerID: 1,
 	}
-	identityField := sqlbuilder.NewField(func(in any) (any, error) { return p.ID, nil }).WithOptions(autoid.OptionAutoID)
+	identityField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
 	ownerIdField := sqlbuilder.NewField(func(in any) (any, error) { return p.OwnerID, nil }).WithOptions(ownerid.OptionOwnerID)
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
 	sql, err := sqlbuilder.NewInsertBuilder(p).AppendField(identityField, ownerIdField, nameField).ToSQL()
@@ -41,7 +41,7 @@ func TestUpdate(t *testing.T) {
 		Name:    "张三",
 		OwnerID: 1,
 	}
-	identityField := sqlbuilder.NewField(func(in any) (any, error) { return p.ID, nil }).WithOptions(autoid.OptionAutoID)
+	identityField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
 	ownerIdField := sqlbuilder.NewField(func(in any) (any, error) { return p.OwnerID, nil }).WithOptions(ownerid.OptionOwnerID)
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
 

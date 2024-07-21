@@ -4,30 +4,15 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func OptionTitle(field *sqlbuilder.Field) {
-	field.SetName("title").SetTitle("标题").MergeSchema(sqlbuilder.Schema{
+func NewTitleField(valueFn sqlbuilder.ValueFn) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(valueFn)
+	f.SetName("title").SetTitle("标题").MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-	field.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
-}
-func Insert(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionTitle)
-}
 
-func Update(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionTitle)
-}
-
-func Select(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
-	field.WithOptions(OptionTitle).WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+	f.SceneSelect(func(f *sqlbuilder.Field) {
+		f.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
+	})
+	return f
 }

@@ -4,8 +4,9 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func OptionTenant(f *sqlbuilder.Field) {
-	f.SetName("ternatId").SetTitle("租户ID").MergeSchema(sqlbuilder.Schema{
+func NewTenantField(valueFn sqlbuilder.ValueFn) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(valueFn).SetName("ternatId").SetTitle("租户ID")
+	f.MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		MinLength: 1,
 		Type:      sqlbuilder.Schema_Type_string,
@@ -13,28 +14,9 @@ func OptionTenant(f *sqlbuilder.Field) {
 		Maximum:   sqlbuilder.UnsinedInt_maximum_bigint,
 		Minimum:   1,
 	})
-
-}
-
-func Insert(f *sqlbuilder.Field) {
-	if f == nil {
-		return
-	}
-	f.WithOptions(OptionTenant)
-}
-
-func Update(f *sqlbuilder.Field) {
-	if f == nil {
-		return
-	}
-	f.WithOptions(OptionTenant)
+	f.SceneUpdate(func(f *sqlbuilder.Field) {
+		f.ShieldUpdate(true) // 不可更新
+	})
 	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
-}
-
-func Select(f *sqlbuilder.Field) {
-	if f == nil {
-		return
-	}
-	f.WithOptions(OptionTenant)
-	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
+	return f
 }

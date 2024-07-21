@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/suifengpiao14/businessunit/id"
-	"github.com/suifengpiao14/businessunit/name"
+	"github.com/suifengpiao14/businessunit/autoid"
 	"github.com/suifengpiao14/businessunit/unique"
 	"github.com/suifengpiao14/sqlbuilder"
 )
@@ -31,9 +30,9 @@ func TestUpdate(t *testing.T) {
 		Name: "张三",
 	}
 
-	idField := sqlbuilder.NewField(func(in any) (any, error) { return p.ID, nil }).WithOptions(id.Update)
-	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).WithOptions(name.Update)).WithOptions(unique.UpdateFn(p, idField))
-	sql, err := sqlbuilder.NewUpdateBuilder(sqlbuilder.TableFn(p.Table)).AppendField(*uniqueFields...).AppendField(idField).ToSQL()
+	idField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
+	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil })).WithOptions(unique.OptionUnique(p, idField))
+	sql, err := sqlbuilder.NewUpdateBuilder(sqlbuilder.TableFn(p.Table)).AppendField(uniqueFields...).AppendField(idField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -44,8 +43,8 @@ func TestInsert(t *testing.T) {
 		ID:   "15",
 		Name: "张三",
 	}
-	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).WithOptions(name.Update)).WithOptions(unique.Insert(p))
-	sql, err := sqlbuilder.NewInsertBuilder(sqlbuilder.TableFn(p.Table)).AppendField(*uniqueFields...).ToSQL()
+	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil })).WithOptions(unique.OptionUnique(p, nil))
+	sql, err := sqlbuilder.NewInsertBuilder(sqlbuilder.TableFn(p.Table)).AppendField(uniqueFields...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 

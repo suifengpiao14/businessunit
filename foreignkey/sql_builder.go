@@ -5,7 +5,10 @@ import (
 )
 
 func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) {
-	if f.SceneIsInsert() && len(redundantFields) > 0 {
+	if len(redundantFields) > 0 {
+		return
+	}
+	f.SceneInsert(func(f *sqlbuilder.Field) {
 		f.ValueFns.InsertAsSecond(func(in any) (any, error) {
 			val, err := f.GetValue()
 			if err != nil {
@@ -24,6 +27,6 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 			}
 			return m, nil
 		})
-	}
+	})
 
 }

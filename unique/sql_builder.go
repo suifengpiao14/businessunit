@@ -3,7 +3,6 @@ package unique
 import (
 	"github.com/doug-martin/goqu/v9"
 	"github.com/pkg/errors"
-	"github.com/suifengpiao14/businessunit/autoid"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -33,7 +32,7 @@ func _checkExists(uniqueI CheckUniqueI, uniqueField sqlbuilder.Fields, idField *
 			return nil, nil
 		}
 		if idField != nil {
-			idField.WithOptions(autoid.Select).WhereFns.Append(func(in any) (any, error) {
+			idField.WhereFns.Append(func(in any) (any, error) {
 				return goqu.C(idField.DBName()).Neq(in), nil
 			})
 			totalParam = totalParam.AppendFields(idField)
@@ -57,20 +56,17 @@ func _checkExists(uniqueI CheckUniqueI, uniqueField sqlbuilder.Fields, idField *
 
 }
 
-func Insert(checkUniqueI CheckUniqueI) func(fields ...*sqlbuilder.Field) {
+func OptionUnique(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) func(fields ...*sqlbuilder.Field) {
 	return func(fields ...*sqlbuilder.Field) {
-		_checkExists(checkUniqueI, fields, nil)
-	}
-}
-
-func UpdateFn(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) func(fields ...*sqlbuilder.Field) {
-	return func(fields ...*sqlbuilder.Field) {
-		_checkExists(checkUniqueI, fields, idField)
-	}
-}
-
-func Select(uniqueField sqlbuilder.Fields) func(fields ...*sqlbuilder.Field) {
-	return func(fields ...*sqlbuilder.Field) {
-
+		if len(fields) == 0 {
+			return
+		}
+		first := fields[0]
+		first.SceneInsert(func(f *sqlbuilder.Field) {
+			_checkExists(checkUniqueI, fields, nil)
+		})
+		first.SceneUpdate(func(f *sqlbuilder.Field) {
+			_checkExists(checkUniqueI, fields, idField)
+		})
 	}
 }

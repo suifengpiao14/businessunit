@@ -4,10 +4,8 @@ import (
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-func OptionAutoID(field *sqlbuilder.Field) {
-	if field == nil {
-		return
-	}
+func NewAutoIdField(valueFn sqlbuilder.ValueFn) (field *sqlbuilder.Field) {
+	field = sqlbuilder.NewField(valueFn)
 	field.SetName("id").SetTitle("ID").MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_int,
 		MaxLength: 64,
@@ -26,4 +24,5 @@ func OptionAutoID(field *sqlbuilder.Field) {
 	field.SceneSelect(func(f *sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	})
+	return field
 }
