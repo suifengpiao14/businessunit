@@ -14,6 +14,11 @@ type District struct {
 	NameField *sqlbuilder.Field
 }
 
+const (
+	Field_Tag_Code = "code"
+	Field_Tag_Name = "name"
+)
+
 func (d *District) Init() {
 	d.CodeField = sqlbuilder.NewField(func(in any) (any, error) { return d.Code, nil }).SetName("code").SetTitle("行政区代码").MergeSchema(sqlbuilder.Schema{
 		Required:  true,
@@ -31,11 +36,16 @@ func (d *District) Init() {
 
 func (d District) Fields() (fs sqlbuilder.Fields) {
 	fs = sqlbuilder.Fields{
-		d.CodeField,
-		d.NameField,
+		d.CodeField.SetTag(Field_Tag_Code),
+		d.NameField.SetTag(Field_Tag_Name),
 	}
 
 	return fs
+}
+
+func (p *District) Apply(initFns ...sqlbuilder.InitFieldFn) *District {
+	p.Fields().Apply(initFns...)
+	return p
 }
 
 func NewDistrict(code string, name string) *District {

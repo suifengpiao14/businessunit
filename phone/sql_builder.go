@@ -21,7 +21,7 @@ var DefaultInitFieldFn sqlbuilder.InitFieldFn = func(f *sqlbuilder.Field, fs ...
 }
 
 func (p *Phone) Apply(initFns ...sqlbuilder.InitFieldFn) *Phone {
-	sqlbuilder.InitFieldFns(initFns).Apply(p.Field)
+	p.Field.Apply(initFns...)
 	return p
 }
 

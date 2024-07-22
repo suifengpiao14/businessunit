@@ -120,18 +120,20 @@ func (addr *Address) Init(table string, checkRuleI CheckRuleI, withDWithDefaultI
 			Key:   "return",
 			Title: "退货地址",
 		},
+	}).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SetName("label").SetTitle("标签")
 	})
-	addr.LabelField.Field.SetName("label").SetTitle("标签")
 
 	addr.ContactPhoneField = phone.NewPhone(addr.ContactPhone).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.SetName("contactPhone").SetTitle("联系手机号")
 	})
-	addr.ContactNameField = name.NewName(addr.ContactName)
-	addr.ContactNameField.Field.SetName("contactName").SetTitle("联系人").MergeSchema(sqlbuilder.Schema{
-		Required:  true,
-		MinLength: 1,
-		MaxLength: 20, // 常规名称在20个字以内
-		Type:      sqlbuilder.Schema_Type_string,
+	addr.ContactNameField = name.NewName(addr.ContactName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SetName("contactName").SetTitle("联系人").MergeSchema(sqlbuilder.Schema{
+			Required:  true,
+			MinLength: 1,
+			MaxLength: 20, // 常规名称在20个字以内
+			Type:      sqlbuilder.Schema_Type_string,
+		})
 	})
 	addr.AddressField = sqlbuilder.NewField(func(in any) (any, error) { return addr.Address, nil }).SetName("adrees").SetTitle("详细地址").MergeSchema(sqlbuilder.Schema{
 		MaxLength: 100, // 线上统计最大55个字符，设置100 应该适合大部分场景大小
@@ -145,15 +147,20 @@ func (addr *Address) Init(table string, checkRuleI CheckRuleI, withDWithDefaultI
 			Key:   "2",
 			Title: "否",
 		},
-	)
-	addr.IsDefaultField.Field.SetName("isDefault").SetTitle("默认").SetTag(Tag_isDefault)
-
-	addr.ProvinceField = districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName)
-	addr.ProvinceField.CodeField.SetName("proviceId").SetTitle("省ID")
-	addr.ProvinceField.NameField.SetName("provice").SetTitle("省").MergeSchema(sqlbuilder.Schema{
-		MaxLength: 16,
+	).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SetName("isDefault").SetTitle("默认").SetTag(Tag_isDefault)
 	})
 
+	addr.ProvinceField = districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		switch true {
+		case f.HastTag(districtcode.Field_Tag_Code):
+			f.SetName("proviceId").SetTitle("省ID")
+		case f.HastTag(districtcode.Field_Tag_Name):
+			f.SetName("provice").SetTitle("省").MergeSchema(sqlbuilder.Schema{
+				MaxLength: 16,
+			})
+		}
+	})
 	addr.CityField = districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName)
 	addr.CityField.CodeField.SetName("cityId").SetTitle("城市ID")
 	addr.CityField.NameField.SetName("city").SetTitle("城市").MergeSchema(sqlbuilder.Schema{

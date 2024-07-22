@@ -24,6 +24,11 @@ func (name *Name) Init() {
 
 }
 
+func (p *Name) Apply(initFns ...sqlbuilder.InitFieldFn) *Name {
+	p.Field.Apply(initFns...)
+	return p
+}
+
 func NewName(value string) *Name {
 	name := &Name{
 		Value: value,

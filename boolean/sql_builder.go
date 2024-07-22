@@ -29,6 +29,11 @@ func (b *Boolean) Init() {
 	b.Field.AppendEnum(b.TrueEnum, b.FalseEnum)
 }
 
+func (p *Boolean) Apply(initFns ...sqlbuilder.InitFieldFn) *Boolean {
+	p.Field.Apply(initFns...)
+	return p
+}
+
 func (b Boolean) Fields() sqlbuilder.Fields {
 	return *sqlbuilder.NewFields(b.Field)
 }

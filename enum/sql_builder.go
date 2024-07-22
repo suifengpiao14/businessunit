@@ -18,6 +18,10 @@ func (b *Enum) Init() {
 func (b Enum) Fields() sqlbuilder.Fields {
 	return *sqlbuilder.NewFields(b.Field)
 }
+func (b *Enum) Apply(initFns ...sqlbuilder.InitFieldFn) *Enum {
+	b.Field.Apply(initFns...)
+	return b
+}
 
 func NewEnum(value any, enums sqlbuilder.Enums) *Enum {
 	e := &Enum{
