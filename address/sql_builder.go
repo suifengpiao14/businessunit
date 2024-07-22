@@ -189,8 +189,14 @@ func (addr *Address) Init(table string, checkRuleI CheckRuleI, withDWithDefaultI
 
 	fields.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		if f.HastTag(Tag_isDefault) { // 查询时，存在default 列，则增加按照默值排在前面规则
-			bol := boolean.NewBooleanFromField(f)
-			f.OrderFn = _OrderFn(*bol)
+			f.OrderFn = func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (orderedExpressions []exp.OrderedExpression) {
+				bol := boolean.NewBooleanFromField(f)
+				segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", bol.Field.DBName())
+				expression := goqu.L(segment, bol.TrueEnum.Key, bol.FalseEnum.Key)
+				orderedExpression := exp.NewOrderedExpression(expression, exp.AscDir, exp.NoNullsSortType)
+				orderedExpressions = sqlbuilder.ConcatOrderedExpression(orderedExpression)
+				return orderedExpressions
+			}
 		}
 	})
 
@@ -219,16 +225,6 @@ type WithDefaultI interface {
 
 type CheckRuleI interface {
 	GetCount(rawSql string) (count int, err error) // 某种类型需要限制数量时,需要实现该接口,查询数据库已有的数量
-}
-
-func _OrderFn(boolean boolean.Boolean) sqlbuilder.OrderFn { // 默认记录排前面
-	return func() (orderedExpressions []exp.OrderedExpression) {
-		segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", boolean.Field.DBName())
-		expression := goqu.L(segment, boolean.TrueEnum.Key, boolean.FalseEnum.Key)
-		orderedExpression := exp.NewOrderedExpression(expression, exp.AscDir, exp.NoNullsSortType)
-		orderedExpressions = sqlbuilder.ConcatOrderedExpression(orderedExpression)
-		return orderedExpressions
-	}
 }
 
 func _ValidateRuleFn(address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
