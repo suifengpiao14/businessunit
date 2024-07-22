@@ -41,6 +41,16 @@ func (b Boolean) IsTrue() bool {
 	return b.FalseEnum.IsEqual(val)
 }
 
+func NewBooleanFromField(f *sqlbuilder.Field) *Boolean {
+	enums := f.Schema.Enums
+	bol := &Boolean{
+		TrueEnum:  enums.GetByTag(sqlbuilder.Enum_tag_true),
+		FalseEnum: enums.GetByTag(sqlbuilder.Enum_tag_false),
+		Field:     f.Copy(),
+	}
+	return bol
+}
+
 // Switch  将值反转
 func Switch(f Boolean) *Boolean {
 	cp := &Boolean{

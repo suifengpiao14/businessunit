@@ -10,7 +10,6 @@ import (
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/districtcode"
 	"github.com/suifengpiao14/businessunit/enum"
-	"github.com/suifengpiao14/businessunit/keytitle"
 	"github.com/suifengpiao14/businessunit/name"
 	"github.com/suifengpiao14/businessunit/ownerid"
 	"github.com/suifengpiao14/businessunit/phone"
@@ -96,7 +95,19 @@ type Address struct {
 	AreaField     *districtcode.District
 }
 
+func NewAddress(table string, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) *Address {
+	address := &Address{}
+	address.Init(table, checkRuleI, withDWithDefaultI)
+	return address
+
+}
+
+const (
+	Tag_isDefault = "isDefault"
+)
+
 func (addr *Address) Init(table string, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) {
+	addr.table = table
 	addr.TenatIDField = tenant.NewTenant(addr.TenantID)
 	addr.OwnerIDField = ownerid.NewOwnerID(addr.OwnerID)
 	addr.LabelField = enum.NewEnum(addr.Label, sqlbuilder.Enums{
@@ -135,7 +146,7 @@ func (addr *Address) Init(table string, checkRuleI CheckRuleI, withDWithDefaultI
 			Title: "否",
 		},
 	)
-	addr.IsDefaultField.Field.SetName("isDefault").SetTitle("默认")
+	addr.IsDefaultField.Field.SetName("isDefault").SetTitle("默认").SetTag(Tag_isDefault)
 
 	addr.ProvinceField = districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName)
 	addr.ProvinceField.CodeField.SetName("proviceId").SetTitle("省ID")
@@ -159,9 +170,21 @@ func (addr *Address) Init(table string, checkRuleI CheckRuleI, withDWithDefaultI
 	first := fields[0]
 	first.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
-			_ValidateRuleFn(table, *addr, checkRuleI),
-			_DealDefault(table, *addr, withDWithDefaultI),
+			_ValidateRuleFn(*addr, checkRuleI),
+			_DealDefault(*addr, withDWithDefaultI),
 		)
+	})
+	first.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Append(
+			_DealDefault(*addr, withDWithDefaultI),
+		)
+	})
+
+	fields.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		if f.HastTag(Tag_isDefault) { // 查询时，存在default 列，则增加按照默值排在前面规则
+			bol := boolean.NewBooleanFromField(f)
+			f.OrderFn = _OrderFn(*bol)
+		}
 	})
 
 }
@@ -180,11 +203,6 @@ func (addr Address) Fields() sqlbuilder.Fields {
 	fs.Append(addr.CityField.Fields()...)
 	fs.Append(addr.AreaField.Fields()...)
 	return fs
-}
-
-type AddressI interface {
-	GetAddress() Address
-	sqlbuilder.TableI
 }
 
 // WithDefaultI 需要设置默认地址时,需要实现该接口
@@ -206,7 +224,7 @@ func _OrderFn(boolean boolean.Boolean) sqlbuilder.OrderFn { // 默认记录排�
 	}
 }
 
-func _ValidateRuleFn(table string, address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
+func _ValidateRuleFn(address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
 	return func(in any) (any, error) {
 		if checkRuleI == nil {
 			return in, nil
@@ -223,7 +241,7 @@ func _ValidateRuleFn(table string, address Address, checkRuleI CheckRuleI) sqlbu
 		if maxNumber == 0 {
 			return in, nil
 		}
-		var tableFn sqlbuilder.TableFn = func() (table string) { return table }
+		var tableFn sqlbuilder.TableFn = func() string { return address.table }
 		rawSql, err := sqlbuilder.NewTotalBuilder(tableFn).AppendFields(
 			address.TenatIDField.Field,
 			address.OwnerIDField.Field,
@@ -253,7 +271,7 @@ func _ValidateRuleFn(table string, address Address, checkRuleI CheckRuleI) sqlbu
 }
 
 // _DealDefault 当前记录需要设置为默认记录时,清除已有的默认记录
-func _DealDefault(table string, address Address, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
+func _DealDefault(address Address, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
 	return func(val any) (any, error) {
 		if withDWithDefaultI == nil {
 			return val, nil
@@ -268,7 +286,7 @@ func _DealDefault(table string, address Address, withDWithDefaultI WithDefaultI)
 		falseField := boolean.Switch(*isDefaultField)
 		labelField := address.LabelField.Field.Copy()
 		labelField.ShieldUpdate(true)
-		var tableFn sqlbuilder.TableFn = func() (table string) { return table }
+		var tableFn sqlbuilder.TableFn = func() string { return address.table }
 		rawSql, err := sqlbuilder.NewUpdateBuilder(tableFn).AppendField(falseField.Field).AppendField(
 			address.TenatIDField.Field,
 			address.OwnerIDField.Field,
@@ -283,89 +301,4 @@ func _DealDefault(table string, address Address, withDWithDefaultI WithDefaultI)
 		}
 		return val, nil
 	}
-}
-
-func Insert(addressI AddressI, withDefaultI WithDefaultI, validateRuleI CheckRuleI) sqlbuilder.InsertParam {
-	address := addressI.GetAddress()
-	return sqlbuilder.NewInsertBuilder(nil).AppendField(address.Fields()...)
-}
-
-func Update(addressI AddressI, withDefaultI WithDefaultI) sqlbuilder.UpdateParam {
-	address := addressI.GetAddress()
-	provice := address.ProvinceField
-	city := address.CityField
-	area := address.AreaField
-	phoneField := address.ContactPhoneField
-	label := address.LabelField
-	isDefault := address.IsDefaultField
-	return sqlbuilder.NewUpdateBuilder(nil).AppendData(_DataFn(addressI)).AppendWhere(_WhereFn(addressI)).Merge(
-		keytitle.Update(provice.IdTitleField),
-		keytitle.Update(city.IdTitleField),
-		keytitle.Update(area.IdTitleField),
-		phone.Update(phoneField),
-		enum.Update(label),
-		boolean.Update(isDefault),
-		tenant.Update(address.TenatIDField),
-		ownerid.Update(address.OwnerIDField),
-	).AppendValidate(_DealDefault(addressI, withDefaultI))
-}
-
-func First(addressI AddressI) sqlbuilder.FirstParam {
-	address := addressI.GetAddress()
-	provice := address.ProvinceField
-	city := address.CityField
-	area := address.AreaField
-	phoneField := address.ContactPhoneField
-	label := address.LabelField
-	isDefault := address.IsDefaultField
-	return sqlbuilder.NewFirstBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		keytitle.First(provice.IdTitleField),
-		keytitle.First(city.IdTitleField),
-		keytitle.First(area.IdTitleField),
-		phone.First(phoneField),
-		enum.First(label),
-		boolean.First(isDefault),
-		tenant.First(address.TenatIDField),
-		ownerid.First(address.OwnerIDField),
-	).AppendOrder(_OrderFn(isDefault))
-}
-
-func List(addressI AddressI) sqlbuilder.ListParam {
-	address := addressI.GetAddress()
-	provice := address.ProvinceField
-	city := address.CityField
-	area := address.AreaField
-	phoneField := address.ContactPhoneField
-	label := address.LabelField
-	isDefault := address.IsDefaultField
-	return sqlbuilder.NewListBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		keytitle.List(provice.IdTitleField),
-		keytitle.List(city.IdTitleField),
-		keytitle.List(area.IdTitleField),
-		phone.List(phoneField),
-		enum.List(label),
-		boolean.List(isDefault),
-		tenant.List(address.TenatIDField),
-		ownerid.List(address.OwnerIDField),
-	).AppendOrder(_OrderFn(isDefault))
-}
-
-func Total(addressI AddressI) sqlbuilder.TotalParam {
-	address := addressI.GetAddress()
-	provice := address.ProvinceField
-	city := address.CityField
-	area := address.AreaField
-	phoneField := address.ContactPhoneField
-	label := address.LabelField
-	isDefault := address.IsDefaultField
-	return sqlbuilder.NewTotalBuilder(nil).AppendWhere(_WhereFn(addressI)).Merge(
-		keytitle.Total(provice.IdTitleField),
-		keytitle.Total(city.IdTitleField),
-		keytitle.Total(area.IdTitleField),
-		phone.Total(phoneField),
-		enum.Total(label),
-		boolean.Total(isDefault),
-		tenant.Total(address.TenatIDField),
-		ownerid.Total(address.OwnerIDField),
-	)
 }

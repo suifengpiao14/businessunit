@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/stretchr/testify/require"
 	"github.com/suifengpiao14/businessunit/address"
-	"github.com/suifengpiao14/businessunit/tenant"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -29,25 +28,23 @@ type InsertAddress struct {
 }
 
 func (addr InsertAddress) GetAddress() (addres address.Address) {
-	province := address.NewProvinceField(func(in any) (any, error) { return addr.ProvinceName, nil }, func(in any) (any, error) { return addr.ProvinceId, nil })
-	city := address.NewCityField(func(in any) (any, error) { return addr.CityId, nil }, func(in any) (any, error) { return addr.CityId, nil })
-	area := address.NewAreaField(func(in any) (any, error) { return addr.AreaId, nil }, func(in any) (any, error) { return addr.AreaName, nil })
-	province.ID.SetName("provinceId")
-	city.ID.SetName("cityId")
-	area.ID.SetName("areaId")
 
 	addres = address.Address{
-		TenatIDField:      tenant.NewTenant(func(in any) (any, error) { return addr.TenantID, nil }).SetName("businessId"),
-		LabelField:        address.NewLabelField(func(in any) (any, error) { return addr.Label, nil }, nil),
-		IsDefaultField:    address.NewIsDefaultField(func(in any) (any, error) { return addr.IsDefault, nil }, nil),
-		ContactPhoneField: address.NewContactPhoneField(func(in any) (any, error) { return addr.ContactPhone, nil }),
-		ContactNameField:  *address.NewContactNameField(func(in any) (any, error) { return addr.ContactName, nil }).SetName("contactName"),
-		AddressField:      *address.NewAddressField(func(in any) (any, error) { return addr.Address, nil }),
-
-		ProvinceField: province,
-		CityField:     city,
-		AreaField:     area,
+		TenantID:     addr.TenantID,
+		OwnerID:      addr.OwnerID,
+		Label:        addr.Label,
+		ContactPhone: addr.ContactPhone,
+		ContactName:  addr.ContactName,
+		Address:      addr.Address,
+		IsDefault:    addr.IsDefault,
+		ProvinceCode: addr.ProvinceId,
+		ProvinceName: addr.ProvinceName,
+		CityCode:     addr.CityId,
+		CityName:     addr.CityName,
+		AreaCode:     addr.AreaId,
+		AreaName:     addr.AreaName,
 	}
+	addres.Init(addr.Table(), addr, addr)
 	return addres
 }
 
@@ -64,27 +61,10 @@ func (addr InsertAddress) GetCount(rawSql string) (count int, err error) {
 	fmt.Println(rawSql)
 	return 0, nil
 }
-func (addr InsertAddress) Fields() (fields sqlbuilder.Fields) {
-	address := addr.GetAddress()
-	fields = sqlbuilder.Fields{
-		address.TenatIDField.Field,
-		address.LabelField.Field,
-		address.IsDefaultField.GetBooleanField().Field,
-		address.ContactPhoneField.Field,
-		address.ContactNameField,
-		address.AddressField,
-	}
-	fields = append(fields, address.ProvinceField.GetIdTitle().Fields()...)
-	fields = append(fields, address.CityField.GetIdTitle().Fields()...)
-	fields = append(fields, address.AreaField.GetIdTitle().Fields()...)
-
-	return fields
-}
 
 func TestInsertDoc(t *testing.T) {
 	var addr = InsertAddress{}
-	reqArgs, err := addr.Fields().DocRequestArgs()
-	require.NoError(t, err)
+	reqArgs := addr.GetAddress().Fields().DocRequestArgs()
 	markdown := reqArgs.Makedown()
 	fmt.Println(markdown)
 	example := reqArgs.JsonExample(true)
@@ -93,7 +73,7 @@ func TestInsertDoc(t *testing.T) {
 
 func TestInsertDDL(t *testing.T) {
 	var addr = InsertAddress{}
-	columns, err := addr.Fields().DBColumns()
+	columns, err := addr.GetAddress().Fields().DBColumns()
 	require.NoError(t, err)
 	ddl := columns.DDL(sqlbuilder.Driver_mysql)
 	fmt.Println(ddl)
@@ -115,7 +95,7 @@ func TestInsert(t *testing.T) {
 		IsDefault:    "1",
 		TenantID:     "15",
 	}
-	sql, err := sqlbuilder.NewInsertBuilder(addr).Merge(address.Insert(addr, addr, addr)).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(addr).AppendField(addr.GetAddress().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -143,7 +123,7 @@ func TestUpdate(t *testing.T) {
 			IsDefault:    "1",
 		},
 	}
-	sql, err := sqlbuilder.NewUpdateBuilder(addr).Merge(address.Update(addr, addr)).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(addr).AppendField(addr.GetAddress().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -181,7 +161,7 @@ func TestSelect(t *testing.T) {
 			IsDefault:    "1",
 		},
 	}
-	sql, err := sqlbuilder.NewListBuilder(addr).Merge(address.List(addr)).ToSQL()
+	sql, err := sqlbuilder.NewListBuilder(addr).AppendFields(addr.GetAddress().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
