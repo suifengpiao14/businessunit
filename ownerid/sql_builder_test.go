@@ -29,7 +29,7 @@ func TestInsert(t *testing.T) {
 	identityField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
 	ownerId := ownerid.NewOwnerID(p.OwnerID)
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
-	sql, err := sqlbuilder.NewInsertBuilder(p).AppendField(identityField, ownerId.Field, nameField).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(p).AppendFields(identityField, ownerId.Field, nameField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -44,7 +44,7 @@ func TestUpdate(t *testing.T) {
 	identityField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
 	ownerId := ownerid.NewOwnerID(p.OwnerID)
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }).SetName("name")
-	sql, err := sqlbuilder.NewUpdateBuilder(p).AppendField(identityField, ownerId.Field, nameField).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(p).AppendFields(identityField, ownerId.Field, nameField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

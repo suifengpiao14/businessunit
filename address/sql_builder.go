@@ -290,7 +290,7 @@ func _DealDefault(address Address, withDWithDefaultI WithDefaultI) sqlbuilder.Va
 		labelField := address.LabelField.Field.Copy()
 		labelField.ShieldUpdate(true)
 		var tableFn sqlbuilder.TableFn = func() string { return address.table }
-		rawSql, err := sqlbuilder.NewUpdateBuilder(tableFn).AppendField(falseField.Field).AppendField(
+		rawSql, err := sqlbuilder.NewUpdateBuilder(tableFn).AppendFields(falseField.Field).AppendFields(
 			address.TenatIDField.Field,
 			address.OwnerIDField.Field,
 			labelField,

@@ -47,7 +47,7 @@ func TestInsert(t *testing.T) {
 		Email:  "莉丝",
 		Tenant: "1000001",
 	}
-	sql, err := sqlbuilder.NewInsertBuilder(row).AppendField(row.Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(row).AppendFields(row.Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }
@@ -99,7 +99,7 @@ func TestUpdate(t *testing.T) {
 		Email:  "莉丝",
 		Tenant: "1000001",
 	}
-	sql, err := sqlbuilder.NewUpdateBuilder(row).AppendField(row.Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(row).AppendFields(row.Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }
@@ -151,7 +151,7 @@ func TestFirst(t *testing.T) {
 		Tenant: "1000001",
 	}
 	tenantField := tenant.NewTenant(row.Tenant).Field
-	sql, err := sqlbuilder.NewFirstBuilder(row).AppendField(tenantField).ToSQL()
+	sql, err := sqlbuilder.NewFirstBuilder(row).AppendFields(tenantField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }
