@@ -244,8 +244,7 @@ func _ValidateRuleFn(address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn 
 		if maxNumber == 0 {
 			return in, nil
 		}
-		var tableFn sqlbuilder.TableFn = func() string { return address.table }
-		rawSql, err := sqlbuilder.NewTotalBuilder(tableFn).AppendFields(
+		rawSql, err := sqlbuilder.NewTotalBuilder(address.table).AppendFields(
 			address.TenatIDField.Field,
 			address.OwnerIDField.Field,
 			address.LabelField.Field,
@@ -289,8 +288,7 @@ func _DealDefault(address Address, withDWithDefaultI WithDefaultI) sqlbuilder.Va
 		falseField := boolean.Switch(*isDefaultField)
 		labelField := address.LabelField.Field.Copy()
 		labelField.ShieldUpdate(true)
-		var tableFn sqlbuilder.TableFn = func() string { return address.table }
-		rawSql, err := sqlbuilder.NewUpdateBuilder(tableFn).AppendFields(falseField.Field).AppendFields(
+		rawSql, err := sqlbuilder.NewUpdateBuilder(address.table).AppendFields(falseField.Field).AppendFields(
 			address.TenatIDField.Field,
 			address.OwnerIDField.Field,
 			labelField,

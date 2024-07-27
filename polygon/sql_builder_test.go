@@ -65,7 +65,7 @@ func TestInsert(t *testing.T) {
 	points, err := polyg.Points()
 	require.NoError(t, err)
 	boxField := points.GetBoundingBox()
-	sql, err := sqlbuilder.NewInsertBuilder(row).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(row.Table()).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }
@@ -113,7 +113,7 @@ func TestList(t *testing.T) {
 	require.NoError(t, err)
 	tenantField := tenant.NewTenant(row.Tenant).Field
 	boxField := points.GetBoundingBox()
-	sql, err := sqlbuilder.NewListBuilder(row).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewListBuilder(row.Table()).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

@@ -95,7 +95,7 @@ func TestInsert(t *testing.T) {
 		IsDefault:    "1",
 		TenantID:     "15",
 	}
-	sql, err := sqlbuilder.NewInsertBuilder(addr).AppendFields(addr.GetAddress().Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -123,7 +123,7 @@ func TestUpdate(t *testing.T) {
 			IsDefault:    "1",
 		},
 	}
-	sql, err := sqlbuilder.NewUpdateBuilder(addr).AppendFields(addr.GetAddress().Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -161,7 +161,7 @@ func TestSelect(t *testing.T) {
 			IsDefault:    "1",
 		},
 	}
-	sql, err := sqlbuilder.NewListBuilder(addr).AppendFields(addr.GetAddress().Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewListBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 

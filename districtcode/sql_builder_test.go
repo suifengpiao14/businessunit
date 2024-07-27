@@ -32,7 +32,7 @@ func TestGetChildren(t *testing.T) {
 	codeField := sqlbuilder.NewField(func(in any) (any, error) { return d.Code, nil }).SetName("code")
 	nameField := sqlbuilder.NewField(func(in any) (any, error) { return d.Name, nil }).SetName("name")
 	districtcode.OptionsGetChildren(codeField, nameField, districtcode.Depth_max)
-	sql, err := sqlbuilder.NewListBuilder(d).AppendFields(codeField, nameField).ToSQL()
+	sql, err := sqlbuilder.NewListBuilder(d.Table()).AppendFields(codeField, nameField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

@@ -23,7 +23,7 @@ func _checkExists(uniqueI CheckUniqueI, uniqueField sqlbuilder.Fields, idField *
 		if idField != nil {
 			idField = idField.Copy() // 复制一份，不影响外部的
 		}
-		totalParam := sqlbuilder.NewTotalBuilder(sqlbuilder.TableFn(uniqueI.Table)).AppendFields(uniqueField...)
+		totalParam := sqlbuilder.NewTotalBuilder(uniqueI.Table()).AppendFields(uniqueField...)
 		expressions, err := totalParam.Where()
 		if err != nil {
 			return nil, err
