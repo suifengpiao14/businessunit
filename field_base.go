@@ -121,14 +121,14 @@ func NewUpdatedAtField() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
 		return time.Now().Local().Format(Time_format), nil
 	})
-	f.SetName("updated_at").SetTitle("更新时间")
+	f.SetName("updated_at").SetTitle("更新时间").SetTag(sqlbuilder.Tag_updatedAt)
 	return f
 }
 
 func NewCreatedAt() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
 		return time.Now().Local().Format(Time_format), nil
-	}).SetName("created_at").SetTitle("创建时间")
+	}).SetName("created_at").SetTitle("创建时间").SetTag(sqlbuilder.Tag_createdAt)
 	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield) // 更新时屏蔽
 	})
@@ -138,9 +138,10 @@ func NewCreatedAt() (f *sqlbuilder.Field) {
 func NewAutoIdField(autoId uint) (field *sqlbuilder.Field) {
 	field = sqlbuilder.NewField(func(in any) (any, error) { return autoId, nil })
 	field.SetName("id").SetTitle("ID").MergeSchema(sqlbuilder.Schema{
-		Type:      sqlbuilder.Schema_Type_int,
-		MaxLength: 64,
-		Primary:   true,
+		Type:          sqlbuilder.Schema_Type_int,
+		MaxLength:     64,
+		Primary:       true,
+		AutoIncrement: true,
 	})
 
 	field.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {

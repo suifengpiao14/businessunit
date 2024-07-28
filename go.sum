@@ -45,10 +45,6 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/suifengpiao14/funcs v0.0.18 h1:TQZ9EPPnzGBFNIIpHO+I/y38ufO0osZlGtm49P2DNkA=
 github.com/suifengpiao14/funcs v0.0.18/go.mod h1:g95inzlUrS2Vtyvv5SjVFOnOeX7ZBPWwyKuEMMW+g7U=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240712055943-e942bc8f7bd2 h1:dte4o54j6l0Xu5Ry9BhRH7WCzUoLJnQD5tWHRri8Dbs=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240712055943-e942bc8f7bd2/go.mod h1:2N8VTtKY/HvpmAO0j3pVgb5Z+FKy8C+b32UHD0N7WYI=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240721150311-3cafb93358d9 h1:27ZjvIVAuUhuq8BHT0UlM3EeWSATsO37ISe4eo7YDro=
-github.com/suifengpiao14/sqlbuilder v0.0.0-20240721150311-3cafb93358d9/go.mod h1:2N8VTtKY/HvpmAO0j3pVgb5Z+FKy8C+b32UHD0N7WYI=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240728042357-0489cd85ee43 h1:B73tdEe0Sin8NI+piqI/jUPDOd6u/3IGM3gn7sgacvk=
 github.com/suifengpiao14/sqlbuilder v0.0.0-20240728042357-0489cd85ee43/go.mod h1:rpwinPiKT8UX2FrOjr7s7ioMA03e5QZx2SsTuRd43uw=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
