@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/spf13/cast"
 	"github.com/stretchr/testify/require"
-	"github.com/suifengpiao14/businessunit/autoid"
+	"github.com/suifengpiao14/businessunit"
 	"github.com/suifengpiao14/businessunit/unique"
 	"github.com/suifengpiao14/sqlbuilder"
 )
@@ -30,7 +31,7 @@ func TestUpdate(t *testing.T) {
 		Name: "张三",
 	}
 
-	idField := autoid.NewAutoIdField(func(in any) (any, error) { return p.ID, nil })
+	idField := businessunit.NewAutoIdField(cast.ToUint(p.ID))
 	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil })).WithOptions(unique.OptionUnique(p, idField))
 	sql, err := sqlbuilder.NewUpdateBuilder(p.Table()).AppendFields(uniqueFields...).AppendFields(idField).ToSQL()
 	require.NoError(t, err)

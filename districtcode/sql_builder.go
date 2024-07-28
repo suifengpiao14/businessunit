@@ -15,8 +15,8 @@ type District struct {
 }
 
 const (
-	Field_Tag_Code = "code"
-	Field_Tag_Name = "name"
+	Field_Name_Code = "code"
+	Field_Name_Name = "name"
 )
 
 func (d *District) Init() {
@@ -25,26 +25,26 @@ func (d *District) Init() {
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 16, //统计局统一是使用12位，如 659008103505
 		MinLength: 2,  // 只使用省时，为2位
-	})
+	}).SetFieldName(Field_Name_Code)
 	d.NameField = sqlbuilder.NewField(func(in any) (any, error) { return d.Name, nil }).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 16, //统计局统一是使用12位，如 659008103505
 		MinLength: 2,  // 只使用省时，为2位
-	})
+	}).SetFieldName(Field_Name_Name)
 }
 
 func (d District) Fields() (fs sqlbuilder.Fields) {
 	fs = sqlbuilder.Fields{
-		d.CodeField.SetTag(Field_Tag_Code),
-		d.NameField.SetTag(Field_Tag_Name),
+		d.CodeField,
+		d.NameField,
 	}
 
 	return fs
 }
 
 func (p *District) Apply(initFns ...sqlbuilder.InitFieldFn) *District {
-	p.Fields().Apply(initFns...)
+	p.CodeField.Apply(initFns...)
 	return p
 }
 

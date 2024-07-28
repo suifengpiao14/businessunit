@@ -3,7 +3,7 @@ package businessunit
 import (
 	"time"
 
-	"github.com/suifengpiao14/businessunit/enum"
+	"github.com/rs/xid"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -81,10 +81,8 @@ func NewHeightField(height int) (f *sqlbuilder.Field) {
 	return f
 }
 
-var NewEnum = enum.NewEnum
-
-func NewGenderField[T int | string](val T, man T, woman T) *enum.Enum {
-	genderField := enum.NewEnum(val, sqlbuilder.Enums{
+func NewGenderField[T int | string](val T, man T, woman T) *EnumField {
+	genderField := NewEnumField(val, sqlbuilder.Enums{
 		sqlbuilder.Enum{
 			Key:   man,
 			Title: "男",
@@ -167,4 +165,205 @@ func NewAutoIdField(autoId uint) (field *sqlbuilder.Field) {
 		}
 	})
 	return field
+}
+
+func NewTenantField[T int | string](tenant T) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(func(in any) (any, error) { return tenant, nil }).SetName("ternatId").SetTitle("租户ID")
+	f.MergeSchema(sqlbuilder.Schema{
+		Required:  true,
+		MinLength: 1,
+		Type:      sqlbuilder.Schema_Type_string,
+		MaxLength: 64,
+		Maximum:   sqlbuilder.UnsinedInt_maximum_bigint,
+		Minimum:   1,
+	})
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ShieldUpdate(true) // 不可更新
+	})
+	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
+	return f
+}
+
+// NewDeletedAtField 通过删除时间列标记删除
+func NewDeletedAtField() (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(nil).SetName("deleted_at").SetTitle("删除时间")
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Append(sqlbuilder.ValueFnShield)
+	})
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ShieldUpdate(true)
+	})
+	//设置删除场景
+	f.SceneFn(sqlbuilder.SCENE_DDL_DELETE, func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Reset(func(in any) (any, error) {
+			return time.Now().Local().Format(Time_format), nil
+		})
+	})
+	f.WhereFns.Append(sqlbuilder.ValueFnForward)
+	return f
+}
+
+const (
+	Tag_DeletedStatusField = "DeletedStatusField"
+)
+
+// NewDeletedStatusField 使用特定状态标记删除
+func NewDeletedStatusField[T int | string](deletedStatus T) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(func(in any) (any, error) {
+		return deletedStatus, nil
+	}).SetName("status").SetTitle("状态").SetTag(Tag_DeletedStatusField) // 设置特殊标记,方便使用时获取列特殊处理
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Append(sqlbuilder.ValueFnShield)
+	})
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ShieldUpdate(true)
+	})
+	//设置删除场景
+	f.SceneFn(sqlbuilder.SCENE_DDL_DELETE, func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Reset(func(in any) (any, error) {
+			return deletedStatus, nil
+		})
+	})
+	f.WhereFns.Append(func(in any) (any, error) {
+		return sqlbuilder.Neq(in), nil
+	})
+
+	return f
+}
+
+func NewKeyFieldField[T int | uint | int64 | string](value T) *sqlbuilder.Field {
+	f := sqlbuilder.NewField(func(in any) (any, error) {
+		return value, nil
+	}).SetName("key").SetTitle("键")
+	f.MergeSchema(sqlbuilder.Schema{
+		Type:      sqlbuilder.Schema_Type_string,
+		MaxLength: 64,
+	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	f.MinBoundaryWhereInsert(1, 1)
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil)
+	})
+	return f
+}
+
+func NewOwnerID[T int | string | int64](value T) *sqlbuilder.Field {
+	field := sqlbuilder.NewField(func(in any) (any, error) { return value, nil }).SetName("ownerId").SetTitle("所有者").MergeSchema(sqlbuilder.Schema{
+		Comment:      "对象标识,缺失时记录无意义",
+		Type:         sqlbuilder.Schema_Type_string,
+		MaxLength:    64,
+		MinLength:    1,
+		Minimum:      1,
+		ShieldUpdate: true, // 所有者不可跟新
+	})
+	field.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SetRequired(true)
+	})
+	field.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	return field
+}
+
+func NewIdentifierField(value any) *sqlbuilder.Field {
+	f := sqlbuilder.NewField(func(in any) (any, error) { return value, nil }).SetName("identity").SetTitle("标识")
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	})
+	return f
+}
+
+func NewUuidField[T int | int64 | string](value T) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(func(in any) (any, error) { return value, nil }).SetName("uuid").SetTitle("UUID")
+	f.MergeSchema(sqlbuilder.Schema{
+		Type:      sqlbuilder.Schema_Type_string,
+		MaxLength: 64,
+		MinLength: 1,
+	})
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SetRequired(true)
+		f.ValueFns.InsertAsFirst(func(in any) (any, error) {
+			return xid.New().String(), nil
+		})
+	})
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ShieldUpdate(true) // uuid 不能更新
+		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil, sqlbuilder.ValueFnForward)
+	})
+
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+	})
+
+	return f
+}
+
+func NewTitleField(value string) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(func(in any) (any, error) { return value, nil })
+	f.SetName("title").SetTitle("标题").MergeSchema(sqlbuilder.Schema{
+		Type:      sqlbuilder.Schema_Type_string,
+		MaxLength: 64,
+	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
+	})
+	return f
+}
+
+func NewKeyField(value any) *sqlbuilder.Field {
+	f := sqlbuilder.NewField(func(in any) (any, error) { return value, nil }).SetName("key").SetTitle("键")
+	f.MergeSchema(sqlbuilder.Schema{
+		Type:      sqlbuilder.Schema_Type_string,
+		MaxLength: 64,
+		Minimum:   1,
+	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil)
+	})
+	return f
+}
+
+type EnumField struct {
+	Enums sqlbuilder.Enums
+	Field *sqlbuilder.Field
+}
+
+func (b *EnumField) Apply(initFns ...sqlbuilder.InitFieldFn) *EnumField {
+	b.Field.Apply(initFns...)
+	return b
+}
+
+func NewEnumField(value any, enums sqlbuilder.Enums) *EnumField {
+	e := &EnumField{
+		Enums: enums,
+	}
+	e.Field = sqlbuilder.NewField(func(in any) (any, error) { return value, nil }).SetName("enum_column").SetTag("枚举列")
+	e.Field.AppendEnum(enums...)
+	return e
+}
+
+func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) {
+	if len(redundantFields) > 0 {
+		return
+	}
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.InsertAsSecond(func(in any) (any, error) {
+			val, err := f.GetValue()
+			if err != nil {
+				return nil, err
+			}
+			m := map[string]any{}
+			for _, redundantField := range redundantFields {
+				redundantField.ValueFns.InsertAsFirst(func(in any) (any, error) { return val, nil })
+				redundantFiledValue, err := redundantField.GetValue()
+				if err != nil {
+					return nil, err
+				}
+				if !sqlbuilder.IsNil(redundantFiledValue) {
+					m[redundantField.DBName()] = redundantFiledValue
+				}
+			}
+			return m, nil
+		})
+	})
+
 }

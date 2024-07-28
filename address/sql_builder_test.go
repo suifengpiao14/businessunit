@@ -30,6 +30,7 @@ type InsertAddress struct {
 func (addr InsertAddress) GetAddress() (addres address.Address) {
 
 	addres = address.Address{
+
 		TenantID:     addr.TenantID,
 		OwnerID:      addr.OwnerID,
 		Label:        addr.Label,
@@ -43,8 +44,9 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 		CityName:     addr.CityName,
 		AreaCode:     addr.AreaId,
 		AreaName:     addr.AreaName,
+		CheckRuleI:   addr,
+		WithDefaultI: addr,
 	}
-	addres.Init(addr.Table(), addr, addr)
 	return addres
 }
 
@@ -64,7 +66,7 @@ func (addr InsertAddress) GetCount(rawSql string) (count int, err error) {
 
 func TestInsertDoc(t *testing.T) {
 	var addr = InsertAddress{}
-	reqArgs := addr.GetAddress().Fields().DocRequestArgs()
+	reqArgs := addr.GetAddress().Fields().Fields().DocRequestArgs()
 	markdown := reqArgs.Makedown()
 	fmt.Println(markdown)
 	example := reqArgs.JsonExample(true)
@@ -73,7 +75,7 @@ func TestInsertDoc(t *testing.T) {
 
 func TestInsertDDL(t *testing.T) {
 	var addr = InsertAddress{}
-	columns, err := addr.GetAddress().Fields().DBColumns()
+	columns, err := addr.GetAddress().Fields().Fields().DBColumns()
 	require.NoError(t, err)
 	ddl := columns.DDL(sqlbuilder.Driver_mysql)
 	fmt.Println(ddl)
@@ -95,7 +97,7 @@ func TestInsert(t *testing.T) {
 		IsDefault:    "1",
 		TenantID:     "15",
 	}
-	sql, err := sqlbuilder.NewInsertBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewInsertBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -123,7 +125,7 @@ func TestUpdate(t *testing.T) {
 			IsDefault:    "1",
 		},
 	}
-	sql, err := sqlbuilder.NewUpdateBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewUpdateBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 
@@ -161,7 +163,7 @@ func TestSelect(t *testing.T) {
 			IsDefault:    "1",
 		},
 	}
-	sql, err := sqlbuilder.NewListBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields()...).ToSQL()
+	sql, err := sqlbuilder.NewListBuilder(addr.Table()).AppendFields(addr.GetAddress().Fields().Fields()...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
 

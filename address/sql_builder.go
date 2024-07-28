@@ -7,28 +7,24 @@ import (
 	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
+	"github.com/suifengpiao14/businessunit"
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/districtcode"
-	"github.com/suifengpiao14/businessunit/enum"
-	"github.com/suifengpiao14/businessunit/name"
-	"github.com/suifengpiao14/businessunit/ownerid"
-	"github.com/suifengpiao14/businessunit/phone"
-	"github.com/suifengpiao14/businessunit/tenant"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
 type AddressRule struct {
-	TenatID   *tenant.Tenant // 业务、应用、租户等唯一标识
-	OwnerID   *ownerid.OwnerID
-	Label     *enum.Enum
+	TenatID   *sqlbuilder.Field // 业务、应用、租户等唯一标识
+	OwnerID   *sqlbuilder.Field
+	Label     *businessunit.EnumField
 	MaxNumber sqlbuilder.Field // 单个业务下指定类型可配置最大条数
 }
 
 type AddressRules []AddressRule
 
-func (rs AddressRules) GetByLabel(tenatID *tenant.Tenant, ownerID *ownerid.OwnerID, label *enum.Enum) (addressRule *AddressRule, exist bool) {
+func (rs AddressRules) GetByLabel(tenatID *sqlbuilder.Field, ownerID *sqlbuilder.Field, label *businessunit.EnumField) (addressRule *AddressRule, exist bool) {
 	for _, r := range rs {
-		if r.TenatID.Field.IsEqual(*tenatID.Field) && r.OwnerID.Field.IsEqual(*ownerID.Field) && r.Label.Field.IsEqual(*label.Field) {
+		if r.TenatID.IsEqual(*tenatID) && r.OwnerID.IsEqual(*ownerID) && r.Label.Field.IsEqual(*label.Field) {
 			return &r, true
 		}
 	}
@@ -81,12 +77,16 @@ type Address struct {
 	CityName     string
 	AreaCode     string
 	AreaName     string
+	CheckRuleI   CheckRuleI
+	WithDefaultI WithDefaultI
+}
 
-	TenatIDField      *tenant.Tenant // 业务、应用、租户等唯一标识
-	OwnerIDField      *ownerid.OwnerID
-	LabelField        *enum.Enum
-	ContactPhoneField *phone.Phone
-	ContactNameField  *name.Name
+type AddressFields struct {
+	TenatIDField      *sqlbuilder.Field // 业务、应用、租户等唯一标识
+	OwnerIDField      *sqlbuilder.Field
+	LabelField        *businessunit.EnumField
+	ContactPhoneField *sqlbuilder.Field
+	ContactNameField  *sqlbuilder.Field
 	AddressField      *sqlbuilder.Field
 	IsDefaultField    *boolean.Boolean
 
@@ -95,120 +95,13 @@ type Address struct {
 	AreaField     *districtcode.District
 }
 
-func NewAddress(table string, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) *Address {
-	address := &Address{}
-	address.Init(table, checkRuleI, withDWithDefaultI)
-	return address
-
-}
-
-const (
-	Tag_isDefault = "isDefault"
-)
-
-func (addr *Address) Init(table string, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) {
-	addr.table = table
-	addr.TenatIDField = tenant.NewTenant(addr.TenantID)
-	addr.OwnerIDField = ownerid.NewOwnerID(addr.OwnerID)
-	addr.LabelField = enum.NewEnum(addr.Label, sqlbuilder.Enums{
-		{
-			Key:       "recive",
-			Title:     "收获地址",
-			IsDefault: true,
-		},
-		{
-			Key:   "return",
-			Title: "退货地址",
-		},
-	}).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.SetName("label").SetTitle("标签")
-	})
-
-	addr.ContactPhoneField = phone.NewPhone(addr.ContactPhone).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.SetName("contactPhone").SetTitle("联系手机号")
-	})
-	addr.ContactNameField = name.NewName(addr.ContactName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.SetName("contactName").SetTitle("联系人").MergeSchema(sqlbuilder.Schema{
-			Required:  true,
-			MinLength: 1,
-			MaxLength: 20, // 常规名称在20个字以内
-			Type:      sqlbuilder.Schema_Type_string,
-		})
-	})
-	addr.AddressField = sqlbuilder.NewField(func(in any) (any, error) { return addr.Address, nil }).SetName("adrees").SetTitle("详细地址").MergeSchema(sqlbuilder.Schema{
-		MaxLength: 100, // 线上统计最大55个字符，设置100 应该适合大部分场景大小
-	})
-	addr.IsDefaultField = boolean.NewBoolean(addr.IsDefault,
-		sqlbuilder.Enum{
-			Key:   "1",
-			Title: "是",
-		},
-		sqlbuilder.Enum{
-			Key:   "2",
-			Title: "否",
-		},
-	).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.SetName("isDefault").SetTitle("默认").SetTag(Tag_isDefault)
-	})
-
-	addr.ProvinceField = districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		switch true {
-		case f.HastTag(districtcode.Field_Tag_Code):
-			f.SetName("proviceId").SetTitle("省ID")
-		case f.HastTag(districtcode.Field_Tag_Name):
-			f.SetName("provice").SetTitle("省").MergeSchema(sqlbuilder.Schema{
-				MaxLength: 16,
-			})
-		}
-	})
-	addr.CityField = districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName)
-	addr.CityField.CodeField.SetName("cityId").SetTitle("城市ID")
-	addr.CityField.NameField.SetName("city").SetTitle("城市").MergeSchema(sqlbuilder.Schema{
-		MaxLength: 32, //海南省黎母山林场（海南黎母山省级自然保护区管理站）线上最长 25，设置32 2的倍数
-	})
-
-	addr.AreaField = districtcode.NewDistrict(addr.AreaCode, addr.AreaName)
-	addr.AreaField.CodeField.SetName("areaId").SetTitle("区ID")
-	addr.AreaField.NameField.SetName("area").SetTitle("区").MergeSchema(sqlbuilder.Schema{
-		MaxLength: 128, //海南省黎母山林场（海南黎母山省级自然保护区管理站）线上最长 25，设置32 2的倍数
-	})
-
-	fields := addr.Fields()
-	first := fields[0]
-	first.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ValueFns.Append(
-			_ValidateRuleFn(*addr, checkRuleI),
-			_DealDefault(*addr, withDWithDefaultI),
-		)
-	})
-	first.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ValueFns.Append(
-			_DealDefault(*addr, withDWithDefaultI),
-		)
-	})
-
-	fields.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		if f.HastTag(Tag_isDefault) { // 查询时，存在default 列，则增加按照默值排在前面规则
-			f.OrderFn = func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (orderedExpressions []exp.OrderedExpression) {
-				bol := boolean.NewBooleanFromField(f)
-				segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", bol.Field.DBName())
-				expression := goqu.L(segment, bol.TrueEnum.Key, bol.FalseEnum.Key)
-				orderedExpression := exp.NewOrderedExpression(expression, exp.AscDir, exp.NoNullsSortType)
-				orderedExpressions = sqlbuilder.ConcatOrderedExpression(orderedExpression)
-				return orderedExpressions
-			}
-		}
-	})
-
-}
-
-func (addr Address) Fields() sqlbuilder.Fields {
+func (addr AddressFields) Fields() sqlbuilder.Fields {
 	fs := sqlbuilder.Fields{
-		addr.TenatIDField.Field,
-		addr.OwnerIDField.Field,
+		addr.TenatIDField,
+		addr.OwnerIDField,
 		addr.LabelField.Field,
-		addr.ContactNameField.Field,
-		addr.ContactPhoneField.Field,
+		addr.ContactPhoneField,
+		addr.ContactNameField,
 		addr.AddressField,
 		addr.IsDefaultField.Field,
 	}
@@ -216,6 +109,118 @@ func (addr Address) Fields() sqlbuilder.Fields {
 	fs.Append(addr.CityField.Fields()...)
 	fs.Append(addr.AreaField.Fields()...)
 	return fs
+}
+
+const (
+	Field_Name_isDefault = "isDefault"
+)
+
+func (addr Address) Fields() *AddressFields {
+	addressFields := &AddressFields{
+		TenatIDField: businessunit.NewTenantField(addr.TenantID),
+		OwnerIDField: businessunit.NewOwnerID(addr.OwnerID),
+		LabelField: businessunit.NewEnumField(addr.Label, sqlbuilder.Enums{
+			{
+				Key:       "recive",
+				Title:     "收获地址",
+				IsDefault: true,
+			},
+			{
+				Key:   "return",
+				Title: "退货地址",
+			},
+		}).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.SetName("label").SetTitle("标签")
+		}),
+
+		ContactPhoneField: businessunit.NewPhoneField(addr.ContactPhone).SetName("contactPhone").SetTitle("联系手机号"),
+		ContactNameField: businessunit.NewNameField(addr.ContactName).SetName("contactName").SetTitle("联系人").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.RequiredWhenInsert(true)
+			f.MinBoundaryWhereInsert(1, 1)
+		}).MergeSchema(sqlbuilder.Schema{
+			MaxLength: 20, // 常规名称在20个字以内
+			Type:      sqlbuilder.Schema_Type_string,
+		}),
+		AddressField: businessunit.NewAddressField(addr.Address),
+		IsDefaultField: boolean.NewBoolean(addr.IsDefault,
+			sqlbuilder.Enum{
+				Key:   "1",
+				Title: "是",
+			},
+			sqlbuilder.Enum{
+				Key:   "2",
+				Title: "否",
+			},
+		).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.SetName("isDefault").SetTitle("默认").SetFieldName(Field_Name_isDefault)
+		}),
+		ProvinceField: districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			switch f.GetFieldName() {
+			case districtcode.Field_Name_Code:
+				f.SetName("proviceId").SetTitle("省ID")
+			case districtcode.Field_Name_Name:
+				f.SetName("provice").SetTitle("省").MergeSchema(sqlbuilder.Schema{
+					MaxLength: 16,
+				})
+			}
+		}),
+		CityField: districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+
+			switch f.GetFieldName() {
+			case districtcode.Field_Name_Code:
+				f.SetName("cityId").SetTitle("城市ID")
+			case districtcode.Field_Name_Name:
+				f.SetName("city").SetTitle("城市").MergeSchema(sqlbuilder.Schema{
+					MaxLength: 32, //海南省黎母山林场（海南黎母山省级自然保护区管理站）线上最长 25，设置32 2的倍数
+				})
+			}
+		}),
+		AreaField: districtcode.NewDistrict(addr.AreaCode, addr.AreaName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			switch f.GetFieldName() {
+			case districtcode.Field_Name_Code:
+				f.SetName("areaId").SetTitle("区ID")
+			case districtcode.Field_Name_Name:
+				f.SetName("area").SetTitle("区").MergeSchema(sqlbuilder.Schema{
+					MaxLength: 128, //海南省黎母山林场（海南黎母山省级自然保护区管理站）线上最长 25，设置32 2的倍数
+				})
+			}
+
+		}),
+	}
+
+	addressFields.TenatIDField.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Append(
+			_ValidateRuleFn(addr.table, *addressFields, addr.CheckRuleI),
+			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
+		)
+	})
+	addressFields.TenatIDField.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Append(
+			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
+		)
+	})
+
+	addressFields.IsDefaultField.Field.OrderFn = func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (orderedExpressions []exp.OrderedExpression) {
+		bol := boolean.NewBooleanFromField(f)
+		segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", bol.Field.DBName())
+		expression := goqu.L(segment, bol.TrueEnum.Key, bol.FalseEnum.Key)
+		orderedExpression := exp.NewOrderedExpression(expression, exp.AscDir, exp.NoNullsSortType)
+		orderedExpressions = sqlbuilder.ConcatOrderedExpression(orderedExpression)
+		return orderedExpressions
+	}
+
+	return addressFields
+
+}
+
+func NewAddress(table string, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) *Address {
+	address := &Address{
+		table:        table,
+		CheckRuleI:   checkRuleI,
+		WithDefaultI: withDWithDefaultI,
+	}
+	return address
+
 }
 
 // WithDefaultI 需要设置默认地址时,需要实现该接口
@@ -227,7 +232,7 @@ type CheckRuleI interface {
 	GetCount(rawSql string) (count int, err error) // 某种类型需要限制数量时,需要实现该接口,查询数据库已有的数量
 }
 
-func _ValidateRuleFn(address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
+func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
 	return func(in any) (any, error) {
 		if checkRuleI == nil {
 			return in, nil
@@ -244,9 +249,9 @@ func _ValidateRuleFn(address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn 
 		if maxNumber == 0 {
 			return in, nil
 		}
-		rawSql, err := sqlbuilder.NewTotalBuilder(address.table).AppendFields(
-			address.TenatIDField.Field,
-			address.OwnerIDField.Field,
+		rawSql, err := sqlbuilder.NewTotalBuilder(table).AppendFields(
+			address.TenatIDField,
+			address.OwnerIDField,
 			address.LabelField.Field,
 		).ToSQL()
 		if err != nil {
@@ -259,8 +264,8 @@ func _ValidateRuleFn(address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn 
 		if maxNumber >= count {
 			err = errors.Errorf(
 				"%s-%s-%s-已有数量(%d)-超过最大数量限制(%d)",
-				address.TenatIDField.Field.LogString(),
-				address.OwnerIDField.Field.LogString(),
+				address.TenatIDField.LogString(),
+				address.OwnerIDField.LogString(),
 				address.LabelField.Field.LogString(),
 				count,
 				maxNumber,
@@ -273,7 +278,7 @@ func _ValidateRuleFn(address Address, checkRuleI CheckRuleI) sqlbuilder.ValueFn 
 }
 
 // _DealDefault 当前记录需要设置为默认记录时,清除已有的默认记录
-func _DealDefault(address Address, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
+func _DealDefault(table string, address AddressFields, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
 	return func(val any) (any, error) {
 		if withDWithDefaultI == nil {
 			return val, nil
@@ -288,9 +293,9 @@ func _DealDefault(address Address, withDWithDefaultI WithDefaultI) sqlbuilder.Va
 		falseField := boolean.Switch(*isDefaultField)
 		labelField := address.LabelField.Field.Copy()
 		labelField.ShieldUpdate(true)
-		rawSql, err := sqlbuilder.NewUpdateBuilder(address.table).AppendFields(falseField.Field).AppendFields(
-			address.TenatIDField.Field,
-			address.OwnerIDField.Field,
+		rawSql, err := sqlbuilder.NewUpdateBuilder(table).AppendFields(falseField.Field).AppendFields(
+			address.TenatIDField,
+			address.OwnerIDField,
 			labelField,
 		).ToSQL()
 		if err != nil {

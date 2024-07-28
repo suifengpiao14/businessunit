@@ -1,28 +1,32 @@
 package operator
 
 import (
-	"github.com/suifengpiao14/businessunit/key"
-	"github.com/suifengpiao14/businessunit/name"
+	"github.com/suifengpiao14/businessunit"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
-type Operator struct {
-	OperatorId      any    `json:"opreatorId"`
-	OperatorName    string `json:"opreatorName"`
-	operatorIdField *sqlbuilder.Field
-	operatorName    *name.Name
+type Operator[T int | string] struct {
+	OperatorId   T      `json:"opreatorId"`
+	OperatorName string `json:"opreatorName"`
 }
 
-func (o Operator) Fields() (fs sqlbuilder.Fields) {
+func (o Operator[T]) Feilds() *OperatorFields {
+
+	return &OperatorFields{
+		businessunit.NewKeyFieldField(o.OperatorId).SetName("opreatorId").SetTitle("操作人ID"),
+		businessunit.NewNameField(o.OperatorName).SetName("operatorName").SetTitle("操作人名称"),
+	}
+}
+
+type OperatorFields struct {
+	OperatorIdField   *sqlbuilder.Field
+	OperatorNameField *sqlbuilder.Field
+}
+
+func (o OperatorFields) Fields() (fs sqlbuilder.Fields) {
 	fs = sqlbuilder.Fields{
-		o.operatorIdField,
-		o.operatorName.Field,
+		o.OperatorIdField,
+		o.OperatorNameField,
 	}
 	return fs
-}
-
-func (o Operator) InitField() {
-	o.operatorIdField = key.NewKeyField(func(in any) (any, error) { return o.OperatorId, nil }).SetName("opreatorId").SetTitle("操作人ID")
-	o.operatorName = name.NewName(o.OperatorName)
-	o.operatorName.Field.SetName("operatorName").SetTitle("操作人名称")
 }

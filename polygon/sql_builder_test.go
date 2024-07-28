@@ -10,8 +10,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/stretchr/testify/require"
+	"github.com/suifengpiao14/businessunit"
 	"github.com/suifengpiao14/businessunit/polygon"
-	"github.com/suifengpiao14/businessunit/tenant"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -61,7 +61,7 @@ func TestInsert(t *testing.T) {
 		Tenant: "1000001",
 	}
 	polyg := Polygon{Path: row.Path}
-	tenantField := tenant.NewTenant(row.Tenant).Field
+	tenantField := businessunit.NewTenantField(row.Tenant)
 	points, err := polyg.Points()
 	require.NoError(t, err)
 	boxField := points.GetBoundingBox()
@@ -111,7 +111,7 @@ func TestList(t *testing.T) {
 	polyg := Polygon{Path: row.Path}
 	points, err := polyg.Points()
 	require.NoError(t, err)
-	tenantField := tenant.NewTenant(row.Tenant).Field
+	tenantField := businessunit.NewTenantField(row.Tenant)
 	boxField := points.GetBoundingBox()
 	sql, err := sqlbuilder.NewListBuilder(row.Table()).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
 	require.NoError(t, err)
