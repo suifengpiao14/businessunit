@@ -115,11 +115,9 @@ func NewEmailField(email string) (f *sqlbuilder.Field) {
 	return f
 }
 
-var Time_format = sqlbuilder.Time_format
-
 func NewUpdatedAtField() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
-		return time.Now().Local().Format(Time_format), nil
+		return time.Now().Local().Format(time.DateTime), nil
 	})
 	f.SetName("updated_at").SetTitle("更新时间").SetTag(sqlbuilder.Tag_updatedAt)
 	return f
@@ -127,7 +125,7 @@ func NewUpdatedAtField() (f *sqlbuilder.Field) {
 
 func NewCreatedAt() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
-		return time.Now().Local().Format(Time_format), nil
+		return time.Now().Local().Format(time.DateTime), nil
 	}).SetName("created_at").SetTitle("创建时间").SetTag(sqlbuilder.Tag_createdAt)
 	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield) // 更新时屏蔽
@@ -197,7 +195,7 @@ func NewDeletedAtField() (f *sqlbuilder.Field) {
 	//设置删除场景
 	f.SceneFn(sqlbuilder.SCENE_DDL_DELETE, func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Reset(func(in any) (any, error) {
-			return time.Now().Local().Format(Time_format), nil
+			return time.Now().Local().Format(time.DateTime), nil
 		})
 	})
 	f.WhereFns.Append(sqlbuilder.ValueFnForward)
