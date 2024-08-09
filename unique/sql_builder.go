@@ -56,17 +56,17 @@ func _checkExists(uniqueI CheckUniqueI, uniqueField sqlbuilder.Fields, idField *
 
 }
 
-func OptionUnique(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) func(fields ...*sqlbuilder.Field) {
-	return func(fields ...*sqlbuilder.Field) {
-		if len(fields) == 0 {
+func OptionUnique(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) sqlbuilder.MiddlewareFn {
+	return func(field *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		if len(fs) == 0 {
 			return
 		}
-		first := fields[0]
+		first := fs[0]
 		first.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-			_checkExists(checkUniqueI, fields, nil)
+			_checkExists(checkUniqueI, fs, nil)
 		})
 		first.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-			_checkExists(checkUniqueI, fields, idField)
+			_checkExists(checkUniqueI, fs, idField)
 		})
 	}
 }

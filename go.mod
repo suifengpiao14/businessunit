@@ -9,7 +9,7 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.8.4
-	github.com/suifengpiao14/sqlbuilder v0.0.11
+	github.com/suifengpiao14/sqlbuilder v0.0.16
 )
 
 require (

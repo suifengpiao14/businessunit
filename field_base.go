@@ -329,7 +329,7 @@ type EnumField struct {
 }
 
 func (b *EnumField) Apply(initFns ...sqlbuilder.InitFieldFn) *EnumField {
-	b.Field.Apply(initFns...)
+	b.Field.Applys(initFns)
 	return b
 }
 

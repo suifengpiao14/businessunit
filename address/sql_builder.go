@@ -1,10 +1,6 @@
 package address
 
 import (
-	"fmt"
-
-	"github.com/doug-martin/goqu/v9"
-	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/suifengpiao14/businessunit"
@@ -199,15 +195,8 @@ func (addr Address) Fields() *AddressFields {
 			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
 		)
 	})
-
-	addressFields.IsDefaultField.Field.OrderFn = func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (orderedExpressions []exp.OrderedExpression) {
-		bol := boolean.NewBooleanFromField(f)
-		segment := fmt.Sprintf("FIELD(`%s`, ?, ?)", bol.Field.DBName())
-		expression := goqu.L(segment, bol.TrueEnum.Key, bol.FalseEnum.Key)
-		orderedExpression := exp.NewOrderedExpression(expression, exp.AscDir, exp.NoNullsSortType)
-		orderedExpressions = sqlbuilder.ConcatOrderedExpression(orderedExpression)
-		return orderedExpressions
-	}
+	bol := boolean.NewBooleanFromField(addressFields.IsDefaultField.Field)
+	addressFields.IsDefaultField.Field.SetOrderFn(sqlbuilder.OrderFieldFn(bol.TrueEnum.Key, bol.FalseEnum.Key))
 
 	return addressFields
 

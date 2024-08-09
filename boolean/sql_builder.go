@@ -30,7 +30,7 @@ func (b *Boolean) Init() {
 }
 
 func (p *Boolean) Apply(initFns ...sqlbuilder.InitFieldFn) *Boolean {
-	p.Field.Apply(initFns...)
+	p.Field.Applys(initFns)
 	return p
 }
 
