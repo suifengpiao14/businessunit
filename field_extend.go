@@ -8,6 +8,7 @@ func NewNickname(nickname string) *sqlbuilder.Field {
 	f := NewNameField(nickname).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.SetName("nickname").SetTitle("昵称")
 	})
+	f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(
 			sqlbuilder.ValueFnEmpty2Nil,
@@ -17,43 +18,64 @@ func NewNickname(nickname string) *sqlbuilder.Field {
 	return f
 }
 
-type KeyTitleField struct {
-	KeyField   *sqlbuilder.Field
-	TitleField *sqlbuilder.Field
+type KeyTitleFields[keyT int | string] struct {
+	Key   sqlbuilder.FieldFn[keyT]
+	Title sqlbuilder.FieldFn[string]
 }
 
-func (kt KeyTitleField) Fields() sqlbuilder.Fields {
-	fs := sqlbuilder.Fields{
-		kt.KeyField,
-		kt.TitleField,
-	}
-	return fs
-}
+func (KeyTitleFields[T]) Fields() KeyTitleFields[T] {
 
-func NewKeyTitleField(key any, title string) *KeyTitleField {
-	return &KeyTitleField{
-		NewKeyField(key),
-		NewTitleField(title),
+	return KeyTitleFields[T]{
+		Key:   NewKeyField[T],
+		Title: NewTitleField,
 	}
 }
 
-type IdNameFields struct {
-	IdField   *sqlbuilder.Field
-	NameField *sqlbuilder.Field
+type IdNameFields[idT int | string] struct {
+	IdField   sqlbuilder.FieldFn[idT]
+	NameField sqlbuilder.FieldFn[string]
 }
 
-func (idName IdNameFields) Fields() sqlbuilder.Fields {
-	fs := sqlbuilder.Fields{
-		idName.IdField,
-		idName.NameField,
+func (IdNameFields[T]) Builder() IdNameFields[T] {
+	return IdNameFields[T]{
+		IdField: func(value T) *sqlbuilder.Field {
+			return NewIdentifierField(value)
+		},
+		NameField: func(value string) *sqlbuilder.Field {
+			return NewNameField(value)
+		},
 	}
-	return fs
 }
 
-func NewIdNameFields(id any, name string) *IdNameFields {
-	return &IdNameFields{
-		IdField:   NewIdentifierField(id),
-		NameField: NewNameField(name),
-	}
+type CUTimeFields struct {
+	CreatedAt sqlbuilder.FieldFn[string]
+	UpdatedAt sqlbuilder.FieldFn[string]
+}
 
+func (CUTimeFields) Builder() CUTimeFields {
+	return CUTimeFields{
+		CreatedAt: func(value string) *sqlbuilder.Field {
+			return NewCreatedAt()
+		},
+		UpdatedAt: func(value string) *sqlbuilder.Field {
+			return NewUpdatedAtField()
+		},
+	}
+}
+
+type CUDTimeFields struct {
+	CreatedAt sqlbuilder.FieldFn[string]
+	UpdatedAt sqlbuilder.FieldFn[string]
+	DeletedAt sqlbuilder.FieldFn[string]
+}
+
+func (CUDTimeFields) Builder() CUDTimeFields {
+	cuTime := new(CUTimeFields).Builder()
+	return CUDTimeFields{
+		CreatedAt: cuTime.CreatedAt,
+		UpdatedAt: cuTime.UpdatedAt,
+		DeletedAt: func(value string) *sqlbuilder.Field {
+			return NewDeletedAtField()
+		},
+	}
 }

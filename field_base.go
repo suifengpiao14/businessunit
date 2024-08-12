@@ -101,6 +101,26 @@ func NewGenderField[T int | string](val T, man T, woman T) *EnumField {
 	return genderField
 }
 
+func NewBooleanField[T int | string](val T, enumTrue T, enumFalse T) *EnumField {
+	genderField := NewEnumField(val, sqlbuilder.Enums{
+		sqlbuilder.Enum{
+			Key:   enumTrue,
+			Title: "真",
+		},
+		sqlbuilder.Enum{
+			Key:   enumFalse,
+			Title: "假",
+		},
+	})
+	genderField.Field.SetName("bool").SetTitle("真假").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+		f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+		})
+	})
+	return genderField
+}
+
 func NewEmailField(email string) (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) { return email, nil }).SetName("email").SetTitle("邮箱")
 	f.MergeSchema(sqlbuilder.Schema{
@@ -137,6 +157,7 @@ func NewAutoIdField(autoId uint) (field *sqlbuilder.Field) {
 	field = sqlbuilder.NewField(func(in any) (any, error) { return autoId, nil })
 	field.SetName("id").SetTitle("ID").MergeSchema(sqlbuilder.Schema{
 		Type:          sqlbuilder.Schema_Type_int,
+		Maximum:       sqlbuilder.Int_maximum_bigint,
 		MaxLength:     64,
 		Primary:       true,
 		AutoIncrement: true,
@@ -147,16 +168,15 @@ func NewAutoIdField(autoId uint) (field *sqlbuilder.Field) {
 	})
 	field.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // id 不能更新
-		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-		if f.Schema.Required {
-			f.MergeSchema(sqlbuilder.Schema{
-				Minimum: 1,
-			})
-		}
+		f.WhereFns.Append(sqlbuilder.ValueFnFormatArray)
+		f.SetRequired(true)
+		f.MergeSchema(sqlbuilder.Schema{
+			Minimum: 1,
+		})
 	})
 
 	field.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil, sqlbuilder.ValueFnFormatArray)
 		if f.Schema.Required {
 			f.MergeSchema(sqlbuilder.Schema{
 				Minimum: 1,
@@ -307,7 +327,7 @@ func NewTitleField(value string) (f *sqlbuilder.Field) {
 	return f
 }
 
-func NewKeyField(value any) *sqlbuilder.Field {
+func NewKeyField[T int | int64 | string](value T) *sqlbuilder.Field {
 	f := sqlbuilder.NewField(func(in any) (any, error) { return value, nil }).SetName("key").SetTitle("键")
 	f.MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
