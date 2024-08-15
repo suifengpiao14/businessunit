@@ -64,23 +64,6 @@ func (addr InsertAddress) GetCount(rawSql string) (count int, err error) {
 	return 0, nil
 }
 
-func TestInsertDoc(t *testing.T) {
-	var addr = InsertAddress{}
-	reqArgs := addr.GetAddress().Fields().Fields().DocRequestArgs()
-	markdown := reqArgs.Makedown()
-	fmt.Println(markdown)
-	example := reqArgs.JsonExample(true)
-	fmt.Println(example)
-}
-
-func TestInsertDDL(t *testing.T) {
-	var addr = InsertAddress{}
-	columns, err := addr.GetAddress().Fields().Fields().DBColumns()
-	require.NoError(t, err)
-	ddl := columns.DDL(sqlbuilder.Driver_mysql)
-	fmt.Println(ddl)
-}
-
 func TestInsert(t *testing.T) {
 	var addr = InsertAddress{
 		OwnerID:      "123",

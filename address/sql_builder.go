@@ -125,12 +125,12 @@ func (addr Address) Fields() *AddressFields {
 				Key:   "return",
 				Title: "退货地址",
 			},
-		}).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		}).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.SetName("label").SetTitle("标签")
 		}),
 
 		ContactPhoneField: businessunit.NewPhoneField(addr.ContactPhone).SetName("contactPhone").SetTitle("联系手机号"),
-		ContactNameField: businessunit.NewNameField(addr.ContactName).SetName("contactName").SetTitle("联系人").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		ContactNameField: businessunit.NewNameField(addr.ContactName).SetName("contactName").SetTitle("联系人").MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.RequiredWhenInsert(true)
 			f.MinBoundaryWhereInsert(1, 1)
 		}).MergeSchema(sqlbuilder.Schema{
@@ -147,10 +147,10 @@ func (addr Address) Fields() *AddressFields {
 				Key:   "2",
 				Title: "否",
 			},
-		).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.SetName("isDefault").SetTitle("默认").SetFieldName(Field_Name_isDefault)
 		}),
-		ProvinceField: districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		ProvinceField: districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			switch f.GetFieldName() {
 			case districtcode.Field_Name_Code:
 				f.SetName("proviceId").SetTitle("省ID")
@@ -160,7 +160,7 @@ func (addr Address) Fields() *AddressFields {
 				})
 			}
 		}),
-		CityField: districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		CityField: districtcode.NewDistrict(addr.ProvinceCode, addr.ProvinceName).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 
 			switch f.GetFieldName() {
 			case districtcode.Field_Name_Code:
@@ -171,7 +171,7 @@ func (addr Address) Fields() *AddressFields {
 				})
 			}
 		}),
-		AreaField: districtcode.NewDistrict(addr.AreaCode, addr.AreaName).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		AreaField: districtcode.NewDistrict(addr.AreaCode, addr.AreaName).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			switch f.GetFieldName() {
 			case districtcode.Field_Name_Code:
 				f.SetName("areaId").SetTitle("区ID")
@@ -184,13 +184,13 @@ func (addr Address) Fields() *AddressFields {
 		}),
 	}
 
-	addressFields.TenatIDField.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	addressFields.TenatIDField.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
 			_ValidateRuleFn(addr.table, *addressFields, addr.CheckRuleI),
 			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
 		)
 	})
-	addressFields.TenatIDField.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	addressFields.TenatIDField.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
 			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
 		)

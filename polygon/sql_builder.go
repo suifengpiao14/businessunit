@@ -17,7 +17,7 @@ func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {
 		sqlbuilder.NewField(func(in any) (any, error) { return boundingBox.LngMax, nil }).SetName(latMaxName).SetTitle("最大纬度").SetTag(latMaxName),
 		sqlbuilder.NewField(func(in any) (any, error) { return boundingBox.LngMin, nil }).SetName(latMinName).SetTitle("最小纬度").SetTag(latMinName),
 	}
-	boundingBoxFields.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	boundingBoxFields.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		fields := sqlbuilder.Fields(fs)
 		if f.HastTag(latMaxName) {
 			latMinField, _ := fields.GetByTag(latMinName)

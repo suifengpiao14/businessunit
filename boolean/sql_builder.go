@@ -29,13 +29,15 @@ func (b *Boolean) Init() {
 	b.Field.AppendEnum(b.TrueEnum, b.FalseEnum)
 }
 
-func (p *Boolean) Apply(initFns ...sqlbuilder.InitFieldFn) *Boolean {
-	p.Field.Applys(initFns)
+func (p *Boolean) MiddlewareFn(initFns ...sqlbuilder.MiddlewareFn) *Boolean {
+	p.Field.MiddlewareFns(initFns)
 	return p
 }
 
 func (b Boolean) Fields() sqlbuilder.Fields {
-	return *sqlbuilder.NewFields(b.Field)
+	return sqlbuilder.Fields{
+		b.Field,
+	}
 }
 
 func (b Boolean) IsTrue() bool {

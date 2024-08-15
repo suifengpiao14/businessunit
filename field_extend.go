@@ -5,11 +5,11 @@ import (
 )
 
 func NewNickname(nickname string) *sqlbuilder.Field {
-	f := NewNameField(nickname).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f := NewNameField(nickname).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.SetName("nickname").SetTitle("昵称")
 	})
 	f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(
 			sqlbuilder.ValueFnEmpty2Nil,
 			sqlbuilder.ValueFnWhereLike,

@@ -32,7 +32,10 @@ func TestUpdate(t *testing.T) {
 	}
 
 	idField := businessunit.NewAutoIdField(cast.ToUint(p.ID))
-	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil })).WithMiddlewares(unique.OptionUnique(p, idField))
+	uniqueFields := sqlbuilder.Fields{
+		sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }),
+	}
+	uniqueFields.WithMiddlewares(unique.OptionUnique(p, idField))
 	sql, err := sqlbuilder.NewUpdateBuilder(p.Table()).AppendFields(uniqueFields...).AppendFields(idField).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
@@ -44,7 +47,11 @@ func TestInsert(t *testing.T) {
 		ID:   "15",
 		Name: "张三",
 	}
-	uniqueFields := sqlbuilder.NewFields(sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil })).WithMiddlewares(unique.OptionUnique(p, nil))
+	uniqueFields := sqlbuilder.Fields{
+		sqlbuilder.NewField(func(in any) (any, error) { return p.Name, nil }),
+	}
+
+	uniqueFields.WithMiddlewares(unique.OptionUnique(p, nil))
 	sql, err := sqlbuilder.NewInsertBuilder(p.Table()).AppendFields(uniqueFields...).ToSQL()
 	require.NoError(t, err)
 	fmt.Println(sql)
