@@ -29,7 +29,7 @@ func (b *Boolean) Init() {
 	b.Field.AppendEnum(b.TrueEnum, b.FalseEnum)
 }
 
-func (p *Boolean) MiddlewareFn(initFns ...sqlbuilder.MiddlewareFn) *Boolean {
+func (p *Boolean) MiddlewareFn(initFns ...sqlbuilder.ApplyFn) *Boolean {
 	p.Field.Applys(initFns)
 	return p
 }

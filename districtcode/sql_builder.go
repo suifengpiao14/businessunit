@@ -43,7 +43,7 @@ func (d District) Fields() (fs sqlbuilder.Fields) {
 	return fs
 }
 
-func (p *District) MiddlewareFn(initFns ...sqlbuilder.MiddlewareFn) *District {
+func (p *District) MiddlewareFn(initFns ...sqlbuilder.ApplyFn) *District {
 	p.CodeField.Applys(initFns)
 	return p
 }

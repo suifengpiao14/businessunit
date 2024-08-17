@@ -371,7 +371,7 @@ type EnumField struct {
 	Field *sqlbuilder.Field
 }
 
-func (b *EnumField) MiddlewareFn(initFns ...sqlbuilder.MiddlewareFn) *EnumField {
+func (b *EnumField) MiddlewareFn(initFns ...sqlbuilder.ApplyFn) *EnumField {
 	b.Field.Applys(initFns)
 	return b
 }

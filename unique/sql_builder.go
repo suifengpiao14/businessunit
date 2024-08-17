@@ -56,7 +56,7 @@ func _checkExists(uniqueI CheckUniqueI, uniqueField sqlbuilder.Fields, idField *
 
 }
 
-func OptionUnique(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) sqlbuilder.MiddlewareFn {
+func OptionUnique(checkUniqueI CheckUniqueI, idField *sqlbuilder.Field) sqlbuilder.ApplyFn {
 	return func(field *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		if len(fs) == 0 {
 			return

@@ -81,8 +81,8 @@ func (CUDTimeFields) Builder() CUDTimeFields {
 	}
 }
 
-// UniqueFieldMiddlewarSceneInsert 单列唯一索引键,新增场景中间件
-func UniqueFieldMiddlewarSceneInsert(table string, existsFn func(sql string) (exists bool, err error)) sqlbuilder.MiddlewareFn {
+// UniqueFieldApplyFn 单列唯一索引键,新增场景中间件
+func UniqueFieldApplyFn(table string, existsFn func(sql string) (exists bool, err error)) sqlbuilder.ApplyFn {
 	return func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		sceneFnName := "checkexists"
 		sceneFn := sqlbuilder.SceneFn{
@@ -112,6 +112,12 @@ func UniqueFieldMiddlewarSceneInsert(table string, existsFn func(sql string) (ex
 			},
 		}
 		f.SceneFn(sceneFn)
+		f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.WhereFns.Append(sqlbuilder.ValueFnForward)
+		})
+		f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+		})
 
 	}
 }
