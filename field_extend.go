@@ -89,7 +89,7 @@ func UniqueFieldMiddlewarSceneInsert(table string, existsFn func(sql string) (ex
 			Name:  sceneFnName,
 			Scene: sqlbuilder.SCENE_SQL_INSERT,
 			Fn: func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-				f1 := f.Copy()               //复制不影响外部
+				f1 := f.Copy()               //复制不影响外部,在内部copy 是运行时 copy,确保 builder阶段的设置都能考呗到
 				f1.SceneFnRmove(sceneFnName) // 避免死循环
 				f1.WhereFns.Append(sqlbuilder.ValueFnForward)
 				f.ValueFns.Append(func(inputValue any) (any, error) {
