@@ -14,7 +14,7 @@ func NewPhoneField(phone string) (f *sqlbuilder.Field) {
 		MaxLength: 15,
 		RegExp:    `^1[3-9]\d{9}$`, // 中国大陆手机号正则表达式
 	})
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f
@@ -27,10 +27,10 @@ func NewNameField(name string) (f *sqlbuilder.Field) {
 	})
 
 	f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-	f.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.MergeSchema(sqlbuilder.Schema{Minimum: 1})
 	})
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
 	})
 	return f
@@ -52,14 +52,23 @@ func NewProfileField(profile string) (f *sqlbuilder.Field) {
 	return f
 }
 
-func NewIntField(name string, maximum uint) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any) (any, error) { return name, nil }).SetName("number").SetTitle("数字").MergeSchema(sqlbuilder.Schema{
+func NewIntField(value int, name string, title string, maximum uint) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(value).SetName(name).SetTitle(title).MergeSchema(sqlbuilder.Schema{
 		Type: sqlbuilder.Schema_Type_int,
 	})
 	if maximum > 0 {
 		f.MergeSchema(sqlbuilder.Schema{Maximum: maximum})
 	}
-	f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
+	return f
+}
+
+func NewStringField(value string, name string, title string, maxLength int) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(value).SetName(name).SetTitle(title).MergeSchema(sqlbuilder.Schema{
+		Type: sqlbuilder.Schema_Type_string,
+	})
+	if maxLength > 0 {
+		f.MergeSchema(sqlbuilder.Schema{MaxLength: maxLength})
+	}
 	return f
 }
 
@@ -92,9 +101,9 @@ func NewGenderField[T int | string](val T, man T, woman T) *EnumField {
 			Title: "女",
 		},
 	})
-	genderField.Field.SetName("gender").SetTitle("性别").MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	genderField.Field.SetName("gender").SetTitle("性别").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-		f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 		})
 	})
@@ -112,9 +121,9 @@ func NewBooleanField[T int | string](val T, enumTrue T, enumFalse T) *EnumField 
 			Title: "假",
 		},
 	})
-	genderField.Field.SetName("bool").SetTitle("真假").MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	genderField.Field.SetName("bool").SetTitle("真假").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-		f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 		})
 	})
@@ -129,7 +138,7 @@ func NewEmailField(email string) (f *sqlbuilder.Field) {
 		MinLength: 5,
 		RegExp:    `([A-Za-z0-9\-]+\.)+[A-Za-z]{2,6}`, // 邮箱验证表达式
 	})
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f
@@ -143,11 +152,21 @@ func NewUpdatedAtField() (f *sqlbuilder.Field) {
 	return f
 }
 
-func NewCreatedAt() (f *sqlbuilder.Field) {
+func NewPageIndexField(pageIndex string) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(pageIndex).SetName("pageIndex").SetTitle("页码").SetTag(sqlbuilder.Field_tag_pageIndex).SetType(sqlbuilder.Schema_Type_int)
+	return f
+}
+
+func NewPageSizeField(pageSize string) (f *sqlbuilder.Field) {
+	f = sqlbuilder.NewField(pageSize).SetName("pageSize").SetTitle("每页数量").SetTag(sqlbuilder.Field_tag_pageIndex).SetType(sqlbuilder.Schema_Type_int)
+	return f
+}
+
+func NewCreatedAtField() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
 		return time.Now().Local().Format(time.DateTime), nil
 	}).SetName("created_at").SetTitle("创建时间").SetTag(sqlbuilder.Tag_createdAt)
-	f.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield) // 更新时屏蔽
 	})
 	return f
@@ -163,10 +182,10 @@ func NewAutoIdField(autoId uint) (field *sqlbuilder.Field) {
 		AutoIncrement: true,
 	})
 
-	field.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	field.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield)
 	})
-	field.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	field.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // id 不能更新
 		f.WhereFns.Append(sqlbuilder.ValueFnFormatArray)
 		f.SetRequired(true)
@@ -175,7 +194,7 @@ func NewAutoIdField(autoId uint) (field *sqlbuilder.Field) {
 		})
 	})
 
-	field.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	field.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil, sqlbuilder.ValueFnFormatArray)
 		if f.Schema.Required {
 			f.MergeSchema(sqlbuilder.Schema{
@@ -196,7 +215,7 @@ func NewTenantField[T int | string](tenant T) (f *sqlbuilder.Field) {
 		Maximum:   sqlbuilder.UnsinedInt_maximum_bigint,
 		Minimum:   1,
 	})
-	f.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // 不可更新
 	})
 	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
@@ -206,17 +225,20 @@ func NewTenantField[T int | string](tenant T) (f *sqlbuilder.Field) {
 // NewDeletedAtField 通过删除时间列标记删除
 func NewDeletedAtField() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(nil).SetName("deleted_at").SetTitle("删除时间")
-	f.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield)
 	})
-	f.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true)
 	})
 	//设置删除场景
-	f.SceneFn(sqlbuilder.SCENE_SQL_DELETE, func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ValueFns.Reset(func(in any) (any, error) {
-			return time.Now().Local().Format(time.DateTime), nil
-		})
+	f.SceneFn(sqlbuilder.SceneFn{
+		Scene: sqlbuilder.SCENE_SQL_DELETE,
+		Fn: func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.ValueFns.Reset(func(in any) (any, error) {
+				return time.Now().Local().Format(time.DateTime), nil
+			})
+		},
 	})
 	f.WhereFns.Append(sqlbuilder.ValueFnForward)
 	return f
@@ -231,17 +253,20 @@ func NewDeletedStatusField[T int | string](deletedStatus T) (f *sqlbuilder.Field
 	f = sqlbuilder.NewField(func(in any) (any, error) {
 		return deletedStatus, nil
 	}).SetName("status").SetTitle("状态").SetTag(Tag_DeletedStatusField) // 设置特殊标记,方便使用时获取列特殊处理
-	f.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield)
 	})
-	f.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true)
 	})
 	//设置删除场景
-	f.SceneFn(sqlbuilder.SCENE_SQL_DELETE, func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ValueFns.Reset(func(in any) (any, error) {
-			return deletedStatus, nil
-		})
+	f.SceneFn(sqlbuilder.SceneFn{
+		Scene: sqlbuilder.SCENE_SQL_DELETE,
+		Fn: func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.ValueFns.Reset(func(in any) (any, error) {
+				return deletedStatus, nil
+			})
+		},
 	})
 	f.WhereFns.Append(func(in any) (any, error) {
 		return sqlbuilder.Neq(in), nil
@@ -259,7 +284,7 @@ func NewKeyFieldField[T int | uint | int64 | string](value T) *sqlbuilder.Field 
 		MaxLength: 64,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	f.MinBoundaryWhereInsert(1, 1)
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f
@@ -274,7 +299,7 @@ func NewOwnerID[T int | string | int64](value T) *sqlbuilder.Field {
 		Minimum:      1,
 		ShieldUpdate: true, // 所有者不可跟新
 	})
-	field.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	field.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.SetRequired(true)
 	})
 	field.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
@@ -283,7 +308,7 @@ func NewOwnerID[T int | string | int64](value T) *sqlbuilder.Field {
 
 func NewIdentifierField(value any) *sqlbuilder.Field {
 	f := sqlbuilder.NewField(func(in any) (any, error) { return value, nil }).SetName("identity").SetTitle("标识")
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f
@@ -296,18 +321,18 @@ func NewUuidField[T int | int64 | string](value T) (f *sqlbuilder.Field) {
 		MaxLength: 64,
 		MinLength: 1,
 	})
-	f.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.SetRequired(true)
 		f.ValueFns.InsertAsFirst(func(in any) (any, error) {
 			return xid.New().String(), nil
 		})
 	})
-	f.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // uuid 不能更新
 		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil, sqlbuilder.ValueFnForward)
 	})
 
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 	})
 
@@ -321,7 +346,7 @@ func NewTitleField(value string) (f *sqlbuilder.Field) {
 		MaxLength: 64,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
 	})
 	return f
@@ -335,7 +360,7 @@ func NewKeyField[T int | int64 | string](value T) *sqlbuilder.Field {
 		Minimum:   1,
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f
@@ -347,7 +372,7 @@ type EnumField struct {
 }
 
 func (b *EnumField) MiddlewareFn(initFns ...sqlbuilder.MiddlewareFn) *EnumField {
-	b.Field.MiddlewareFns(initFns)
+	b.Field.Applys(initFns)
 	return b
 }
 
@@ -364,7 +389,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 	if len(redundantFields) > 0 {
 		return
 	}
-	f.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.InsertAsSecond(func(in any) (any, error) {
 			val, err := f.GetValue()
 			if err != nil {

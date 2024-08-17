@@ -8,7 +8,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 	if len(redundantFields) > 0 {
 		return
 	}
-	f.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.InsertAsSecond(func(in any) (any, error) {
 			val, err := f.GetValue()
 			if err != nil {

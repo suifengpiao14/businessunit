@@ -130,7 +130,7 @@ func (addr Address) Fields() *AddressFields {
 		}),
 
 		ContactPhoneField: businessunit.NewPhoneField(addr.ContactPhone).SetName("contactPhone").SetTitle("联系手机号"),
-		ContactNameField: businessunit.NewNameField(addr.ContactName).SetName("contactName").SetTitle("联系人").MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		ContactNameField: businessunit.NewNameField(addr.ContactName).SetName("contactName").SetTitle("联系人").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.RequiredWhenInsert(true)
 			f.MinBoundaryWhereInsert(1, 1)
 		}).MergeSchema(sqlbuilder.Schema{
@@ -184,13 +184,13 @@ func (addr Address) Fields() *AddressFields {
 		}),
 	}
 
-	addressFields.TenatIDField.MiddlewareSceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	addressFields.TenatIDField.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
 			_ValidateRuleFn(addr.table, *addressFields, addr.CheckRuleI),
 			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
 		)
 	})
-	addressFields.TenatIDField.MiddlewareSceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	addressFields.TenatIDField.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
 			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
 		)

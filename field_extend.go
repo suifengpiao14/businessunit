@@ -1,15 +1,16 @@
 package businessunit
 
 import (
+	"github.com/pkg/errors"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
 func NewNickname(nickname string) *sqlbuilder.Field {
-	f := NewNameField(nickname).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f := NewNameField(nickname).Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.SetName("nickname").SetTitle("昵称")
 	})
 	f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
-	f.MiddlewareSceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(
 			sqlbuilder.ValueFnEmpty2Nil,
 			sqlbuilder.ValueFnWhereLike,
@@ -55,7 +56,7 @@ type CUTimeFields struct {
 func (CUTimeFields) Builder() CUTimeFields {
 	return CUTimeFields{
 		CreatedAt: func(value string) *sqlbuilder.Field {
-			return NewCreatedAt()
+			return NewCreatedAtField()
 		},
 		UpdatedAt: func(value string) *sqlbuilder.Field {
 			return NewUpdatedAtField()
@@ -77,5 +78,40 @@ func (CUDTimeFields) Builder() CUDTimeFields {
 		DeletedAt: func(value string) *sqlbuilder.Field {
 			return NewDeletedAtField()
 		},
+	}
+}
+
+// UniqueFieldMiddlewarSceneInsert 单列唯一索引键,新增场景中间件
+func UniqueFieldMiddlewarSceneInsert(table string, existsFn func(sql string) (exists bool, err error)) sqlbuilder.MiddlewareFn {
+	return func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		sceneFnName := "checkexists"
+		sceneFn := sqlbuilder.SceneFn{
+			Name:  sceneFnName,
+			Scene: sqlbuilder.SCENE_SQL_INSERT,
+			Fn: func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+				f1 := f.Copy()               //复制不影响外部
+				f1.SceneFnRmove(sceneFnName) // 避免死循环
+				f1.WhereFns.Append(sqlbuilder.ValueFnForward)
+				f.ValueFns.Append(func(inputValue any) (any, error) {
+					totalParam := sqlbuilder.NewTotalBuilder(table).AppendFields(f1)
+					sql, err := totalParam.ToSQL()
+					if err != nil {
+						return nil, err
+					}
+					exists, err := existsFn(sql)
+					if err != nil {
+						return nil, err
+					}
+					if exists {
+						err = errors.Errorf("unique column %s value %s exists", f1.DBName(), inputValue)
+						return nil, err
+					}
+					return inputValue, nil
+				})
+
+			},
+		}
+		f.SceneFn(sceneFn)
+
 	}
 }
