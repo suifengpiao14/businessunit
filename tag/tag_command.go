@@ -5,7 +5,7 @@ import (
 )
 
 type CmdAdd struct {
-	Classify     *sqlbuilder.Field // 该列可能为空
+	Dimension    *sqlbuilder.Field // 该列可能为空
 	Tag          sqlbuilder.Field
 	Table        string
 	ExtendFields func(cmdAdd *CmdAdd) sqlbuilder.Fields
@@ -16,20 +16,20 @@ type CmdAdd struct {
 func (q CmdAdd) Fields() sqlbuilder.Fields {
 	fs := sqlbuilder.Fields{}
 
-	if q.Classify != nil {
-		q.Classify.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	if q.Dimension != nil {
+		q.Dimension.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.WhereFns.Append(sqlbuilder.ValueFnForward)
 		})
 	}
 	q.Tag.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnForward)
 	})
-	fs.Append(&q.Tag, q.Classify)
+	fs.Append(&q.Tag, q.Dimension)
 	if q.ExtendFields != nil {
 		fs.Append(q.ExtendFields(&q)...)
 	}
 
-	return sqlbuilder.Fields{&q.Tag, q.Classify}
+	return sqlbuilder.Fields{&q.Tag, q.Dimension}
 }
 
 func (action CmdAdd) ExistsBuilder() (builder sqlbuilder.ExistsParam) {

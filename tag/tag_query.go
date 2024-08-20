@@ -5,13 +5,13 @@ import (
 )
 
 type QueryAll struct {
-	Classify     *sqlbuilder.Field
+	Dimension    *sqlbuilder.Field
 	Table        string
 	QueryHandler sqlbuilder.QueryHandler
 }
 
 func (q QueryAll) Fields() sqlbuilder.Fields {
-	return sqlbuilder.Fields{q.Classify}
+	return sqlbuilder.Fields{q.Dimension}
 }
 
 func (q QueryAll) Param() (builder sqlbuilder.ListParam) {
