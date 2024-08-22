@@ -158,7 +158,7 @@ func NewPageIndexField(pageIndex string) (f *sqlbuilder.Field) {
 }
 
 func NewPageSizeField(pageSize string) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(pageSize).SetName("pageSize").SetTitle("每页数量").SetTag(sqlbuilder.Field_tag_pageIndex).SetType(sqlbuilder.Schema_Type_int)
+	f = sqlbuilder.NewField(pageSize).SetName("pageSize").SetTitle("每页数量").SetTag(sqlbuilder.Field_tag_pageSize).SetType(sqlbuilder.Schema_Type_int)
 	return f
 }
 

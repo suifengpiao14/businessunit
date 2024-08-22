@@ -9,8 +9,7 @@ type CmdAdd struct {
 	Tag          sqlbuilder.Field
 	Table        string
 	ExtendFields func(cmdAdd *CmdAdd) sqlbuilder.Fields
-	QueryHandler sqlbuilder.QueryHandler // 查询是否存在
-	ExecHandler  sqlbuilder.ExecHandler  //执行插入
+	Builder      sqlbuilder.Builder
 }
 
 func (q CmdAdd) Fields() sqlbuilder.Fields {
@@ -32,25 +31,16 @@ func (q CmdAdd) Fields() sqlbuilder.Fields {
 	return sqlbuilder.Fields{&q.Tag, q.Dimension}
 }
 
-func (action CmdAdd) ExistsBuilder() (builder sqlbuilder.ExistsParam) {
-	return sqlbuilder.NewExistsBuilder(action.Table).AppendFields(action.Fields()...)
-}
+func (cmd CmdAdd) Exec() (err error) {
 
-func (action CmdAdd) InsertBuilder() (builder sqlbuilder.InsertParam) {
-	return sqlbuilder.NewInsertBuilder(action.Table).AppendFields(action.Fields()...)
-}
-func (action CmdAdd) Exists() (exists bool, err error) {
-	return action.ExistsBuilder().Exists(action.QueryHandler)
-}
-func (action CmdAdd) Exec() (err error) {
-	exists, err := action.Exists()
+	exists, err := cmd.Builder.Exists(cmd.Fields()...)
 	if err != nil {
 		return err
 	}
 	if exists {
 		return nil
 	}
-	err = action.InsertBuilder().Exec(action.ExecHandler)
+	err = cmd.Builder.Insert(cmd.Fields()...)
 	return err
 
 }
