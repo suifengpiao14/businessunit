@@ -104,6 +104,10 @@ func NewGenderField[T int | string](val T, man T, woman T) *EnumField {
 	genderField.Field.SetName("gender").SetTitle("性别").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 		f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.Schema.Enums.Append(sqlbuilder.Enum{
+				Key:   "",
+				Title: "全部",
+			})
 			f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 		})
 	})
@@ -372,7 +376,7 @@ type EnumField struct {
 }
 
 func (b *EnumField) MiddlewareFn(initFns ...sqlbuilder.ApplyFn) *EnumField {
-	b.Field.Applys(initFns)
+	b.Field.Apply(initFns...)
 	return b
 }
 
