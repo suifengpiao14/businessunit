@@ -244,7 +244,13 @@ func NewDeletedAtField() (f *sqlbuilder.Field) {
 			})
 		},
 	})
-	f.WhereFns.Append(sqlbuilder.ValueFnForward)
+	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.ValueFns.Reset(func(inputValue any) (any, error) {
+			return "", nil
+		})
+		f.WhereFns.Append(sqlbuilder.ValueFnForward)
+	})
+
 	return f
 }
 
@@ -333,7 +339,7 @@ func NewUuidField[T int | int64 | string](value T) (f *sqlbuilder.Field) {
 	})
 	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // uuid 不能更新
-		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil, sqlbuilder.ValueFnForward)
+		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
 	})
 
 	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
