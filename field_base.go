@@ -157,12 +157,16 @@ func NewUpdatedAtField() (f *sqlbuilder.Field) {
 }
 
 func NewPageIndexField(pageIndex string) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(pageIndex).SetName("pageIndex").SetTitle("页码").SetTag(sqlbuilder.Field_tag_pageIndex).SetType(sqlbuilder.Schema_Type_int)
+	f = sqlbuilder.NewField(pageIndex).SetName("pageIndex").SetTitle("页码").Apply(sqlbuilder.ApplyFnValueEmpty2Nil).SetTag(sqlbuilder.Field_tag_pageIndex).SetType(sqlbuilder.Schema_Type_int).SceneInit(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.Reset() // 屏蔽where 条件
+	})
 	return f
 }
 
 func NewPageSizeField(pageSize string) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(pageSize).SetName("pageSize").SetTitle("每页数量").SetTag(sqlbuilder.Field_tag_pageSize).SetType(sqlbuilder.Schema_Type_int)
+	f = sqlbuilder.NewField(pageSize).SetName("pageSize").SetTitle("每页数量").Apply(sqlbuilder.ApplyFnValueEmpty2Nil).SetTag(sqlbuilder.Field_tag_pageSize).SetType(sqlbuilder.Schema_Type_int).SceneInit(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.Reset() // 屏蔽where 条件
+	})
 	return f
 }
 
