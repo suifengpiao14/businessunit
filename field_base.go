@@ -226,13 +226,13 @@ func NewTenantField[T int | string](tenant T) (f *sqlbuilder.Field) {
 	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // 不可更新
 	})
-	f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward) // update,select 都必须为条件
+	f.WhereFns.Append(sqlbuilder.ValueFnForward) // update,select 都必须为条件
 	return f
 }
 
 // NewDeletedAtField 通过删除时间列标记删除
 func NewDeletedAtField() (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(nil).SetName("deleted_at").SetTitle("删除时间")
+	f = sqlbuilder.NewField("").SetName("deleted_at").SetTitle("删除时间")
 	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield)
 	})
@@ -243,13 +243,13 @@ func NewDeletedAtField() (f *sqlbuilder.Field) {
 	f.SceneFn(sqlbuilder.SceneFn{
 		Scene: sqlbuilder.SCENE_SQL_DELETE,
 		Fn: func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-			f.ValueFns.Reset(func(in any) (any, error) {
+			f.ValueFns.ResetSetValueFn(func(in any) (any, error) {
 				return time.Now().Local().Format(time.DateTime), nil
 			})
 		},
 	})
 	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ValueFns.Reset(func(inputValue any) (any, error) {
+		f.ValueFns.ResetSetValueFn(func(inputValue any) (any, error) {
 			return "", nil
 		})
 		f.WhereFns.Append(sqlbuilder.ValueFnForward)
@@ -277,13 +277,16 @@ func NewDeletedStatusField[T int | string](deletedStatus T) (f *sqlbuilder.Field
 	f.SceneFn(sqlbuilder.SceneFn{
 		Scene: sqlbuilder.SCENE_SQL_DELETE,
 		Fn: func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-			f.ValueFns.Reset(func(in any) (any, error) {
+			f.ValueFns.ResetSetValueFn(func(in any) (any, error) {
 				return deletedStatus, nil
 			})
 		},
 	})
-	f.WhereFns.Append(func(in any) (any, error) {
-		return sqlbuilder.Neq(in), nil
+	f.WhereFns.Append(sqlbuilder.ValueFn{
+		Layer: sqlbuilder.Value_Layer_DBFormat,
+		Fn: func(in any) (any, error) {
+			return sqlbuilder.Neq(in), nil
+		},
 	})
 
 	return f
@@ -299,7 +302,7 @@ func NewKeyFieldField[T int | uint | int64 | string](value T) *sqlbuilder.Field 
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	f.MinBoundaryWhereInsert(1, 1)
 	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil)
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f
 }
@@ -337,17 +340,20 @@ func NewUuidField[T int | int64 | string](value T) (f *sqlbuilder.Field) {
 	})
 	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.SetRequired(true)
-		f.ValueFns.InsertAsFirst(func(in any) (any, error) {
-			return xid.New().String(), nil
+		f.ValueFns.Append(sqlbuilder.ValueFn{
+			Layer: sqlbuilder.Value_Layer_DBFormat,
+			Fn: func(in any) (any, error) {
+				return xid.New().String(), nil
+			},
 		})
-	})
-	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ShieldUpdate(true) // uuid 不能更新
-		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
-	})
+		f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.ShieldUpdate(true) // uuid 不能更新
+			f.WhereFns.Append(sqlbuilder.ValueFnForward)
+		})
 
-	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnForward)
+		f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+			f.WhereFns.Append(sqlbuilder.ValueFnForward)
+		})
 	})
 
 	return f
@@ -375,7 +381,7 @@ func NewKeyField[T int | int64 | string](value T) *sqlbuilder.Field {
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 
 	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.WhereFns.InsertAsFirst(sqlbuilder.ValueFnEmpty2Nil)
+		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	})
 	return f
 }
@@ -404,23 +410,29 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 		return
 	}
 	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ValueFns.InsertAsSecond(func(in any) (any, error) {
-			val, err := f.GetValue()
-			if err != nil {
-				return nil, err
-			}
-			m := map[string]any{}
-			for _, redundantField := range redundantFields {
-				redundantField.ValueFns.InsertAsFirst(func(in any) (any, error) { return val, nil })
-				redundantFiledValue, err := redundantField.GetValue()
+		f.ValueFns.Append(sqlbuilder.ValueFn{
+			Layer: sqlbuilder.Value_Layer_ApiFormat,
+			Fn: func(in any) (any, error) {
+				val, err := f.GetValue()
 				if err != nil {
 					return nil, err
 				}
-				if !sqlbuilder.IsNil(redundantFiledValue) {
-					m[redundantField.DBName()] = redundantFiledValue
+				m := map[string]any{}
+				for _, redundantField := range redundantFields {
+					redundantField.ValueFns.Append(sqlbuilder.ValueFn{
+						Layer: sqlbuilder.Value_Layer_SetValue,
+						Fn:    func(in any) (any, error) { return val, nil },
+					})
+					redundantFiledValue, err := redundantField.GetValue()
+					if err != nil {
+						return nil, err
+					}
+					if !sqlbuilder.IsNil(redundantFiledValue) {
+						m[redundantField.DBName()] = redundantFiledValue
+					}
 				}
-			}
-			return m, nil
+				return m, nil
+			},
 		})
 	})
 

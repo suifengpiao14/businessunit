@@ -21,15 +21,21 @@ func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {
 		fields := sqlbuilder.Fields(fs)
 		if f.HastTag(latMaxName) {
 			latMinField, _ := fields.GetByTag(latMinName)
-			f.WhereFns.Append(func(data any) (any, error) {
-				return sqlbuilder.Between{latMinField.DBName(), data, f.DBName()}, nil
+			f.WhereFns.Append(sqlbuilder.ValueFn{
+				Layer: sqlbuilder.Value_Layer_SetValue,
+				Fn: func(data any) (any, error) {
+					return sqlbuilder.Between{latMinField.DBName(), data, f.DBName()}, nil
+				},
 			})
 		} else if f.HastTag(latMinName) {
 			f.WhereFns.Append(sqlbuilder.ValueFnShield)
 		} else if f.HastTag(lngMaxName) {
 			LngMinField, _ := fields.GetByTag(lngMinName)
-			f.WhereFns.Append(func(data any) (any, error) {
-				return sqlbuilder.Between{LngMinField.DBName(), data, f.DBName()}, nil
+			f.WhereFns.Append(sqlbuilder.ValueFn{
+				Layer: sqlbuilder.Value_Layer_SetValue,
+				Fn: func(data any) (any, error) {
+					return sqlbuilder.Between{LngMinField.DBName(), data, f.DBName()}, nil
+				},
 			})
 		} else if f.HastTag(lngMinName) {
 			f.WhereFns.Append(sqlbuilder.ValueFnShield)

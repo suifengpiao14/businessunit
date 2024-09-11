@@ -9,23 +9,29 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 		return
 	}
 	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.ValueFns.InsertAsSecond(func(in any) (any, error) {
-			val, err := f.GetValue()
-			if err != nil {
-				return nil, err
-			}
-			m := map[string]any{}
-			for _, redundantField := range redundantFields {
-				redundantField.ValueFns.InsertAsFirst(func(in any) (any, error) { return val, nil })
-				redundantFiledValue, err := redundantField.GetValue()
+		f.ValueFns.Append(sqlbuilder.ValueFn{
+			Layer: sqlbuilder.Value_Layer_ApiFormat,
+			Fn: func(in any) (any, error) {
+				val, err := f.GetValue()
 				if err != nil {
 					return nil, err
 				}
-				if !sqlbuilder.IsNil(redundantFiledValue) {
-					m[redundantField.DBName()] = redundantFiledValue
+				m := map[string]any{}
+				for _, redundantField := range redundantFields {
+					redundantField.ValueFns.Append(sqlbuilder.ValueFn{
+						Layer: sqlbuilder.Value_Layer_SetValue,
+						Fn:    func(in any) (any, error) { return val, nil },
+					})
+					redundantFiledValue, err := redundantField.GetValue()
+					if err != nil {
+						return nil, err
+					}
+					if !sqlbuilder.IsNil(redundantFiledValue) {
+						m[redundantField.DBName()] = redundantFiledValue
+					}
 				}
-			}
-			return m, nil
+				return m, nil
+			},
 		})
 	})
 

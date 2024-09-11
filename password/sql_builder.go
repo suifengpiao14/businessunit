@@ -19,14 +19,17 @@ type Password struct {
 
 func (p Password) Init() {
 	p.PasswordField = sqlbuilder.NewField(func(in any) (any, error) { return p.Password, nil }).SetName("password").SetTitle("密码")
-	p.PasswordField.ValueFns.AppendIfNotFirst(func(in any) (any, error) {
-		password := cast.ToString(in)
-		if password == "" {
-			err := errors.Errorf("password request string")
-			return nil, err
-		}
-		value := EncodingFn(password) // 对密码字段加密转换
-		return value, nil
+	p.PasswordField.ValueFns.Append(sqlbuilder.ValueFn{
+		Layer: sqlbuilder.Value_Layer_DBFormat,
+		Fn: func(in any) (any, error) {
+			password := cast.ToString(in)
+			if password == "" {
+				err := errors.Errorf("password request string")
+				return nil, err
+			}
+			value := EncodingFn(password) // 对密码字段加密转换
+			return value, nil
+		},
 	})
 	p.PasswordField.MergeSchema(sqlbuilder.Schema{
 		Title:     "密码",

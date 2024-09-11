@@ -73,18 +73,21 @@ const (
 
 func OptionsGetChildren(codeField *sqlbuilder.Field, nameField *sqlbuilder.Field, depth int) {
 	codeField.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil, GetChildrenWhereFn(depth))
-	nameField.WhereFns.InsertAsFirst(sqlbuilder.ValueFnShield)
+	nameField.WhereFns.Append(sqlbuilder.ValueFnShield)
 }
 
 // GetChildrenWhereFn 获取子集where 函数(包含自己)depth<=0 不限制子级层级
 func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.ValueFn) {
-	return func(in any) (value any, err error) {
-		if depth <= 0 {
-			depth = math.MaxInt
-		}
-		code := cast.ToString(in)
-		dc := &_CodeLevel{}
-		dc = dc.Deserialize(code) // 重新初始化化值
-		return sqlbuilder.Ilike{dc.Levels.GetChildrenLikePlaceholder(depth)}, nil
+	return sqlbuilder.ValueFn{
+		Fn: func(in any) (value any, err error) {
+			if depth <= 0 {
+				depth = math.MaxInt
+			}
+			code := cast.ToString(in)
+			dc := &_CodeLevel{}
+			dc = dc.Deserialize(code) // 重新初始化化值
+			return sqlbuilder.Ilike{dc.Levels.GetChildrenLikePlaceholder(depth)}, nil
+		},
+		Layer: sqlbuilder.Value_Layer_SetValue,
 	}
 }

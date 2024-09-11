@@ -64,43 +64,55 @@ func Switch(f Boolean) *Boolean {
 		Value: f.Value,
 		Field: f.Field.Copy(),
 	}
-	cp.Field.ValueFns.InsertAsSecond(func(in any) (any, error) {
-		enums := cp.Field.Schema.Enums
-		for _, enum := range enums {
-			if !enum.IsEqual(in) {
-				return enum.Key, nil
+	cp.Field.ValueFns.Append(sqlbuilder.ValueFn{
+		Layer:       sqlbuilder.Value_Layer_ApiFormat,
+		Description: "反转布尔值",
+		Fn: func(in any) (any, error) {
+			enums := cp.Field.Schema.Enums
+			for _, enum := range enums {
+				if !enum.IsEqual(in) {
+					return enum.Key, nil
+				}
 			}
-		}
-		err := errors.Errorf("not found reversed enum key ;current:%v", in)
-		return nil, err
+			err := errors.Errorf("not found reversed enum key ;current:%v", in)
+			return nil, err
+		},
 	})
 	return cp
 }
 
 // TrunOff  改成false
 func TrunOff(f *sqlbuilder.Field) {
-	f.ValueFns.InsertAsSecond(func(in any) (any, error) {
-		enums := f.Schema.Enums
-		for _, enum := range enums {
-			if enum.Tag == sqlbuilder.Enum_tag_false {
-				return enum.Key, nil
+	f.ValueFns.Append(sqlbuilder.ValueFn{
+		Layer:       sqlbuilder.Value_Layer_ApiFormat,
+		Description: "将值置为false",
+		Fn: func(in any) (any, error) {
+			enums := f.Schema.Enums
+			for _, enum := range enums {
+				if enum.Tag == sqlbuilder.Enum_tag_false {
+					return enum.Key, nil
+				}
 			}
-		}
-		err := errors.Errorf("not found fase enum key enums:%s", enums.String())
-		return nil, err
+			err := errors.Errorf("not found fase enum key enums:%s", enums.String())
+			return nil, err
+		},
 	})
 }
 
 // TrunOn  改成true
 func TrunOn(f *sqlbuilder.Field) {
-	f.ValueFns.InsertAsSecond(func(in any) (any, error) {
-		enums := f.Schema.Enums
-		for _, enum := range enums {
-			if enum.Tag == sqlbuilder.Enum_tag_true {
-				return enum.Key, nil
+	f.ValueFns.Append(sqlbuilder.ValueFn{
+		Layer:       sqlbuilder.Value_Layer_ApiFormat,
+		Description: "将值置为true",
+		Fn: func(in any) (any, error) {
+			enums := f.Schema.Enums
+			for _, enum := range enums {
+				if enum.Tag == sqlbuilder.Enum_tag_true {
+					return enum.Key, nil
+				}
 			}
-		}
-		err := errors.Errorf("not found true enum key enums:%s", enums.String())
-		return nil, err
+			err := errors.Errorf("not found true enum key enums:%s", enums.String())
+			return nil, err
+		},
 	})
 }

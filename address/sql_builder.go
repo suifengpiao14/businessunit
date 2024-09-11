@@ -222,78 +222,84 @@ type CheckRuleI interface {
 }
 
 func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
-	return func(in any) (any, error) {
-		if checkRuleI == nil {
-			return in, nil
-		}
-		r, ok := GetAddressRules().GetByLabel(address.TenatIDField, address.OwnerIDField, address.LabelField)
-		if !ok {
-			return in, nil
-		}
-		val, err := r.MaxNumber.GetValue()
-		if err != nil {
-			return nil, err
-		}
-		maxNumber := cast.ToInt(val)
-		if maxNumber == 0 {
-			return in, nil
-		}
-		rawSql, err := sqlbuilder.NewTotalBuilder(table).AppendFields(
-			address.TenatIDField,
-			address.OwnerIDField,
-			address.LabelField.Field,
-		).ToSQL()
-		if err != nil {
-			return nil, err
-		}
-		count, err := checkRuleI.GetCount(rawSql)
-		if err != nil {
-			return nil, err
-		}
-		if maxNumber >= count {
-			err = errors.Errorf(
-				"%s-%s-%s-已有数量(%d)-超过最大数量限制(%d)",
-				address.TenatIDField.LogString(),
-				address.OwnerIDField.LogString(),
-				address.LabelField.Field.LogString(),
-				count,
-				maxNumber,
-			)
-			return nil, err
-		}
+	return sqlbuilder.ValueFn{
+		Layer: sqlbuilder.Value_Layer_ApiValidate,
+		Fn: func(in any) (any, error) {
+			if checkRuleI == nil {
+				return in, nil
+			}
+			r, ok := GetAddressRules().GetByLabel(address.TenatIDField, address.OwnerIDField, address.LabelField)
+			if !ok {
+				return in, nil
+			}
+			val, err := r.MaxNumber.GetValue()
+			if err != nil {
+				return nil, err
+			}
+			maxNumber := cast.ToInt(val)
+			if maxNumber == 0 {
+				return in, nil
+			}
+			rawSql, err := sqlbuilder.NewTotalBuilder(table).AppendFields(
+				address.TenatIDField,
+				address.OwnerIDField,
+				address.LabelField.Field,
+			).ToSQL()
+			if err != nil {
+				return nil, err
+			}
+			count, err := checkRuleI.GetCount(rawSql)
+			if err != nil {
+				return nil, err
+			}
+			if maxNumber >= count {
+				err = errors.Errorf(
+					"%s-%s-%s-已有数量(%d)-超过最大数量限制(%d)",
+					address.TenatIDField.LogString(),
+					address.OwnerIDField.LogString(),
+					address.LabelField.Field.LogString(),
+					count,
+					maxNumber,
+				)
+				return nil, err
+			}
 
-		return in, nil
+			return in, nil
+		},
 	}
 }
 
 // _DealDefault 当前记录需要设置为默认记录时,清除已有的默认记录
 func _DealDefault(table string, address AddressFields, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
-	return func(val any) (any, error) {
-		if withDWithDefaultI == nil {
-			return val, nil
-		}
+	return sqlbuilder.ValueFn{
+		Layer: sqlbuilder.Value_Layer_ApiFormat,
+		Fn: func(val any) (any, error) {
+			if withDWithDefaultI == nil {
+				return val, nil
+			}
 
-		isDefaultField := address.IsDefaultField
-		if isDefaultField == nil || !isDefaultField.IsTrue() { //当前记录不是默认记录时,无需处理
-			return val, nil
-		}
+			isDefaultField := address.IsDefaultField
+			if isDefaultField == nil || !isDefaultField.IsTrue() { //当前记录不是默认记录时,无需处理
+				return val, nil
+			}
 
-		// 构造一个false 值记录
-		falseField := boolean.Switch(*isDefaultField)
-		labelField := address.LabelField.Field.Copy()
-		labelField.ShieldUpdate(true)
-		rawSql, err := sqlbuilder.NewUpdateBuilder(table).AppendFields(falseField.Field).AppendFields(
-			address.TenatIDField,
-			address.OwnerIDField,
-			labelField,
-		).ToSQL()
-		if err != nil {
-			return nil, err
-		}
-		err = withDWithDefaultI.CleanDefault(rawSql)
-		if err != nil {
-			return nil, err
-		}
-		return val, nil
+			// 构造一个false 值记录
+			falseField := boolean.Switch(*isDefaultField)
+			labelField := address.LabelField.Field.Copy()
+			labelField.ShieldUpdate(true)
+			rawSql, err := sqlbuilder.NewUpdateBuilder(table).AppendFields(falseField.Field).AppendFields(
+				address.TenatIDField,
+				address.OwnerIDField,
+				labelField,
+			).ToSQL()
+			if err != nil {
+				return nil, err
+			}
+			err = withDWithDefaultI.CleanDefault(rawSql)
+			if err != nil {
+				return nil, err
+			}
+			return val, nil
+		},
 	}
 }
