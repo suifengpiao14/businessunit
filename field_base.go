@@ -152,7 +152,7 @@ func NewUpdatedAtField() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
 		return time.Now().Local().Format(time.DateTime), nil
 	})
-	f.SetName("updated_at").SetTitle("更新时间").SetTag(sqlbuilder.Tag_updatedAt)
+	f.SetName("updatedAt").SetTitle("更新时间").SetTag(sqlbuilder.Tag_updatedAt)
 	return f
 }
 
@@ -173,7 +173,7 @@ func NewPageSizeField(pageSize string) (f *sqlbuilder.Field) {
 func NewCreatedAtField() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) {
 		return time.Now().Local().Format(time.DateTime), nil
-	}).SetName("created_at").SetTitle("创建时间").SetTag(sqlbuilder.Tag_createdAt)
+	}).SetName("createdAt").SetTitle("创建时间").SetTag(sqlbuilder.Tag_createdAt)
 	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield) // 更新时屏蔽
 	})
