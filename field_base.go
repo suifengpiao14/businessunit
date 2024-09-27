@@ -52,25 +52,8 @@ func NewProfileField(profile string) (f *sqlbuilder.Field) {
 	return f
 }
 
-func NewIntField(value int, name string, title string, maximum uint) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(value).SetName(name).SetTitle(title).MergeSchema(sqlbuilder.Schema{
-		Type: sqlbuilder.Schema_Type_int,
-	})
-	if maximum > 0 {
-		f.MergeSchema(sqlbuilder.Schema{Maximum: maximum})
-	}
-	return f
-}
-
-func NewStringField(value string, name string, title string, maxLength int) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(value).SetName(name).SetTitle(title).MergeSchema(sqlbuilder.Schema{
-		Type: sqlbuilder.Schema_Type_string,
-	})
-	if maxLength > 0 {
-		f.MergeSchema(sqlbuilder.Schema{MaxLength: maxLength})
-	}
-	return f
-}
+var NewIntField = sqlbuilder.NewIntField
+var NewStringField = sqlbuilder.NewStringField
 
 func NewAddressField(address string) (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any) (any, error) { return address, nil }).SetName("address").SetTitle("地址").MergeSchema(sqlbuilder.Schema{
@@ -190,7 +173,7 @@ func NewAutoIdField(autoId uint) (field *sqlbuilder.Field) {
 		AutoIncrement: true,
 	})
 
-	field.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	field.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield)
 	})
 	field.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
