@@ -5,42 +5,44 @@ import (
 )
 
 type CmdAdd struct {
-	Dimension    *sqlbuilder.Field // 该列可能为空
-	Tag          sqlbuilder.Field
-	Table        string
-	ExtendFields func(cmdAdd *CmdAdd) sqlbuilder.Fields
-	Builder      sqlbuilder.Builder
+	Dimension *sqlbuilder.Field // 该列可能为空
+	Tag       *sqlbuilder.Field
+	Table     string
+	Builder   sqlbuilder.Builder
 }
 
 func (q CmdAdd) Fields() sqlbuilder.Fields {
-	fs := sqlbuilder.Fields{}
-
-	if q.Dimension != nil {
-		q.Dimension.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-			f.WhereFns.Append(sqlbuilder.ValueFnForward)
-		})
-	}
-	q.Tag.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+	dimensionField := sqlbuilder.NewStringField("", "dimension", "维度", 0).SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnForward)
 	})
-	fs.Append(&q.Tag, q.Dimension)
-	if q.ExtendFields != nil {
-		fs.Append(q.ExtendFields(&q)...)
+
+	tagField := sqlbuilder.NewStringField("", "tag", "标签", 0).SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.WhereFns.Append(sqlbuilder.ValueFnForward)
+	})
+
+	fs := sqlbuilder.Fields{}
+	if q.Dimension != nil {
+		q.Dimension.Combine(dimensionField)
+		fs = append(fs, q.Dimension)
+	}
+	if q.Tag != nil {
+		q.Tag.Combine(tagField)
+		fs = append(fs, q.Tag)
 	}
 
-	return sqlbuilder.Fields{&q.Tag, q.Dimension}
+	return fs
 }
 
-func (cmd CmdAdd) Exec() (err error) {
+func (cmd CmdAdd) Exec(fields ...*sqlbuilder.Field) (err error) {
 
-	exists, err := cmd.Builder.Exists(cmd.Fields()...)
+	exists, err := cmd.Builder.Exists(fields...)
 	if err != nil {
 		return err
 	}
 	if exists {
 		return nil
 	}
-	err = cmd.Builder.Insert(cmd.Fields()...)
+	err = cmd.Builder.Insert(fields...)
 	return err
 
 }

@@ -6,19 +6,20 @@ import (
 	"github.com/suifengpiao14/businessunit"
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/districtcode"
+	"github.com/suifengpiao14/commonlanguage"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
 type AddressRule struct {
 	TenatID   *sqlbuilder.Field // 业务、应用、租户等唯一标识
 	OwnerID   *sqlbuilder.Field
-	Label     *businessunit.EnumField
+	Label     *commonlanguage.EnumField
 	MaxNumber sqlbuilder.Field // 单个业务下指定类型可配置最大条数
 }
 
 type AddressRules []AddressRule
 
-func (rs AddressRules) GetByLabel(tenatID *sqlbuilder.Field, ownerID *sqlbuilder.Field, label *businessunit.EnumField) (addressRule *AddressRule, exist bool) {
+func (rs AddressRules) GetByLabel(tenatID *sqlbuilder.Field, ownerID *sqlbuilder.Field, label *commonlanguage.EnumField) (addressRule *AddressRule, exist bool) {
 	for _, r := range rs {
 		if r.TenatID.IsEqual(*tenatID) && r.OwnerID.IsEqual(*ownerID) && r.Label.Field.IsEqual(*label.Field) {
 			return &r, true
@@ -80,7 +81,7 @@ type Address struct {
 type AddressFields struct {
 	TenatIDField      *sqlbuilder.Field // 业务、应用、租户等唯一标识
 	OwnerIDField      *sqlbuilder.Field
-	LabelField        *businessunit.EnumField
+	LabelField        *commonlanguage.EnumField
 	ContactPhoneField *sqlbuilder.Field
 	ContactNameField  *sqlbuilder.Field
 	AddressField      *sqlbuilder.Field
@@ -112,24 +113,26 @@ const (
 )
 
 func (addr Address) Fields() *AddressFields {
+	labelField := commonlanguage.NewEnumField(addr.Label, sqlbuilder.Enums{
+		{
+			Key:       "recive",
+			Title:     "收获地址",
+			IsDefault: true,
+		},
+		{
+			Key:   "return",
+			Title: "退货地址",
+		},
+	})
+	labelField.Field.Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
+		f.SetName("label").SetTitle("标签")
+	})
 	addressFields := &AddressFields{
 		TenatIDField: businessunit.NewTenantField(addr.TenantID),
-		OwnerIDField: businessunit.NewOwnerID(addr.OwnerID),
-		LabelField: businessunit.NewEnumField(addr.Label, sqlbuilder.Enums{
-			{
-				Key:       "recive",
-				Title:     "收获地址",
-				IsDefault: true,
-			},
-			{
-				Key:   "return",
-				Title: "退货地址",
-			},
-		}).MiddlewareFn(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-			f.SetName("label").SetTitle("标签")
-		}),
+		OwnerIDField: commonlanguage.NewOwnerID(addr.OwnerID),
+		LabelField:   labelField,
 
-		ContactPhoneField: businessunit.NewPhoneField(addr.ContactPhone).SetName("contactPhone").SetTitle("联系手机号"),
+		ContactPhoneField: commonlanguage.NewPhone(addr.ContactPhone).SetName("contactPhone").SetTitle("联系手机号"),
 		ContactNameField: businessunit.NewNameField(addr.ContactName).SetName("contactName").SetTitle("联系人").Apply(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 			f.RequiredWhenInsert(true)
 			f.MinBoundaryWhereInsert(1, 1)
@@ -137,7 +140,7 @@ func (addr Address) Fields() *AddressFields {
 			MaxLength: 20, // 常规名称在20个字以内
 			Type:      sqlbuilder.Schema_Type_string,
 		}),
-		AddressField: businessunit.NewAddressField(addr.Address),
+		AddressField: commonlanguage.NewAddress(addr.Address),
 		IsDefaultField: boolean.NewBoolean(addr.IsDefault,
 			sqlbuilder.Enum{
 				Key:   "1",

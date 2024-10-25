@@ -1,6 +1,7 @@
 package businessunit
 
 import (
+	"github.com/suifengpiao14/commonlanguage"
 	"github.com/suifengpiao14/sqlbuilder"
 )
 
@@ -27,7 +28,7 @@ func (KeyTitleFields[T]) Fields() KeyTitleFields[T] {
 
 	return KeyTitleFields[T]{
 		Key:   NewKeyField[T],
-		Title: NewTitleField,
+		Title: commonlanguage.NewTitle,
 	}
 }
 
@@ -39,7 +40,7 @@ type IdNameFields[idT int | string] struct {
 func (IdNameFields[T]) Builder() IdNameFields[T] {
 	return IdNameFields[T]{
 		IdField: func(value T) *sqlbuilder.Field {
-			return NewIdentifierField(value)
+			return commonlanguage.NewIdentifier(value)
 		},
 		NameField: func(value string) *sqlbuilder.Field {
 			return NewNameField(value)
@@ -75,7 +76,7 @@ func (CUDTimeFields) Builder() CUDTimeFields {
 		CreatedAt: cuTime.CreatedAt,
 		UpdatedAt: cuTime.UpdatedAt,
 		DeletedAt: func(value string) *sqlbuilder.Field {
-			return NewDeletedAtField()
+			return commonlanguage.NewDeletedAt()
 		},
 	}
 }
