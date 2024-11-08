@@ -151,7 +151,7 @@ func NewDeletedStatusField[T int | string](deletedStatus T) (f *sqlbuilder.Field
 	f.WhereFns.Append(sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_DBFormat,
 		Fn: func(in any) (any, error) {
-			return sqlbuilder.Neq(in), nil
+			return sqlbuilder.Neq{Value: in}, nil
 		},
 	})
 
