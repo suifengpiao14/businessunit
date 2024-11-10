@@ -12,7 +12,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 		f.ValueFns.Append(sqlbuilder.ValueFn{
 			Layer: sqlbuilder.Value_Layer_ApiFormat,
 			Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
-				val, err := f.GetValue()
+				val, err := f.GetValue(sqlbuilder.Layer_order)
 				if err != nil {
 					return nil, err
 				}
@@ -22,7 +22,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 						Layer: sqlbuilder.Value_Layer_SetValue,
 						Fn:    func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return val, nil },
 					})
-					redundantFiledValue, err := redundantField.GetValue()
+					redundantFiledValue, err := redundantField.GetValue(sqlbuilder.Layer_order)
 					if err != nil {
 						return nil, err
 					}
