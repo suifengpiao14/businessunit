@@ -41,7 +41,7 @@ func (b Boolean) Fields() sqlbuilder.Fields {
 }
 
 func (b Boolean) IsTrue() bool {
-	val, err := b.Field.GetValue()
+	val, err := b.Field.GetValue(sqlbuilder.Layer_order)
 	if err != nil {
 		return false
 	}
