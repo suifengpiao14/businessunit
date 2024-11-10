@@ -18,10 +18,10 @@ type Password struct {
 }
 
 func (p Password) Init() {
-	p.PasswordField = sqlbuilder.NewField(func(in any) (any, error) { return p.Password, nil }).SetName("password").SetTitle("密码")
+	p.PasswordField = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return p.Password, nil }).SetName("password").SetTitle("密码")
 	p.PasswordField.ValueFns.Append(sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_DBFormat,
-		Fn: func(in any) (any, error) {
+		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 			password := cast.ToString(in)
 			if password == "" {
 				err := errors.Errorf("password request string")

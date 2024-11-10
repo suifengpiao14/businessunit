@@ -12,10 +12,18 @@ func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {
 		latMinName = "latMin"
 	)
 	boundingBoxFields = sqlbuilder.Fields{
-		sqlbuilder.NewField(func(in any) (any, error) { return boundingBox.LngMax, nil }).SetName(lngMaxName).SetTitle("最大经度").SetTag(lngMaxName),
-		sqlbuilder.NewField(func(in any) (any, error) { return boundingBox.LngMin, nil }).SetName(lngMinName).SetTitle("最小经度").SetTag(lngMinName),
-		sqlbuilder.NewField(func(in any) (any, error) { return boundingBox.LngMax, nil }).SetName(latMaxName).SetTitle("最大纬度").SetTag(latMaxName),
-		sqlbuilder.NewField(func(in any) (any, error) { return boundingBox.LngMin, nil }).SetName(latMinName).SetTitle("最小纬度").SetTag(latMinName),
+		sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
+			return boundingBox.LngMax, nil
+		}).SetName(lngMaxName).SetTitle("最大经度").SetTag(lngMaxName),
+		sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
+			return boundingBox.LngMin, nil
+		}).SetName(lngMinName).SetTitle("最小经度").SetTag(lngMinName),
+		sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
+			return boundingBox.LngMax, nil
+		}).SetName(latMaxName).SetTitle("最大纬度").SetTag(latMaxName),
+		sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
+			return boundingBox.LngMin, nil
+		}).SetName(latMinName).SetTitle("最小纬度").SetTag(latMinName),
 	}
 	boundingBoxFields.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		fields := sqlbuilder.Fields(fs)
@@ -23,7 +31,7 @@ func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {
 			latMinField, _ := fields.GetByTag(latMinName)
 			f.WhereFns.Append(sqlbuilder.ValueFn{
 				Layer: sqlbuilder.Value_Layer_SetValue,
-				Fn: func(data any) (any, error) {
+				Fn: func(data any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 					return sqlbuilder.Between{latMinField.DBName(), data, f.DBName()}, nil
 				},
 			})
@@ -33,7 +41,7 @@ func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {
 			LngMinField, _ := fields.GetByTag(lngMinName)
 			f.WhereFns.Append(sqlbuilder.ValueFn{
 				Layer: sqlbuilder.Value_Layer_SetValue,
-				Fn: func(data any) (any, error) {
+				Fn: func(data any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 					return sqlbuilder.Between{LngMinField.DBName(), data, f.DBName()}, nil
 				},
 			})

@@ -23,7 +23,7 @@ func NewBoolean(value any, trueEnum, falseEnum sqlbuilder.Enum) *Boolean {
 }
 
 func (b *Boolean) Init() {
-	b.Field = sqlbuilder.NewField(func(in any) (any, error) { return b.Value, nil }).SetName("bool").SetTag("布尔列")
+	b.Field = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return b.Value, nil }).SetName("bool").SetTag("布尔列")
 	b.TrueEnum.Tag = sqlbuilder.Enum_tag_true
 	b.FalseEnum.Tag = sqlbuilder.Enum_tag_false
 	b.Field.AppendEnum(b.TrueEnum, b.FalseEnum)
@@ -67,7 +67,7 @@ func Switch(f Boolean) *Boolean {
 	cp.Field.ValueFns.Append(sqlbuilder.ValueFn{
 		Layer:       sqlbuilder.Value_Layer_ApiFormat,
 		Description: "反转布尔值",
-		Fn: func(in any) (any, error) {
+		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 			enums := cp.Field.Schema.Enums
 			for _, enum := range enums {
 				if !enum.IsEqual(in) {
@@ -86,7 +86,7 @@ func TrunOff(f *sqlbuilder.Field) {
 	f.ValueFns.Append(sqlbuilder.ValueFn{
 		Layer:       sqlbuilder.Value_Layer_ApiFormat,
 		Description: "将值置为false",
-		Fn: func(in any) (any, error) {
+		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 			enums := f.Schema.Enums
 			for _, enum := range enums {
 				if enum.Tag == sqlbuilder.Enum_tag_false {
@@ -104,7 +104,7 @@ func TrunOn(f *sqlbuilder.Field) {
 	f.ValueFns.Append(sqlbuilder.ValueFn{
 		Layer:       sqlbuilder.Value_Layer_ApiFormat,
 		Description: "将值置为true",
-		Fn: func(in any) (any, error) {
+		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 			enums := f.Schema.Enums
 			for _, enum := range enums {
 				if enum.Tag == sqlbuilder.Enum_tag_true {

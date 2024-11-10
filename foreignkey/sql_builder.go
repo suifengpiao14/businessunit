@@ -11,7 +11,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFn{
 			Layer: sqlbuilder.Value_Layer_ApiFormat,
-			Fn: func(in any) (any, error) {
+			Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 				val, err := f.GetValue()
 				if err != nil {
 					return nil, err
@@ -20,7 +20,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 				for _, redundantField := range redundantFields {
 					redundantField.ValueFns.Append(sqlbuilder.ValueFn{
 						Layer: sqlbuilder.Value_Layer_SetValue,
-						Fn:    func(in any) (any, error) { return val, nil },
+						Fn:    func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return val, nil },
 					})
 					redundantFiledValue, err := redundantField.GetValue()
 					if err != nil {

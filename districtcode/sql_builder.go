@@ -20,13 +20,13 @@ const (
 )
 
 func (d *District) Init() {
-	d.CodeField = sqlbuilder.NewField(func(in any) (any, error) { return d.Code, nil }).SetName("code").SetTitle("行政区代码").MergeSchema(sqlbuilder.Schema{
+	d.CodeField = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return d.Code, nil }).SetName("code").SetTitle("行政区代码").MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 16, //统计局统一是使用12位，如 659008103505
 		MinLength: 2,  // 只使用省时，为2位
 	}).SetFieldName(Field_Name_Code)
-	d.NameField = sqlbuilder.NewField(func(in any) (any, error) { return d.Name, nil }).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
+	d.NameField = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return d.Name, nil }).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 16, //统计局统一是使用12位，如 659008103505
@@ -79,7 +79,7 @@ func OptionsGetChildren(codeField *sqlbuilder.Field, nameField *sqlbuilder.Field
 // GetChildrenWhereFn 获取子集where 函数(包含自己)depth<=0 不限制子级层级
 func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.ValueFn) {
 	return sqlbuilder.ValueFn{
-		Fn: func(in any) (value any, err error) {
+		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (value any, err error) {
 			if depth <= 0 {
 				depth = math.MaxInt
 			}

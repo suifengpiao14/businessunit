@@ -29,8 +29,8 @@ func TestGetChildren(t *testing.T) {
 		Code: "440300",
 		Name: "深圳",
 	}
-	codeField := sqlbuilder.NewField(func(in any) (any, error) { return d.Code, nil }).SetName("code")
-	nameField := sqlbuilder.NewField(func(in any) (any, error) { return d.Name, nil }).SetName("name")
+	codeField := sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return d.Code, nil }).SetName("code")
+	nameField := sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return d.Name, nil }).SetName("name")
 	districtcode.OptionsGetChildren(codeField, nameField, districtcode.Depth_max)
 	sql, err := sqlbuilder.NewListBuilder(d.Table()).AppendFields(codeField, nameField).ToSQL()
 	require.NoError(t, err)

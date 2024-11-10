@@ -227,7 +227,7 @@ type CheckRuleI interface {
 func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
 	return sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_ApiValidate,
-		Fn: func(in any) (any, error) {
+		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 			if checkRuleI == nil {
 				return in, nil
 			}
@@ -276,7 +276,7 @@ func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI)
 func _DealDefault(table string, address AddressFields, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
 	return sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_ApiFormat,
-		Fn: func(val any) (any, error) {
+		Fn: func(val any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 			if withDWithDefaultI == nil {
 				return val, nil
 			}
