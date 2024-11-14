@@ -235,7 +235,7 @@ func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI)
 			if !ok {
 				return in, nil
 			}
-			val, err := r.MaxNumber.GetValue(sqlbuilder.Layer_order)
+			val, err := r.MaxNumber.GetValue(sqlbuilder.Layer_all)
 			if err != nil {
 				return nil, err
 			}
