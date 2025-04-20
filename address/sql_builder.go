@@ -60,7 +60,7 @@ CREATE TABLE `t_merchant_address_info` (
 **/
 
 type Address struct {
-	table        string
+	table        sqlbuilder.TableConfig
 	TenantID     string
 	OwnerID      string
 	Label        string
@@ -205,7 +205,7 @@ func (addr Address) Fields() *AddressFields {
 
 }
 
-func NewAddress(table string, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) *Address {
+func NewAddress(table sqlbuilder.TableConfig, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) *Address {
 	address := &Address{
 		table:        table,
 		CheckRuleI:   checkRuleI,
@@ -224,7 +224,7 @@ type CheckRuleI interface {
 	GetCount(rawSql string) (count int, err error) // 某种类型需要限制数量时,需要实现该接口,查询数据库已有的数量
 }
 
-func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
+func _ValidateRuleFn(table sqlbuilder.TableConfig, address AddressFields, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
 	return sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_ApiValidate,
 		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
@@ -273,7 +273,7 @@ func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI)
 }
 
 // _DealDefault 当前记录需要设置为默认记录时,清除已有的默认记录
-func _DealDefault(table string, address AddressFields, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
+func _DealDefault(table sqlbuilder.TableConfig, address AddressFields, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
 	return sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_ApiFormat,
 		Fn: func(val any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {

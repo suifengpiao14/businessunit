@@ -32,7 +32,7 @@ func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {
 			f.WhereFns.Append(sqlbuilder.ValueFn{
 				Layer: sqlbuilder.Value_Layer_SetValue,
 				Fn: func(data any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
-					return sqlbuilder.Between{latMinField.DBName(), data, f.DBName()}, nil
+					return sqlbuilder.Between{latMinField.DBColumnName().FullName(), data, f.DBColumnName().FullName()}, nil
 				},
 			})
 		} else if f.HastTag(latMinName) {
@@ -42,7 +42,7 @@ func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {
 			f.WhereFns.Append(sqlbuilder.ValueFn{
 				Layer: sqlbuilder.Value_Layer_SetValue,
 				Fn: func(data any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
-					return sqlbuilder.Between{LngMinField.DBName(), data, f.DBName()}, nil
+					return sqlbuilder.Between{LngMinField.DBColumnName().FullName(), data, f.DBColumnName().FullName()}, nil
 				},
 			})
 		} else if f.HastTag(lngMinName) {

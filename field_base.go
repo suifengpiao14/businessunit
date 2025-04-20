@@ -39,8 +39,8 @@ func NewProfile(profile string) (f *sqlbuilder.Field) {
 	return f
 }
 
-var NewIntField = sqlbuilder.NewIntField
-var NewStringField = sqlbuilder.NewStringField
+var NewIntField = sqlbuilder.NewIntField[int]
+var NewStringField = sqlbuilder.NewStringField[string]
 
 func NewUpdatedAtField() (f *sqlbuilder.Field) {
 	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
@@ -238,7 +238,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 						return nil, err
 					}
 					if !sqlbuilder.IsNil(redundantFiledValue) {
-						m[redundantField.DBName()] = redundantFiledValue
+						m[redundantField.DBColumnName().FullName()] = redundantFiledValue
 					}
 				}
 				return m, nil
