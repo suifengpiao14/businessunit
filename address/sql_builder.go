@@ -60,7 +60,7 @@ CREATE TABLE `t_merchant_address_info` (
 **/
 
 type Address struct {
-	table        string
+	table        sqlbuilder.TableConfig
 	TenantID     string
 	OwnerID      string
 	Label        string
@@ -113,7 +113,7 @@ const (
 )
 
 func (addr Address) GetTable() sqlbuilder.TableConfig {
-	return sqlbuilder.NewTableConfig(addr.table)
+	return addr.table
 }
 
 func (addr Address) Fields() *AddressFields {
@@ -209,7 +209,7 @@ func (addr Address) Fields() *AddressFields {
 
 }
 
-func NewAddress(table string, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) *Address {
+func NewAddress(table sqlbuilder.TableConfig, checkRuleI CheckRuleI, withDWithDefaultI WithDefaultI) *Address {
 	address := &Address{
 		table:        table,
 		CheckRuleI:   checkRuleI,
