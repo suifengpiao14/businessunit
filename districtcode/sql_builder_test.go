@@ -14,8 +14,8 @@ type District struct {
 	Name string `json:"name"`
 }
 
-func (d District) Table() string {
-	return "t_city_info"
+func (d District) Table() sqlbuilder.TableConfig {
+	return sqlbuilder.NewTableConfig("t_city_info")
 }
 func (d District) Select() (columns []any) {
 	return

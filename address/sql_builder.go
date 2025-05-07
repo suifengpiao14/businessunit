@@ -112,6 +112,10 @@ const (
 	Field_Name_isDefault = "isDefault"
 )
 
+func (addr Address) GetTable() sqlbuilder.TableConfig {
+	return sqlbuilder.NewTableConfig(addr.table)
+}
+
 func (addr Address) Fields() *AddressFields {
 	labelField := commonlanguage.NewEnumField(addr.Label, sqlbuilder.Enums{
 		{
@@ -189,13 +193,13 @@ func (addr Address) Fields() *AddressFields {
 
 	addressFields.TenatIDField.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
-			_ValidateRuleFn(addr.table, *addressFields, addr.CheckRuleI),
-			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
+			_ValidateRuleFn(addr.GetTable(), *addressFields, addr.CheckRuleI),
+			_DealDefault(addr.GetTable(), *addressFields, addr.WithDefaultI),
 		)
 	})
 	addressFields.TenatIDField.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
-			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
+			_DealDefault(addr.GetTable(), *addressFields, addr.WithDefaultI),
 		)
 	})
 	bol := boolean.NewBooleanFromField(addressFields.IsDefaultField.Field)
@@ -224,7 +228,7 @@ type CheckRuleI interface {
 	GetCount(rawSql string) (count int, err error) // 某种类型需要限制数量时,需要实现该接口,查询数据库已有的数量
 }
 
-func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
+func _ValidateRuleFn(table sqlbuilder.TableConfig, address AddressFields, checkRuleI CheckRuleI) sqlbuilder.ValueFn {
 	return sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_ApiValidate,
 		Fn: func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
@@ -273,7 +277,7 @@ func _ValidateRuleFn(table string, address AddressFields, checkRuleI CheckRuleI)
 }
 
 // _DealDefault 当前记录需要设置为默认记录时,清除已有的默认记录
-func _DealDefault(table string, address AddressFields, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
+func _DealDefault(table sqlbuilder.TableConfig, address AddressFields, withDWithDefaultI WithDefaultI) sqlbuilder.ValueFn {
 	return sqlbuilder.ValueFn{
 		Layer: sqlbuilder.Value_Layer_ApiFormat,
 		Fn: func(val any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {

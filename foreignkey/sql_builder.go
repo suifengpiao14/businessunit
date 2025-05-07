@@ -27,7 +27,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 						return nil, err
 					}
 					if !sqlbuilder.IsNil(redundantFiledValue) {
-						m[redundantField.DBName()] = redundantFiledValue
+						m[redundantField.DBColumnName().FullName()] = redundantFiledValue
 					}
 				}
 				return m, nil

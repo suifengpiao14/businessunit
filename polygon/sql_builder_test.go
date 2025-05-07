@@ -26,8 +26,8 @@ type InsertParam struct {
 	Tenant string `db:"-"`
 }
 
-func (p InsertParam) Table() string {
-	return "t_polygon"
+func (p InsertParam) Table() sqlbuilder.TableConfig {
+	return sqlbuilder.NewTableConfig("t_polygon")
 }
 
 type Polygon struct {
@@ -79,8 +79,8 @@ type ListParam struct {
 	PageSize  string `db:"-"`
 }
 
-func (p ListParam) Table() string {
-	return "t_polygon"
+func (p ListParam) Table() sqlbuilder.TableConfig {
+	return sqlbuilder.NewTableConfig("t_polygon")
 }
 
 func (p ListParam) Order() []exp.OrderedExpression {

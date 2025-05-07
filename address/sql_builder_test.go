@@ -50,8 +50,8 @@ func (addr InsertAddress) GetAddress() (addres address.Address) {
 	return addres
 }
 
-func (addr InsertAddress) Table() (table string) {
-	return "t_address"
+func (addr InsertAddress) Table() (table sqlbuilder.TableConfig) {
+	return sqlbuilder.NewTableConfig("t_address")
 }
 
 func (addr InsertAddress) CleanDefault(rawSql string) (err error) {
