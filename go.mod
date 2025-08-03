@@ -9,8 +9,8 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/spf13/cast v1.6.0
 	github.com/stretchr/testify v1.10.0
-	github.com/suifengpiao14/commonlanguage v0.0.10
-	github.com/suifengpiao14/sqlbuilder v0.1.39
+	github.com/suifengpiao14/commonlanguage v0.0.19
+	github.com/suifengpiao14/sqlbuilder v0.1.65
 )
 
 require (
@@ -20,6 +20,7 @@ require (
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
+	github.com/jfcote87/sshdb v0.5.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/kylelemons/go-gypsy v1.0.0 // indirect
@@ -28,11 +29,13 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/redis/go-redis/v9 v9.7.0 // indirect
-	github.com/suifengpiao14/cache v0.0.8 // indirect
+	github.com/suifengpiao14/cache v0.0.10 // indirect
 	github.com/suifengpiao14/funcs v0.0.25 // indirect
-	github.com/suifengpiao14/memorytable v0.0.10 // indirect
+	github.com/suifengpiao14/sshmysql v0.0.6 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
+	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect

@@ -15,5 +15,5 @@ func (q QueryAll) Fields() sqlbuilder.Fields {
 }
 
 func (q QueryAll) Query(result any) (err error) {
-	return q.Builder.List(result, q.Fields()...)
+	return q.Builder.ListParam(q.Fields()).List(result)
 }

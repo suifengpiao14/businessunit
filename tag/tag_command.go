@@ -35,14 +35,14 @@ func (q CmdAdd) Fields() sqlbuilder.Fields {
 
 func (cmd CmdAdd) Exec(fields ...*sqlbuilder.Field) (err error) {
 
-	exists, err := cmd.Builder.Exists(fields...)
+	exists, err := cmd.Builder.ExistsParam(fields).Exists()
 	if err != nil {
 		return err
 	}
 	if exists {
 		return nil
 	}
-	err = cmd.Builder.Insert(fields...)
+	err = cmd.Builder.InsertParam(fields).Exec()
 	return err
 
 }

@@ -15,7 +15,7 @@ func NewNameField(name string) (f *sqlbuilder.Field) {
 
 	f.ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-		f.MergeSchema(sqlbuilder.Schema{Minimum: 1})
+		f.MergeSchema(sqlbuilder.Schema{Minimum: sqlbuilder.IntRef(1)})
 	})
 	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnWhereLike)
@@ -77,11 +77,9 @@ func NewCreatedAtField() (f *sqlbuilder.Field) {
 func NewAutoId(autoId uint) (field *sqlbuilder.Field) {
 	field = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return autoId, nil })
 	field.SetName("id").SetTitle("ID").MergeSchema(sqlbuilder.Schema{
-		Type:          sqlbuilder.Schema_Type_int,
-		Maximum:       sqlbuilder.Int_maximum_bigint,
-		MaxLength:     64,
-		Primary:       true,
-		AutoIncrement: true,
+		Type:      sqlbuilder.Schema_Type_int,
+		Maximum:   sqlbuilder.Int_maximum_bigint,
+		MaxLength: 64,
 	})
 
 	field.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
@@ -92,7 +90,7 @@ func NewAutoId(autoId uint) (field *sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnFormatArray)
 		f.SetRequired(true)
 		f.MergeSchema(sqlbuilder.Schema{
-			Minimum: 1,
+			Minimum: sqlbuilder.IntRef(1),
 		})
 	})
 
@@ -100,7 +98,7 @@ func NewAutoId(autoId uint) (field *sqlbuilder.Field) {
 		f.WhereFns.Append(sqlbuilder.ValueFnEmpty2Nil, sqlbuilder.ValueFnFormatArray)
 		if f.Schema.Required {
 			f.MergeSchema(sqlbuilder.Schema{
-				Minimum: 1,
+				Minimum: sqlbuilder.IntRef(1),
 			})
 		}
 	})
@@ -115,7 +113,7 @@ func NewTenantField[T int | string](tenant T) (f *sqlbuilder.Field) {
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
 		Maximum:   sqlbuilder.UnsinedInt_maximum_bigint,
-		Minimum:   1,
+		Minimum:   sqlbuilder.IntRef(1),
 	})
 	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ShieldUpdate(true) // 不可更新
@@ -206,7 +204,7 @@ func NewKeyField[T int | int64 | string](value T) *sqlbuilder.Field {
 	f.MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
-		Minimum:   1,
+		Minimum:   sqlbuilder.IntRef(1),
 	}).ValueFns.Append(sqlbuilder.ValueFnEmpty2Nil)
 
 	f.SceneSelect(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
