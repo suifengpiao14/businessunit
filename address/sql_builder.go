@@ -112,6 +112,10 @@ const (
 	Field_Name_isDefault = "isDefault"
 )
 
+func (addr Address) GetTable() sqlbuilder.TableConfig {
+	return addr.table
+}
+
 func (addr Address) Fields() *AddressFields {
 	labelField := commonlanguage.NewEnumField(addr.Label, sqlbuilder.Enums{
 		{
@@ -189,13 +193,13 @@ func (addr Address) Fields() *AddressFields {
 
 	addressFields.TenatIDField.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
-			_ValidateRuleFn(addr.table, *addressFields, addr.CheckRuleI),
-			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
+			_ValidateRuleFn(addr.GetTable(), *addressFields, addr.CheckRuleI),
+			_DealDefault(addr.GetTable(), *addressFields, addr.WithDefaultI),
 		)
 	})
 	addressFields.TenatIDField.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(
-			_DealDefault(addr.table, *addressFields, addr.WithDefaultI),
+			_DealDefault(addr.GetTable(), *addressFields, addr.WithDefaultI),
 		)
 	})
 	bol := boolean.NewBooleanFromField(addressFields.IsDefaultField.Field)
