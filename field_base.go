@@ -8,7 +8,7 @@ import (
 )
 
 func NewNameField(name string) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return name, nil }).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
+	f = sqlbuilder.NewField(name).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
 	})
@@ -24,7 +24,7 @@ func NewNameField(name string) (f *sqlbuilder.Field) {
 }
 
 func NewTextField(text string, maxLength int) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return text, nil }).SetName("text").SetTitle("文本").MergeSchema(sqlbuilder.Schema{
+	f = sqlbuilder.NewField(text).SetName("text").SetTitle("文本").MergeSchema(sqlbuilder.Schema{
 		Type: sqlbuilder.Schema_Type_string,
 	})
 	if maxLength > 0 {
@@ -43,9 +43,7 @@ var NewIntField = sqlbuilder.NewIntField[int]
 var NewStringField = sqlbuilder.NewStringField[string]
 
 func NewUpdatedAtField() (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
-		return time.Now().Local().Format(time.DateTime), nil
-	})
+	f = sqlbuilder.NewField(time.Now().Local().Format(time.DateTime))
 	f.SetName("updatedAt").SetTitle("更新时间").SetTag(sqlbuilder.Tag_updatedAt)
 	return f
 }
@@ -65,9 +63,7 @@ func NewPageSizeField(pageSize string) (f *sqlbuilder.Field) {
 }
 
 func NewCreatedAtField() (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
-		return time.Now().Local().Format(time.DateTime), nil
-	}).SetName("createdAt").SetTitle("创建时间").SetTag(sqlbuilder.Tag_createdAt)
+	f = sqlbuilder.NewField(time.Now().Local().Format(time.DateTime)).SetName("createdAt").SetTitle("创建时间").SetTag(sqlbuilder.Tag_createdAt)
 	f.SceneUpdate(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield) // 更新时屏蔽
 	})
@@ -75,7 +71,7 @@ func NewCreatedAtField() (f *sqlbuilder.Field) {
 }
 
 func NewAutoId(autoId uint) (field *sqlbuilder.Field) {
-	field = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return autoId, nil })
+	field = sqlbuilder.NewField(autoId)
 	field.SetName("id").SetTitle("ID").MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_int,
 		Maximum:   sqlbuilder.Int_maximum_bigint,
@@ -106,7 +102,7 @@ func NewAutoId(autoId uint) (field *sqlbuilder.Field) {
 }
 
 func NewTenantField[T int | string](tenant T) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return tenant, nil }).SetName("ternatId").SetTitle("租户ID")
+	f = sqlbuilder.NewField(tenant).SetName("ternatId").SetTitle("租户ID")
 	f.MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		MinLength: 1,
@@ -128,9 +124,7 @@ const (
 
 // NewDeletedStatusField 使用特定状态标记删除
 func NewDeletedStatusField[T int | string](deletedStatus T) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
-		return deletedStatus, nil
-	}).SetName("status").SetTitle("状态").SetTag(Tag_DeletedStatusField) // 设置特殊标记,方便使用时获取列特殊处理
+	f = sqlbuilder.NewField(deletedStatus).SetName("status").SetTitle("状态").SetTag(Tag_DeletedStatusField) // 设置特殊标记,方便使用时获取列特殊处理
 	f.SceneInsert(func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
 		f.ValueFns.Append(sqlbuilder.ValueFnShield)
 	})
@@ -141,9 +135,9 @@ func NewDeletedStatusField[T int | string](deletedStatus T) (f *sqlbuilder.Field
 	f.SceneFn(sqlbuilder.SceneFn{
 		Scene: sqlbuilder.SCENE_SQL_DELETE,
 		Fn: func(f *sqlbuilder.Field, fs ...*sqlbuilder.Field) {
-			f.ValueFns.ResetSetValueFn(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
+			f.ValueFns.Append(sqlbuilder.ValueFnApiFormat(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
 				return deletedStatus, nil
-			})
+			}))
 		},
 	})
 	f.WhereFns.Append(sqlbuilder.ValueFn{
@@ -157,9 +151,7 @@ func NewDeletedStatusField[T int | string](deletedStatus T) (f *sqlbuilder.Field
 }
 
 func NewKeyFieldField[T int | uint | int64 | string](value T) *sqlbuilder.Field {
-	f := sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) {
-		return value, nil
-	}).SetName("key").SetTitle("键")
+	f := sqlbuilder.NewField(value).SetName("key").SetTitle("键")
 	f.MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
@@ -172,7 +164,7 @@ func NewKeyFieldField[T int | uint | int64 | string](value T) *sqlbuilder.Field 
 }
 
 func NewUuidField[T int | int64 | string](value T) (f *sqlbuilder.Field) {
-	f = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return value, nil }).SetName("uuid").SetTitle("UUID")
+	f = sqlbuilder.NewField(value).SetName("uuid").SetTitle("UUID")
 	f.MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
@@ -200,7 +192,7 @@ func NewUuidField[T int | int64 | string](value T) (f *sqlbuilder.Field) {
 }
 
 func NewKeyField[T int | int64 | string](value T) *sqlbuilder.Field {
-	f := sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return value, nil }).SetName("key").SetTitle("键")
+	f := sqlbuilder.NewField(value).SetName("key").SetTitle("键")
 	f.MergeSchema(sqlbuilder.Schema{
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 64,
@@ -227,10 +219,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 				}
 				m := map[string]any{}
 				for _, redundantField := range redundantFields {
-					redundantField.ValueFns.Append(sqlbuilder.ValueFn{
-						Layer: sqlbuilder.Value_Layer_SetValue,
-						Fn:    func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return val, nil },
-					})
+					redundantField.ValueFns.Append(sqlbuilder.ValueFnApiFormat(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return val, nil }))
 					redundantFiledValue, err := redundantField.GetValue(sqlbuilder.Layer_all)
 					if err != nil {
 						return nil, err

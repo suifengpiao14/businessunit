@@ -65,7 +65,10 @@ func TestInsert(t *testing.T) {
 	points, err := polyg.Points()
 	require.NoError(t, err)
 	boxField := points.GetBoundingBox()
-	sql, err := sqlbuilder.NewInsertBuilder(row.Table()).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
+	fs := sqlbuilder.Fields{}
+	fs = fs.Add(tenantField)
+	fs = fs.Add(boxField.Fields()...)
+	sql, err := sqlbuilder.NewInsertBuilder(row.Table()).ToSQL(fs)
 	require.NoError(t, err)
 	fmt.Println(sql)
 }
@@ -113,7 +116,11 @@ func TestList(t *testing.T) {
 	require.NoError(t, err)
 	tenantField := businessunit.NewTenantField(row.Tenant)
 	boxField := points.GetBoundingBox()
-	sql, err := sqlbuilder.NewListBuilder(row.Table()).AppendFields(tenantField).AppendFields(boxField.Fields()...).ToSQL()
+	fs := sqlbuilder.Fields{
+		tenantField,
+	}
+	fs = fs.Add(boxField.Fields()...)
+	sql, err := sqlbuilder.NewListBuilder(row.Table()).ToSQL(fs)
 	require.NoError(t, err)
 	fmt.Println(sql)
 }

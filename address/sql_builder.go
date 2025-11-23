@@ -145,7 +145,7 @@ func (addr Address) Fields() *AddressFields {
 			Type:      sqlbuilder.Schema_Type_string,
 		}),
 		AddressField: commonlanguage.NewAddress(addr.Address),
-		IsDefaultField: boolean.NewBoolean(addr.IsDefault,
+		IsDefaultField: boolean.NewBoolean(cast.ToBool(addr.IsDefault),
 			sqlbuilder.Enum{
 				Key:   "1",
 				Title: "是",
@@ -247,11 +247,12 @@ func _ValidateRuleFn(table sqlbuilder.TableConfig, address AddressFields, checkR
 			if maxNumber == 0 {
 				return in, nil
 			}
-			rawSql, err := sqlbuilder.NewTotalBuilder(table).AppendFields(
+			fs1 := sqlbuilder.Fields{
 				address.TenatIDField,
 				address.OwnerIDField,
 				address.LabelField.Field,
-			).ToSQL()
+			}
+			rawSql, err := sqlbuilder.NewTotalBuilder(table).ToSQL(fs1)
 			if err != nil {
 				return nil, err
 			}
@@ -294,11 +295,12 @@ func _DealDefault(table sqlbuilder.TableConfig, address AddressFields, withDWith
 			falseField := boolean.Switch(*isDefaultField)
 			labelField := address.LabelField.Field.Copy()
 			labelField.ShieldUpdate(true)
-			rawSql, err := sqlbuilder.NewUpdateBuilder(table).AppendFields(falseField.Field).AppendFields(
+			fs1 := sqlbuilder.Fields{
 				address.TenatIDField,
 				address.OwnerIDField,
 				labelField,
-			).ToSQL()
+			}
+			rawSql, err := sqlbuilder.NewUpdateBuilder(table).AppendFields(falseField.Field).ToSQL(fs1)
 			if err != nil {
 				return nil, err
 			}

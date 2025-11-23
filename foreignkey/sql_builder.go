@@ -19,7 +19,7 @@ func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) 
 				m := map[string]any{}
 				for _, redundantField := range redundantFields {
 					redundantField.ValueFns.Append(sqlbuilder.ValueFn{
-						Layer: sqlbuilder.Value_Layer_SetValue,
+						Layer: sqlbuilder.Value_Layer_ApiFormat,
 						Fn:    func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return val, nil },
 					})
 					redundantFiledValue, err := redundantField.GetValue(sqlbuilder.Layer_all)

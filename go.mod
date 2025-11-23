@@ -1,6 +1,6 @@
 module github.com/suifengpiao14/businessunit
 
-go 1.22
+go 1.23.0
 
 require (
 	github.com/doug-martin/goqu/v9 v9.19.0

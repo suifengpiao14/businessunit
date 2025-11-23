@@ -6,13 +6,13 @@ import (
 )
 
 type Boolean struct {
-	Value     any `json:"value"`
+	Value     bool `json:"value"`
 	TrueEnum  sqlbuilder.Enum
 	FalseEnum sqlbuilder.Enum
 	Field     *sqlbuilder.Field
 }
 
-func NewBoolean(value any, trueEnum, falseEnum sqlbuilder.Enum) *Boolean {
+func NewBoolean(value bool, trueEnum, falseEnum sqlbuilder.Enum) *Boolean {
 	b := &Boolean{
 		Value:     value,
 		TrueEnum:  trueEnum,
@@ -23,7 +23,7 @@ func NewBoolean(value any, trueEnum, falseEnum sqlbuilder.Enum) *Boolean {
 }
 
 func (b *Boolean) Init() {
-	b.Field = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return b.Value, nil }).SetName("bool").SetTag("布尔列")
+	b.Field = sqlbuilder.NewField(b.Value).SetName("bool").SetTag("布尔列")
 	b.TrueEnum.Tag = sqlbuilder.Enum_tag_true
 	b.FalseEnum.Tag = sqlbuilder.Enum_tag_false
 	b.Field.AppendEnum(b.TrueEnum, b.FalseEnum)

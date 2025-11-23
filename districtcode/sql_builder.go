@@ -20,13 +20,13 @@ const (
 )
 
 func (d *District) Init() {
-	d.CodeField = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return d.Code, nil }).SetName("code").SetTitle("行政区代码").MergeSchema(sqlbuilder.Schema{
+	d.CodeField = sqlbuilder.NewField(d.Code).SetName("code").SetTitle("行政区代码").MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 16, //统计局统一是使用12位，如 659008103505
 		MinLength: 2,  // 只使用省时，为2位
 	}).SetFieldName(Field_Name_Code)
-	d.NameField = sqlbuilder.NewField(func(in any, f *sqlbuilder.Field, fs ...*sqlbuilder.Field) (any, error) { return d.Name, nil }).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
+	d.NameField = sqlbuilder.NewField(d.Name).SetName("name").SetTitle("名称").MergeSchema(sqlbuilder.Schema{
 		Required:  true,
 		Type:      sqlbuilder.Schema_Type_string,
 		MaxLength: 16, //统计局统一是使用12位，如 659008103505
@@ -88,6 +88,6 @@ func GetChildrenWhereFn(depth int) (whereValueFn sqlbuilder.ValueFn) {
 			dc = dc.Deserialize(code) // 重新初始化化值
 			return sqlbuilder.Ilike{dc.Levels.GetChildrenLikePlaceholder(depth)}, nil
 		},
-		Layer: sqlbuilder.Value_Layer_SetValue,
+		Layer: sqlbuilder.Value_Layer_ApiFormat,
 	}
 }
