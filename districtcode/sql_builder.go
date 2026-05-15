@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/spf13/cast"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 type District struct {

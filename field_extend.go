@@ -1,8 +1,8 @@
 package businessunit
 
 import (
-	"github.com/suifengpiao14/commonlanguage"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/commonlanguage"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 func NewNickname(nickname string) *sqlbuilder.Field {

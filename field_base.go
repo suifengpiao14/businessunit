@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/rs/xid"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 func NewNameField(name string) (f *sqlbuilder.Field) {

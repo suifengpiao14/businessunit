@@ -6,8 +6,8 @@ import (
 	"github.com/suifengpiao14/businessunit"
 	"github.com/suifengpiao14/businessunit/boolean"
 	"github.com/suifengpiao14/businessunit/districtcode"
-	"github.com/suifengpiao14/commonlanguage"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/commonlanguage"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 type AddressRule struct {

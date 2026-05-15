@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/suifengpiao14/businessunit"
 	"github.com/suifengpiao14/businessunit/polygon"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 func init() {

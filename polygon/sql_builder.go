@@ -1,7 +1,7 @@
 package polygon
 
 import (
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 func (boundingBox BoundingBox) Fields() (boundingBoxFields sqlbuilder.Fields) {

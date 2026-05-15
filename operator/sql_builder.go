@@ -2,7 +2,7 @@ package operator
 
 import (
 	"github.com/suifengpiao14/businessunit"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 type Operator[T int | string] struct {

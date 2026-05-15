@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/stretchr/testify/require"
 	"github.com/suifengpiao14/businessunit/address"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 type InsertAddress struct {

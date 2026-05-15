@@ -2,7 +2,7 @@ package boolean
 
 import (
 	"github.com/pkg/errors"
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 type Boolean struct {

@@ -1,7 +1,7 @@
 package foreignkey
 
 import (
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 func OptionForeignkey(f *sqlbuilder.Field, redundantFields ...sqlbuilder.Field) {

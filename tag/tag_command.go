@@ -1,7 +1,7 @@
 package tag
 
 import (
-	"github.com/suifengpiao14/sqlbuilder"
+	"gitlab.huishoubao.com/gopackage/sqlbuilder"
 )
 
 type CmdAdd struct {
